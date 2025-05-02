@@ -1,0 +1,335 @@
+{% load static %}
+
+{% block content %}
+<div class="lists-wrapper">
+    <div class="back-button">
+{#        href="javascript:history.back()" #}
+        <a href="{% url 'product_list' %}" class="action-button secondary-button">
+            <i class="fas fa-arrow-left"></i> Назад
+        </a>
+    </div>
+
+    <div class="lists-container">
+        <h1 class="lists-main-title">Мои листи</h1>
+
+        <div class="lists-actions">
+            <button id="create-list-btn" class="action-button primary-button">
+                <i class="fas fa-plus"></i> Нова листа
+            </button>
+
+            <div id="create-list-form" class="create-list-form" style="display: none;">
+                <form method="post" action="{% url 'create_list' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" name="list_name" placeholder="Име на листата" required class="form-input">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="action-button submit-button">Креирај</button>
+                        <button type="button" id="cancel-create" class="action-button secondary-button">Откажи</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="lists-grid">
+            {% for list in user_lists %}
+            <div class="list-card">
+                <a href="{% url 'view_list' list.id %}" class="list-card-link">
+                    <h3 class="list-title">{{ list.name }}</h3>
+                    <div class="list-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-shopping-basket"></i> {{ list.items.count }} продукти
+                        </span>
+                        <span class="meta-item">
+                            <i class="far fa-calendar-alt"></i> {{ list.created_at|date:"d.m.Y" }}
+                        </span>
+                    </div>
+                </a>
+                <form method="post" action="{% url 'delete_list' list.id %}" class="delete-list-form">
+                    {% csrf_token %}
+                    <button type="submit" class="action-button danger-button small-button">
+                        <i class="fas fa-trash-alt"></i> Избриши
+                    </button>
+                </form>
+            </div>
+            {% empty %}
+            <div class="empty-lists-message">
+                <i class="far fa-folder-open"></i>
+                <p>Немате креирано листи.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Base Styles - Consistent with shopping list */
+    .lists-wrapper {
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        background-image: url('{% static "images/baner1.jpg" %}');
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    .back-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10;
+    }
+
+    .lists-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.85); /* Semi-transparent background */
+        border-radius: 10px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-top: 60px;
+    }
+
+    .lists-main-title {
+        text-align: center;
+        color: #2c3e50;
+        margin-bottom: 30px;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    /* Action Buttons - Consistent style */
+    .lists-actions {
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 25px;
+        border-radius: 6px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .primary-button {
+        background-color: #3498db;
+        color: white;
+        border-color: #3498db;
+    }
+
+    .primary-button:hover {
+        background-color: #2980b9;
+        border-color: #2980b9;
+    }
+
+    .secondary-button {
+        background-color: #f8f9fa;
+        color: #495057;
+        border-color: #dee2e6;
+    }
+
+    .secondary-button:hover {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+    }
+
+    .danger-button {
+        background-color: #e74c3c;
+        color: white;
+        border-color: #e74c3c;
+    }
+
+    .danger-button:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
+
+    .submit-button {
+        background-color: #28a745;
+        color: white;
+        border-color: #28a745;
+    }
+
+    .submit-button:hover {
+        background-color: #218838;
+        border-color: #218838;
+    }
+
+    .small-button {
+        padding: 8px 15px;
+        font-size: 14px;
+    }
+
+    /* Create List Form */
+    .create-list-form {
+        max-width: 500px;
+        margin: 20px auto 0;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+
+    .form-input:focus {
+        border-color: #3498db;
+        outline: none;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+    }
+
+    /* Lists Grid */
+    .lists-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+
+    /* List Card */
+    .list-card {
+        position: relative;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .list-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .list-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .list-title {
+        color: #2c3e50;
+        margin: 0 0 15px 0;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .list-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        color: #6c757d;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+    }
+
+    .delete-list-form {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+    }
+
+    /* Empty State */
+    .empty-lists-message {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+
+    .empty-lists-message i {
+        font-size: 40px;
+        margin-bottom: 15px;
+        color: #adb5bd;
+    }
+
+    .empty-lists-message p {
+        font-size: 18px;
+        margin: 0;
+    }
+
+    /* Icons */
+    i {
+        font-size: 14px;
+    }
+
+    /* Responsive Styles */
+    @media (max-width: 768px) {
+        .lists-container {
+            padding: 20px;
+        }
+
+        .lists-main-title {
+            font-size: 24px;
+        }
+
+        .lists-grid {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        }
+    }
+
+    @media (max-width: 480px) {
+        .lists-container {
+            padding: 15px;
+        }
+
+        .lists-main-title {
+            font-size: 20px;
+        }
+
+        .action-button {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .form-actions button {
+            width: 100%;
+        }
+    }
+
+</style>
+
+<script>
+    document.getElementById('create-list-btn').addEventListener('click', function() {
+        document.getElementById('create-list-form').style.display = 'block';
+        this.style.display = 'none';
+    });
+
+    document.getElementById('cancel-create').addEventListener('click', function() {
+        document.getElementById('create-list-form').style.display = 'none';
+        document.getElementById('create-list-btn').style.display = 'inline-flex';
+    });
+</script>
+
+<!-- Include Font Awesome for icons (add this in your base template) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% endblock %}

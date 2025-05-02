@@ -1,0 +1,967 @@
+{#{% load custom_filters %}#}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .category-carousel {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+        }
+
+        .category-carousel h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .categories {
+            display: flex;
+            gap: 20px; /* Increased gap */
+            overflow-x: auto;
+            padding: 20px 10px; /* More padding */
+            scrollbar-width: thin;
+        }
+
+        /* Improved Category Cards */
+        .category-card {
+            min-width: 200px; /* Increased width */
+            height: 250px; /* Increased height */
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            flex-shrink: 0; /* Prevent shrinking */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .category-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .category-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .category-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+
+        /* Hide scrollbar but keep functionality */
+        .categories::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .categories::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .categories::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .categories::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Discounted Products Section */
+        .discounted-products {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            padding: 0 20px;
+        }
+
+        .discounted-products h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+
+        /* Footer */
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 40px 20px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .footer-section p, .footer-section a {
+            color: #bbb;
+            margin-bottom: 10px;
+            display: block;
+            text-decoration: none;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid #444;
+            color: #bbb;
+        }
+
+        /* Message Styling */
+        .message-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+
+        @media (max-width: 768px) {
+            .category-carousel {
+                padding: 0 10px;
+            }
+
+            .category-card {
+                min-width: 150px;
+                height: 180px;
+            }
+
+            .category-name {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .footer-section {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .message-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+
+
+        /* Add these to your existing styles */
+        .category-card {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        @media (max-width: 480px) {
+            /* Carousel adjustments */
+            .categories {
+                padding: 15px 5px;
+                gap: 10px;
+                -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            }
+
+            .category-card {
+                min-width: 120px;
+                height: 160px;
+            }
+
+            .category-name {
+                padding: 8px;
+                font-size: 0.8rem;
+            }
+
+            /* Force show scrollbar on mobile */
+            .categories {
+                scrollbar-width: auto;
+                -ms-overflow-style: auto;
+            }
+
+            .categories::-webkit-scrollbar {
+                height: 5px;
+            }
+        }
+
+
+        /* Prevent zoom on form inputs */
+        @media (max-width: 768px) {
+            input, select, textarea {
+                font-size: 16px;
+            }
+        }
+
+        .category-carousel {
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            padding: 0 15px; /* Changed from 20px */
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            .category-carousel {
+                padding: 0 10px;
+            }
+
+            .categories {
+                padding: 15px 5px;
+                gap: 8px;
+                scroll-snap-type: x mandatory;
+            }
+
+            .category-card {
+                min-width: 140px;
+                height: 160px;
+                scroll-snap-align: start;
+            }
+
+            .category-name {
+                padding: 8px;
+                font-size: 0.9rem;
+            }
+        }
+
+        #logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: auto;
+        }
+
+
+        #other a:hover, #other button:hover {
+            color: lightgreen !important; /* Light green on hover */
+        }
+
+
+        #login:hover, #signup:hover {
+            color: lightgreen !important; /* Maintain white text on hover */
+        }
+
+        /* Category Carousel Section */
+        .category-carousel {
+            padding: 50px 20px;
+            background-color: #f8f8f8;
+            text-align: center;
+        }
+
+        /* Carousel Header */
+        .category-carousel h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        /* Carousel Container */
+        .carousel-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Categories Container */
+        .categories {
+            display: flex;
+            transition: transform 0.5s ease;
+            gap: 20px;
+        }
+
+        /* Category Card */
+        .category-card {
+            position: relative;
+            max-width: 250px;
+            width: 100%;
+            height: 250px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-decoration: none;
+        }
+
+        .category-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Category Name Overlay */
+        .category-name {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px;
+            font-size: 1.1rem;
+            text-align: center;
+            color: white;
+            background: rgba(0, 0, 0, 0.6);
+            font-weight: bold;
+        }
+
+        /* Hover Effects */
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .category-card:hover img {
+            opacity: 0.8;
+        }
+
+        /* Carousel Navigation Buttons */
+        .carousel-prev, .carousel-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 2rem;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .carousel-prev {
+            left: 10px;
+        }
+
+        .carousel-next {
+            right: 10px;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .category-carousel h2 {
+                font-size: 2rem;
+            }
+
+            .categories {
+                gap: 10px;
+            }
+
+            .category-card {
+                max-width: 200px;
+                height: 200px;
+            }
+
+            .category-name {
+                font-size: 1rem;
+            }
+
+            .carousel-prev, .carousel-next {
+                font-size: 1.5rem;
+            }
+        }
+
+
+        /* ===== DESKTOP NAVBAR ===== */
+        #desktop-navbar {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: white;
+            border-bottom: 1px solid #e2e2e2; /* design line under links */
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+
+        #logo img {
+            height: 90px;
+        }
+
+        #other {
+            display: flex;
+            align-items: center;
+        }
+
+        #other a,
+        .user-actions a,
+        .user-actions button {
+            margin-left: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            color: black;
+        }
+
+        .user-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* ===== MOBILE HEADER ===== */
+        #mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: white;
+            border-bottom: 1px solid #e2e2e2;
+            z-index: 1001;
+            position: relative;
+        }
+
+        #mobile-logo img {
+            height: 40px;
+        }
+
+        .menu-toggle {
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* ===== MOBILE SLIDE MENU ===== */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 75%;
+            height: 100vh;
+            background-color: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            transition: right 0.3s ease;
+            padding: 20px;
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu.open {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: flex-end;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            cursor: pointer;
+        }
+
+        .mobile-search input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .mobile-menu nav a,
+        .mobile-menu nav button {
+            display: block;
+            margin: 15px 0;
+            font-size: 18px;
+            text-decoration: none;
+            color: black;
+            background: none;
+            border: none;
+            text-align: left;
+        }
+
+        /* Logo on the left */
+        #logo img {
+            height: 90px;
+        }
+
+        /* Links on the right */
+        #nav-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        /* Style all links and buttons */
+        #nav-links a,
+        .user-actions a,
+        .user-actions button {
+            color: black;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        /* Hover color */
+        #nav-links a:hover,
+        .user-actions a:hover,
+        .user-actions button:hover {
+            color: #2ecc71; /* Green hover */
+        }
+
+        /* Group login/register or logout properly */
+        .user-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background-color: #2ecc71; /* Green background */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #27ae60; /* Darker green on hover */
+        }
+
+
+        /* ===== OVERLAY FOR MOBILE ===== */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+
+        #overlay.active {
+            display: block;
+        }
+
+        /* ===== RESPONSIVENESS ===== */
+        @media (max-width: 768px) {
+            #desktop-navbar {
+                display: none;
+            }
+
+            #mobile-header {
+                display: flex;
+            }
+        }
+
+        /* ===== BANNER ===== */
+        .banner {
+            position: relative;
+            width: 100%;
+            height: 40vh;
+            background: url("{% static 'images/baner1.jpg' %}") center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .banner-content {
+            color: white;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .banner-content h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .banner-content .highlight {
+            color: #fdd835; /* highlight "Штедко" */
+        }
+
+        .banner-content p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+        }
+
+        .banner-btn {
+            padding: 12px 30px;
+            font-size: 1rem;
+            background-color: #fdd835;
+            color: black;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .banner-btn:hover {
+            background-color: #ffeb3b;
+        }
+
+        .mobile-search-form {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 8px;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .mobile-search-form input {
+            flex: 1;
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .mobile-search-form button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-search-form button:hover {
+            background-color: #27ae60;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="message-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+                <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+<!-- Navbar (same as product_list) -->
+{% load static %}
+<!-- FULL NAVBAR -->
+<div id="navbar">
+
+    <!-- DESKTOP NAVBAR -->
+    <div id="desktop-navbar">
+        <!-- Logo on the left -->
+        <div id="logo">
+            <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"/>
+        </div>
+
+        <!-- Navigation links on the right -->
+        <div id="nav-links">
+            <a href="{% url 'home' %}">Дома</a>
+            <a href="{% url 'product_list' %}">Каталог</a>
+            <a href="#">Статистика</a>
+
+            <div class="user-actions">
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn">Logout</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" id="login">Login</a>
+                    <a href="{% url 'register' %}" id="signup">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
+    <div id="mobile-header">
+        <div id="mobile-logo">
+            <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого" style="height: 40px;">
+        </div>
+        <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
+    </div>
+
+
+    <div id="mobile-menu" class="mobile-menu">
+        <div class="mobile-menu-header">
+            <span class="close-btn" onclick="toggleMobileMenu()">✕</span>
+        </div>
+        <form method="get" action="{% url 'product_list' %}" class="mobile-search-form">
+            <input type="text" name="q" placeholder="Пребарај производ..." required/>
+            <button type="submit"><i class="fas fa-magnifying-glass"></i></button>
+        </form>
+        <nav>
+            <a href="{% url 'home' %}">Дома</a>
+            <a href="{% url 'product_list' %}">Каталог</a>
+            <a href="#">Статистика</a>
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Sign Up</a>
+            {% endif %}
+        </nav>
+    </div>
+    <!-- MOBILE DARK OVERLAY -->
+    <div id="overlay" onclick="toggleMobileMenu()"></div>
+
+
+</div>
+{% block details %}
+{% endblock %}
+<section class="banner">
+    <div class="banner-overlay">
+        <div class="banner-content">
+            <h1>Добредојдовте во <span class="highlight">Штедко</span>!</h1>
+            <p>Најдобри цени, најквалитетни производи</p>
+            <a href="{% url 'product_list' %}" class="banner-btn">Разгледај производи</a>
+        </div>
+    </div>
+</section>
+
+
+<section class="category-carousel">
+    <h2 style="background-color: #2e652e; color: white; border-radius: 10px; padding:7px">Категории</h2>
+    {% if categories %}
+        <div class="categories">
+            {% for category in categories %}
+                <a href="{% url 'product_list' %}?category={{ category }}" class="category-card">
+                    <img src="{% static 'images/categories/' %}{{ category|lower }}.jpg"
+                         alt="{{ category }}"
+                         onerror="this.src='{% static 'images/categories/default.jpg' %}'">
+{#                    <span class="category-name">{{ category }}</span>#}
+
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center;">Нема достапни категории</p>
+    {% endif %}
+</section>
+
+
+<!-- Discounted Products -->
+<section class="discounted-products">
+{#    <h2>Актуелни Попусти</h2>#}
+    {% if discounted_products %}
+        <div class="grid">
+            {% for product in discounted_products %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center;">Моментално немаме производи на попуст</p>
+    {% endif %}
+</section>
+
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>За нас</h3>
+            <p>Ние сме водечка онлајн продавница со најдобри цени и квалитетни производи.</p>
+        </div>
+        <div class="footer-section">
+            <h3>Контакт</h3>
+            <p>Телефон: +389 70 123 456</p>
+            <p>Email: kontakt@nasataprodavnica.com</p>
+            <p>Адреса: Улица ББ, Скопје</p>
+        </div>
+        <div class="footer-section">
+            <h3>Брзи линкови</h3>
+            <a href="{% url 'home' %}">Дома</a>
+            <a href="{% url 'product_list' %}">Каталог</a>
+            <a href="#">Услови на користење</a>
+            <a href="#">Политика на приватност</a>
+        </div>
+    </div>
+    <div class="copyright">
+        &copy; 2023 Нашата Продавница. Сите права се задржани.
+    </div>
+</footer>
+
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById('other');
+        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('#navbar') &&
+                !e.target.classList.contains('menu-toggle')) {
+                document.getElementById('other').style.display = 'none';
+            }
+        });
+
+        const carousel = document.querySelector('.categories');
+        if (carousel) {
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            carousel.addEventListener('mousedown', (e) => {
+                isDown = true;
+                startX = e.pageX - carousel.offsetLeft;
+                scrollLeft = carousel.scrollLeft;
+                carousel.style.cursor = 'grabbing';
+            });
+
+            carousel.addEventListener('mouseleave', () => {
+                isDown = false;
+                carousel.style.cursor = 'grab';
+            });
+
+            carousel.addEventListener('mouseup', () => {
+                isDown = false;
+                carousel.style.cursor = 'grab';
+            });
+
+            carousel.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - carousel.offsetLeft;
+                const walk = (x - startX) * 2;
+                carousel.scrollLeft = scrollLeft - walk;
+            });
+
+            carousel.addEventListener('touchstart', (e) => {
+                isDown = true;
+                startX = e.touches[0].pageX - carousel.offsetLeft;
+                scrollLeft = carousel.scrollLeft;
+            });
+
+            carousel.addEventListener('touchend', () => {
+                isDown = false;
+            });
+
+            carousel.addEventListener('touchmove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.touches[0].pageX - carousel.offsetLeft;
+                const walk = (x - startX) * 2;
+                carousel.scrollLeft = scrollLeft - walk;
+            });
+        }
+
+
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+    });
+
+    function toggleMobileMenu() {
+        const menu = document.getElementById("mobile-menu");
+        const overlay = document.getElementById("overlay");
+
+        menu.classList.toggle("open");
+        overlay.classList.toggle("active");
+    }
+</script>
+</body>
+</html>
