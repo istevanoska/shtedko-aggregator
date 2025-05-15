@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nearby Stores</title>
+</head>
+<body>
+    <h2>Nearby Stores</h2>
+    <div>
+        <p>Your location: Latitude: {{ user_lat }}, Longitude: {{ user_lon }}</p>
+        <ul>
+            {% for store in stores %}
+                <li>
+                    <strong>{{ store.store_name }}:</strong> {{ store.name }}<br>
+                    Distance: {{ store.distance }} km<br>
+                    Coordinates: ({{ store.latitude }}, {{ store.longitude }})
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

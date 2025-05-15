@@ -1,0 +1,376 @@
+{% load static %}
+
+<div class="stats-wrapper">
+    <div class="back-button">
+{#        <a href="javascript:history.back()" class="action-button secondary-button">#}
+        <a href="{% url 'home' %}" class="action-button secondary-button">
+            <i class="fas fa-arrow-left"></i> Назад
+        </a>
+    </div>
+
+    <div class="stats-container">
+        <h1 class="stats-main-title"
+            style="padding: 10px; color: white; border-radius: 10px; background: linear-gradient(135deg, #1f3f1f, #2e652e);">
+            Ценовна историја
+        </h1>
+
+        <form method="get" class="stats-form">
+            <div class="form-group">
+                <label for="store-select">Продавница:</label>
+                <select name="store" id="store-select" required class="form-input">
+                    <option value="">Избери продавница...</option>
+                    <option value="Vero">Vero</option>
+                    <option value="Ramstore">Ramstore</option>
+                    <option value="Reptil">Reptil</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="product-input">Продукт:</label>
+                <input type="text" id="product-input" name="query" placeholder="напр. ВОДА" required
+                       value="{{ query|default:'' }}" class="form-input">
+            </div>
+            <!-- Add these date range fields -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="start-date">Од датум:</label>
+                    <input type="date" id="start-date" name="start_date" class="form-input"
+                           value="{{ start_date|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="end-date">До датум:</label>
+                    <input type="date" id="end-date" name="end_date" class="form-input"
+                           value="{{ end_date|default:'' }}">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="action-button primary-button">
+                    <i class="fas fa-chart-line"></i> Прикажи историја
+                </button>
+            </div>
+        </form>
+
+        {% if similar_products and not exact_match %}
+            <div class="product-choices">
+                <h3>Слични производи во {{ store }}:</h3>
+                <div class="products-grid">
+                    {% for product, similarity in similar_products %}
+                        <div class="product-card">
+                            <a href="?store={{ store|urlencode }}&query={{ query|urlencode }}&selected_product={{ product|urlencode }}"
+                               class="product-card-link">
+                                <h4 class="product-title">{{ product }}</h4>
+                                <div class="product-meta">
+                                    <span class="similarity-badge">{{ similarity|floatformat:2 }} сличност</span>
+                                </div>
+                            </a>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if matched_name %}
+            <div class="price-history">
+                <h3>Ценовна историја за {{ matched_name }} во {{ store }}</h3>
+                <canvas id="priceChart"></canvas>
+            </div>
+        {% elif query %}
+            <div class="no-results">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Не се пронајдени производи за "{{ query }}" во {{ store }}.</p>
+                <p>Обидете се со различни термини или проверете го пишувањето.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    {% if chart_data %}
+        const ctx = document.getElementById('priceChart').getContext('2d');
+
+        const labels = [
+            {% for item in chart_data %}
+                "{{ item.date|date:'d.m.Y' }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        const prices = [
+            {% for item in chart_data %}
+                {{ item.price }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Цена (МКД) {{ start_date }} до {{ end_date }}',
+                    data: prices,
+                    borderColor: '#2e652e',
+                    backgroundColor: 'rgba(46, 101, 46, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    }
+                }
+            }
+        });
+    {% endif %}
+    document.querySelector('.stats-form').addEventListener('submit', function (e) {
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+
+        if (startDate && endDate && startDate > endDate) {
+            alert('Крајниот датум мора да биде после почетниот датум.');
+            e.preventDefault();
+        }
+    });
+</script>
+
+<style>
+    .stats-wrapper {
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        background: url('{% static "images/baner1.jpg" %}') no-repeat center center fixed;
+        background-size: cover;
+        min-height: 100vh;
+    }
+
+    .back-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 10;
+    }
+
+    .stats-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+        padding: 30px;
+        margin-top: 60px;
+    }
+
+    .stats-main-title {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
+    .stats-form {
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #2e652e;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #aed581;
+        border-radius: 6px;
+        font-size: 16px;
+        transition: all 0.3s;
+        background-color: white;
+    }
+
+    .form-input:focus {
+        border-color: #2e652e;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(46, 101, 46, 0.2);
+    }
+
+    .form-actions {
+        text-align: center;
+        margin-top: 25px;
+    }
+
+    .action-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 25px;
+        border-radius: 6px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+    }
+
+    .primary-button {
+        background-color: #2e652e;
+        color: white;
+        border-color: #2e652e;
+    }
+
+    .primary-button:hover {
+        background-color: #1f3f1f;
+        border-color: #1f3f1f;
+    }
+
+    .secondary-button {
+        background-color: #e8f5e9;
+        color: #2e652e;
+        border-color: #c8e6c9;
+    }
+
+    .secondary-button:hover {
+        background-color: #d0f0d0;
+        border-color: #b2dfdb;
+    }
+
+    .product-choices {
+        margin: 30px 0;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .product-card {
+        background: white;
+        border-left: 4px solid #81c784;
+        border-radius: 8px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        padding: 15px;
+        transition: all 0.3s;
+    }
+
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+    }
+
+    .product-card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .product-title {
+        color: #2e652e;
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        font-weight: 500;
+    }
+
+    .product-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .similarity-badge {
+        background: #e8f5e9;
+        color: #2e652e;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .price-history {
+        margin: 40px 0;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .price-history h3 {
+        color: #2e652e;
+        margin-top: 0;
+        margin-bottom: 20px;
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 30px;
+        background: #fff3e0;
+        border-radius: 8px;
+        color: #e65100;
+        margin: 30px 0;
+    }
+
+    .no-results i {
+        font-size: 40px;
+        margin-bottom: 15px;
+        color: #e65100;
+    }
+
+    .no-results p {
+        margin: 5px 0;
+        font-size: 16px;
+    }
+
+    @media (max-width: 768px) {
+        .stats-container {
+            padding: 20px;
+        }
+
+        .products-grid {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-container {
+            padding: 15px;
+        }
+
+        .stats-main-title {
+            font-size: 24px;
+        }
+
+        .form-actions button {
+            width: 100%;
+        }
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-row .form-group {
+        flex: 1;
+    }
+
+    /* Style date inputs to match other form elements */
+    input[type="date"].form-input {
+        padding: 11px 15px; /* Slightly adjusted to account for browser styling */
+    }
+</style>

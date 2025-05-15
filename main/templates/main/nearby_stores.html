@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nearby Stores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #2c3e50;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+    </style>
+</head>
+<body>
+<h2>Nearby Stores</h2>
+
+<p>Your location: Latitude {{ latitude }}, Longitude {{ longitude }}</p>
+<p>Your car's fuel consumption: {{ fuel_usage }} L/100km</p>
+<p>Store chain: {{ selected_store }}</p>
+
+{% if nearby_stores %}
+    <h3>Closest Stores:</h3>
+    <ul>
+        {% for store in nearby_stores %}
+            <li>
+                {{ store.name }} -
+                {{ store.distance|floatformat:2 }} km away -
+                {{ store.fuel|floatformat:2 }} liters used
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No stores found for the selected chain.</p>
+{% endif %}
+</body>
+</html>

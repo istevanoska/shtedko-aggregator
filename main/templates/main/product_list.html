@@ -1,0 +1,2037 @@
+{% load static %}
+{% load category_filters %}  <!-- Change this line -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Product Catalog</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header image */
+        #horizontal_picture {
+            display: block;
+            text-align: center;
+            background-image: url('{% static "images/baner1.jpg" %}');
+            background-size: cover; /* Cover the entire element */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat;
+            height: 170px;
+            padding-top: 30px;
+            padding-bottom: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Main content layout */
+        .catalog-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Filters sidebar */
+        .filters {
+            width: 250px;
+            padding: 20px;
+            background-color: #cea274;
+            border-radius: 8px;
+            margin-right: 30px;
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        .filter-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .filter-option {
+            margin-bottom: 10px;
+        }
+
+        .price-slider {
+            width: 100%;
+        }
+
+        .price-range {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        /* Products grid */
+        .products-grid {
+            flex: 1;
+        }
+
+        .sorting-options {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .sorting-options select {
+            width: auto;
+            margin-left: 10px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            height: 180px;
+            background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .product-price {
+            color: #007bff;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .old-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9em;
+            margin-right: 5px;
+        }
+
+        .discount-badge {
+            background-color: #ff4444;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
+        .product-category {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+
+        /* Pagination */
+        .pagination {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .pagination .step-links {
+            display: inline-block;
+        }
+
+        .pagination .step-links a {
+            text-decoration: none;
+            color: #549249;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 0 5px 20px;
+        }
+
+        .pagination .step-links a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination .current {
+            font-weight: bold;
+            padding: 5px 10px;
+            background-color: #2e652e;
+            color: white;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .catalog-container {
+                flex-direction: column;
+            }
+
+            .filters {
+                width: auto;
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+        }
+
+        .no-products {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .view-product {
+            font-size: 12px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .search-form {
+            margin: 20px auto;
+            max-width: 800px;
+        }
+
+        .search-form input {
+            padding: 10px;
+            width: 70%;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+        }
+
+        .search-form button {
+            padding: 10px 20px;
+            background-color: #cb7e31;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .search-form button:hover {
+            background-color: #cb7e31;
+        }
+
+        .discount-badge {
+            background-color: #ff4444;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+
+        .discount-valid {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .search-form {
+            margin: 20px auto;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0 15px;
+        }
+
+        .search-form input {
+            padding: 12px;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .search-form button {
+            padding: 12px 24px;
+            width: auto;
+        }
+
+        @media (min-width: 768px) {
+            .search-form {
+                flex-direction: row;
+            }
+
+            .search-form input {
+                margin-bottom: 0;
+                margin-right: 10px;
+            }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .product-image {
+                height: 140px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+
+        .filters {
+            width: 250px;
+            padding: 20px;
+            background-color: #f8f8f8;
+            border-radius: 8px;
+            margin-right: 30px;
+        }
+
+        .filter-toggle {
+            display: none;
+            background: #cb7e31;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .catalog-container {
+                flex-direction: column;
+            }
+
+            .filters {
+                width: 90%;
+                margin-right: 0;
+                margin-bottom: 20px;
+            }
+
+            .filter-toggle {
+                display: block;
+            }
+
+            .filter-section {
+                display: none;
+            }
+
+            .filter-section.active {
+                display: block;
+            }
+        }
+
+        #other a:hover, #other button:hover {
+            color: lightgreen;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            #navbar {
+                flex-wrap: wrap;
+            }
+
+            #mobile-header {
+                display: flex;
+                width: 90%;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            #logo {
+                margin-right: 0;
+                order: 2;
+                flex-grow: 1;
+                text-align: center;
+            }
+
+            .menu-toggle {
+                display: block;
+                font-size: 1.8rem;
+                cursor: pointer;
+                padding: 5px 15px;
+                order: 1;
+            }
+
+            #other {
+                display: none;
+                width: 100%;
+                flex-direction: column;
+                margin-top: 10px;
+                padding: 0;
+                background: none;
+                border-radius: 0;
+                margin-left: 0;
+            }
+
+            #other.active {
+                display: flex;
+            }
+
+            #other a, #other button {
+                padding: 12px 20px;
+                border-bottom: 1px solid #eee;
+                text-align: center;
+            }
+
+            .user-actions {
+                margin-top: 10px;
+                border-top: 1px solid #eee;
+                padding-top: 10px;
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+
+        /* Add these new styles for the modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .create-new-list {
+            margin-top: 15px;
+            padding: 10px;
+            text-align: center;
+            border: 1px dashed #549249;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #549249;
+        }
+
+        .create-new-list:hover {
+            background-color: #f0f8ff;
+        }
+
+        .new-list-form {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .new-list-form input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .new-list-form button {
+            padding: 8px 15px;
+            background-color: #b42824;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+
+        .remember-choice input {
+            margin-right: 8px;
+        }
+
+        .lists-header h4 {
+            margin: 0;
+        }
+
+        .lists-header button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+
+        /* Quantity input styles in modal */
+        .quantity-input label {
+            margin-right: 10px;
+        }
+
+        .quantity-input input {
+            width: 60px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #horizontal_picture {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #horizontal_picture:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        #horizontal_picture {
+            position: relative;
+            text-align: center;
+            background-image: url('{% static "images/baner1.jpg" %}');
+            background-size: cover;
+            background-position: center;
+            height: 170px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            margin-bottom: 30px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); /* ← Floating shadow */
+            border-radius: 10px; /* Optional: rounded edges look cleaner */
+        }
+
+        /* ===== DESKTOP NAVBAR ===== */
+        #desktop-navbar {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 15px 40px;
+            background-color: white;
+            border-bottom: 1px solid #e2e2e2; /* design line under links */
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); /* ← Floating shadow */
+
+        }
+
+        #logo img {
+            height: 90px;
+        }
+
+        #other {
+            display: flex;
+            align-items: center;
+        }
+
+        #other a,
+        .user-actions a,
+        .user-actions button {
+            margin-left: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            color: black;
+        }
+
+        .user-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* ===== MOBILE HEADER ===== */
+        #mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background-color: white;
+            border-bottom: 1px solid #e2e2e2;
+            z-index: 1001;
+            position: relative;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); /* ← Floating shadow */
+
+        }
+
+        #mobile-logo img {
+            height: 40px;
+        }
+
+        .menu-toggle {
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        /* ===== MOBILE SLIDE MENU ===== */
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 75%;
+            height: 100vh;
+            background-color: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            transition: right 0.3s ease;
+            padding: 20px;
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu.open {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: flex-end;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            cursor: pointer;
+        }
+
+        .mobile-search input {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .mobile-menu nav a,
+        .mobile-menu nav button {
+            display: block;
+            margin: 15px 0;
+            font-size: 18px;
+            text-decoration: none;
+            color: black;
+            background: none;
+            border: none;
+            text-align: left;
+        }
+
+        #desktop-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background-color: white;
+            border-bottom: 2px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Logo on the left */
+        #logo img {
+            height: 90px;
+        }
+
+        /* Links on the right */
+        #nav-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        /* Style all links and buttons */
+        #nav-links a,
+        .user-actions a,
+        .user-actions button {
+            color: black;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        /* Hover color */
+        #nav-links a:hover,
+        .user-actions a:hover,
+        .user-actions button:hover {
+            color: #2ecc71; /* Green hover */
+        }
+
+        /* Group login/register or logout properly */
+        .user-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background-color: #2ecc71; /* Green background */
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+        {#background-color: #27ae60;#}
+        }
+
+
+        #login:hover {
+            color: #cb7e31 !important;
+
+        }
+
+        #signup:hover {
+            color: black !important;
+        }
+
+        #signup {
+            background-color: #cb7e31 !important;
+            padding: 10px !important;
+            border-radius: 10px;
+            color: white !important;
+        }
+
+        #signup:hover {
+            color: black !important;
+
+        }
+
+
+        /* ===== OVERLAY FOR MOBILE ===== */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+
+        }
+
+        #overlay.active {
+            display: block;
+        }
+
+        /* ===== RESPONSIVENESS ===== */
+        @media (max-width: 768px) {
+            #desktop-navbar {
+                display: none;
+            }
+
+            #mobile-header {
+                display: flex;
+            }
+        }
+
+        .mobile-search-form {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            gap: 8px;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .mobile-search-form input {
+            flex: 1;
+            padding: 8px 14px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .mobile-search-form button {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .mobile-search-form button:hover {
+            background-color: #27ae60;
+        }
+
+        /* Mobile and smaller screens */
+        @media (max-width: 768px) {
+            #horizontal_picture {
+                padding: 40px 10px; /* Reduce padding for smaller screens */
+            }
+
+            #horizontal_picture h2 {
+                font-size: 2.5rem; /* Smaller font size */
+            }
+
+            #horizontal_picture h3 {
+                font-size: 1.2rem;
+            }
+
+            .search-form {
+                width: 90%;
+                max-width: 100%;
+                margin-top: 20px;
+            }
+
+            .search-form input {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            .search-form button {
+                padding: 10px 25px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            #horizontal_picture {
+                padding: 50px 20px;
+            }
+
+            .search-form {
+                width: 80%;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1025px) {
+            #horizontal_picture {
+                padding: 50px 20px;
+            }
+
+            .search-form {
+                width: 60%;
+            }
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            max-height: 200px; /* Ограничи максимална висина */
+            overflow-y: auto; /* Овозможи вертикален скрол */
+        }
+
+        .filter-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .filter-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .filter-section::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .filter-section::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #888 #f1f1f1;
+        }
+
+        .filter-section h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 16px;
+            position: sticky;
+            top: 0;
+            background-color: #cb7e31;
+            padding: 5px 0;
+            z-index: 1;
+            color: white;
+            padding-left: 10px;
+            border-radius: 10px;
+        }
+
+        /* Стилови за скролбар за различни прелистувачи */
+        .filter-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .filter-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .filter-section::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        .filter-section::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .filter-option {
+            margin-bottom: 10px;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .filter-option:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .filter-section {
+                max-height: 150px; /* Помал скрол контејнер за мобилни */
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse-on-click {
+            animation: pulse 0.4s ease;
+        }
+
+
+    </style>
+</head>
+<body>
+{% load static %}
+<div id="navbar">
+
+    <!-- DESKTOP NAVBAR -->
+    <div id="desktop-navbar">
+        <!-- Logo on the left -->
+        <div id="logo">
+            <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"/></a>
+        </div>
+
+        <!-- Navigation links on the right -->
+        <div id="nav-links">
+            {#            <a href="{% url 'home' %}">Дома</a>#}
+            <a href="{% url 'product_list' %}">Каталог</a>
+            <a href="#"><img src="{% static 'images/stats.png' %}" width="57px"></a>
+            <a href="{% url 'view_lists' %}"><img src="{% static 'images/lists.png' %}" width="30px"></a>
+            <!-- Add the Листи link here -->
+
+            <div class="user-actions">
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-btn"><img src="{% static 'images/log_out.png' %}"
+                                                                      width="35px"></button>
+                    </form>
+                {% else %}
+                    <a style="padding: 10px" href="{% url 'login' %}" id="login">Login</a>
+                    <a style="padding: 10px" href="{% url 'register' %}" id="signup">Sign Up</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE NAVBAR -->
+    <div id="mobile-header">
+        <div id="mobile-logo">
+            <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого" style="height: 30px;">
+        </div>
+        <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
+    </div>
+
+    <!-- MOBILE SLIDE-IN MENU -->
+    <div id="mobile-menu" class="mobile-menu">
+        <div class="mobile-menu-header">
+            <span class="close-btn" onclick="toggleMobileMenu()">✕</span>
+        </div>
+        <form method="get" action="{% url 'product_list' %}" class="mobile-search-form">
+            <input type="text" name="q" placeholder="Пребарај производ..." required/>
+            <button type="submit"><i class="fas fa-magnifying-glass"></i></button>
+        </form>
+        <nav>
+            <a href="{% url 'home' %}">Дома</a>
+            <a href="{% url 'product_list' %}">Каталог</a>
+            <a href="#">Статистика</a>
+            <a href="{% url 'view_lists' %}">Листи</a> <!-- Add Листи here as well -->
+
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}">Sign Up</a>
+            {% endif %}
+        </nav>
+    </div>
+    <!-- MOBILE DARK OVERLAY -->
+    <div id="overlay" onclick="toggleMobileMenu()"></div>
+
+</div>
+
+<div id="horizontal_picture"
+     style="background-image: url('{% static 'images/baner1.jpg' %}'); background-size: cover; background-position: center; padding: 50px 30px; text-align: center; color: white; position: relative; z-index: 1;">
+    <!-- Heading Section -->
+    {#    <h2 style="font-size: 3rem; font-weight: bold; margin-bottom: 10px;">Каталог</h2>#}
+    {#    <h3 style="font-size: 1.5rem; font-weight: 300; margin-bottom: 20px;">Избери го вистинското!</h3>#}
+
+    <!-- Search Form -->
+    <form method="GET" action="." class="search-form"
+          style="display: inline-block; position: relative; z-index: 2; width: 100%; max-width: 800px;">
+        <input type="text" name="search" placeholder="Пребарај производи по име..."
+               value="{{ request.GET.search }}"
+               style="padding: 12px 20px; width: 80%; max-width: 600px; border-radius: 50px; border: 1px solid #ddd; font-size: 1rem; outline: none; transition: all 0.3s ease;">
+        <button type="submit"
+                style="padding: 12px 30px; color: white; background-color: #cb7e31; border: none; border-radius: 50px; margin-left: 10px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease;">
+            Пребарај
+        </button>
+    </form>
+
+    <!-- Overlay for Text Contrast -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 0;"></div>
+</div>
+
+<!-- Add this modal at the bottom of your body -->
+<div class="modal-overlay" id="listModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title">Избери листа</div>
+            <button class="close-modal" onclick="closeModal()">×</button>
+        </div>
+        <div id="listsContainer">
+            <!-- Lists will be dynamically populated here -->
+        </div>
+        <div class="create-new-list" onclick="showNewListForm()">+ Креирај нова листа</div>
+        <div class="new-list-form" id="newListForm">
+            <input type="text" id="newListName" placeholder="Име на листата">
+            <button onclick="createNewList()">Креирај</button>
+        </div>
+    </div>
+</div>
+
+<div class="catalog-container">
+    <div class="filters">
+        <button class="filter-toggle" onclick="toggleFilters()">☰ Филтри</button>
+        <form id="filterForm" method="GET" action=".">
+
+            {% if request.GET.search %}
+                <input type="hidden" name="search" value="{{ request.GET.search }}">
+            {% endif %}
+
+            <div class="filter-section">
+                <h3>Категории</h3>
+                {% for category in categories %}
+                    <div class="filter-option">
+                        <input type="checkbox" id="cat-{{ forloop.counter }}" name="category" value="{{ category }}"
+                               {% if category in selected_categories %}checked{% endif %}>
+                        <label for="cat-{{ forloop.counter }}">{{ category|translate_category }}</label>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="filter-section">
+                <h3>Цена</h3>
+                <input type="range" min="0" max="1000" value="{{ selected_max_price|default:'1000' }}"
+                       class="price-slider" id="priceRange" name="max_price">
+                <div class="price-range">
+                    <span>0 ден.</span>
+                    <span id="maxPriceDisplay">{{ selected_max_price|default:'1000' }} ден.</span>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3>Продавници</h3>
+                <div class="filter-option">
+                    <input type="checkbox" id="store-vero" name="store" value="Vero"
+                           {% if 'Vero' in selected_stores %}checked{% endif %}>
+                    <label for="store-vero">Vero</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="store-reptil" name="store" value="Reptil"
+                           {% if 'Reptil' in selected_stores %}checked{% endif %}>
+                    <label for="store-reptil">Reptil</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="store-ramstore" name="store" value="Ramstore"
+                           {% if 'Ramstore' in selected_stores %}checked{% endif %}>
+                    <label for="store-ramstore">Ramstore</label>
+                </div>
+            </div>
+
+            <input type="hidden" name="sort" id="sortValue" value="{{ selected_sort }}">
+
+            <button type="submit" class="filter-submit-btn"
+                    style="background-color: #2e652e; border-radius: 10px; padding: 7px; color:white; border-color: white">
+                Филтрирај
+            </button>
+        </form>
+    </div>
+
+
+    <!-- Products Grid -->
+    <div class="products-grid">
+        <!-- Sorting Options -->
+        {% if request.GET.search %}
+            <div style="margin-bottom: 15px; text-align: center;">
+                <h3>Резултати за пребарување: "<strong>{{ request.GET.search }}</strong>"</h3>
+                <a href="?" style="color: #666; text-decoration: none;">× Откажи пребарување</a>
+            </div>
+        {% endif %}
+        <div class="sorting-options">
+            <label style="margin-top: 7px" for="sort">Сортирај по:</label>
+            <select id="sort" onchange="updateSort()">
+                <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Цена (најниска)
+                </option>
+                <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Цена (највисока)
+                </option>
+                <option value="name_asc" {% if selected_sort == 'name_asc' %}selected{% endif %}>Име (А-Ш)</option>
+                <option value="name_desc" {% if selected_sort == 'name_desc' %}selected{% endif %}>Име (Ш-А)</option>
+                <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Најпопуларни</option>
+            </select>
+            <select id="listSelector" class="form-select">
+                <option value="">-- Избери листа --</option>
+            </select>
+        </div>
+
+        <!-- Product Grid -->
+        <div class="grid">
+            {% for product in page_obj %}
+                <div class="product-card">
+                    <a href="{% url 'product_detail' product.id %}">
+                        <div class="product-image">
+                            {% if product.image_url %}
+                                <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                                     style="max-width: 100%; max-height: 100%;">
+                            {% else %}
+                                [No Image]
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+
+                            <div style="color: rgba(10,12,15,0.71)" class="product-name">{{ product.name }}</div>
+                            <div class="product-price">
+                                {% if product.popust %}
+                                    <span class="old-price">{{ product.price }} ден.</span>
+                                    {{ product.actual_price }} ден.
+                                    <span class="discount-badge">Попуст!</span>
+                                    {% if product.popust_date %}
+                                        <div class="discount-valid">
+                                            Важи до: {{ product.popust_date|date:"d.m.Y" }}
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    {{ product.price }} ден.
+                                {% endif %}
+                            </div>
+
+
+                            <div class="product-store">
+                                {% if product.store == 'Vero' %}
+                                    <img src="{% static 'images/vero_logo.png' %}" alt="Vero" style="height: 35px;">
+                                {% elif product.store == 'Ramstore' %}
+                                    <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore"
+                                         style="height: 35px;">
+                                {% elif product.store == 'Reptil' %}
+                                    <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil" style="height: 35px;">
+                                {% endif %}
+                            </div>
+                            <div class="product-category">{{ product.category|translate_category }}</div>
+                            <div class="product-actions">
+                                <a href="{{ product.product_url }}" target="_blank" class="view-product">Види
+                                    производ</a>
+                                <div class="product-actions">
+                                    <button class="btn btn-success add-to-list-btn"
+                                            style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer;"
+                                            data-product-id="{{ product.id }}">Додај
+                                        во листа
+                                    </button>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            {% empty %}
+                <div class="no-products">
+                    Нема пронајдени продукти што ги задоволуваат избраните филтри
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+            <div class="pagination">
+        <span class="step-links" style="margin-bottom: 40px">
+            {% if page_obj.has_previous %}
+                <a href="?page=1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        {% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo;</a>
+                <a href="?page=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        {{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&lsaquo;</a>
+            {% endif %}
+
+            <span class="current">
+                Страна {{ page_obj.number }} од {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        {{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&rsaquo;</a>
+                <a href="?page=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        {{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&raquo;</a>
+            {% endif %}
+        </span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById('other');
+        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+
+    // Filter toggle for mobile
+    function toggleFilters() {
+        document.querySelectorAll('.filter-section').forEach(section => {
+            section.classList.toggle('active');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize filters as collapsed on mobile
+        if (window.innerWidth <= 768) {
+            document.querySelectorAll('.filter-section').forEach(section => {
+                section.classList.remove('active');
+            });
+        }
+
+        // Close filters when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.filters') && !e.target.classList.contains('filter-toggle')) {
+                document.querySelectorAll('.filter-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+            }
+        });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        // Price range slider functionality
+        const priceSlider = document.getElementById('priceRange');
+        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+
+        if (priceSlider && maxPriceDisplay) {
+            // Set initial value if filter is active
+            if ("{{ selected_max_price }}" && "{{ selected_max_price }}" !== "1000") {
+                priceSlider.value = "{{ selected_max_price }}";
+                maxPriceDisplay.textContent = "{{ selected_max_price }}" + ' ден.';
+            }
+
+            // Update display when slider moves
+            priceSlider.addEventListener('input', function () {
+                maxPriceDisplay.textContent = this.value + ' ден.';
+            });
+        }
+
+        // Connect the sorting dropdown
+        const sortSelect = document.getElementById('sort');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', function () {
+                // Get the selected sort value
+                const sortValue = this.value;
+
+                // Get current URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+
+                // Update or add the sort parameter
+                urlParams.set('sort', sortValue);
+
+                // Reset to first page when changing sort
+                urlParams.set('page', '1');
+
+                // Reload the page with new parameters
+                window.location.search = urlParams.toString();
+            });
+        }
+
+        // Function to handle checkbox changes (immediate filter application)
+        document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                document.getElementById('filterForm').submit();
+            });
+        });
+
+        // Ensure form submits properly
+        document.getElementById('filterForm').addEventListener('submit', function (e) {
+            // You can add any pre-submit logic here if needed
+        });
+
+        // Add to shopping list functionality
+        document.querySelectorAll('.add-to-list').forEach(button => {
+            button.addEventListener('click', function () {
+                const productId = this.getAttribute('data-product-id');
+
+                // Send AJAX request to add to shopping list
+                fetch('/add-to-list/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({
+                        product_id: productId
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Продуктот е додаден во вашата листа!');
+                        } else {
+                            alert('Грешка: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Настана грешка при додавање на продуктот.');
+                    });
+            });
+        });
+    });
+    // Global variables for list management
+
+    let selectedListId = null;
+    let rememberChoice = localStorage.getItem('rememberListChoice') === 'true';
+
+    // Toggle lists dropdown
+    function toggleListsDropdown() {
+        const dropdown = document.getElementById('listsDropdown');
+        dropdown.classList.toggle('show');
+
+        // Load lists if not already loaded
+        if (dropdown.classList.contains('show') && userLists.length === 0) {
+            fetchUserLists();
+        }
+    }
+
+    // Close dropdown when clicking outside
+    window.addEventListener('click', function (e) {
+        if (!e.target.closest('.lists-dropdown') && !e.target.classList.contains('lists-toggle')) {
+            const dropdown = document.getElementById('listsDropdown');
+            dropdown.classList.remove('show');
+        }
+    });
+
+    // Fetch user's shopping lists
+    let userLists = [];
+    let currentProductId = null;
+
+    // Fetch user's lists
+    async function fetchUserLists() {
+        try {
+            const response = await fetch('/api/lists/');
+            const data = await response.json();
+            console.log("Fetched data from /api/lists/:", data); // 🔍 Check structure
+
+            // Access the lists properly based on the received data structure
+            if (data.lists && Array.isArray(data.lists)) {
+                userLists = data.lists;  // Now userLists gets the correct array
+            } else {
+                console.error("Unexpected response format:", data);
+                userLists = []; // Fallback to empty
+            }
+        } catch (error) {
+            console.error('Error fetching lists:', error);
+            alert('Грешка при вчитување на листите.');
+        }
+    }
+
+
+    // Render user's shopping lists in navbar
+    function renderUserLists() {
+        const container = document.getElementById('navbarListsContainer');
+
+        if (userLists.length === 0) {
+            container.innerHTML = '<div class="no-lists">Немате креирано листи</div>';
+            return;
+        }
+
+        container.innerHTML = '';
+
+        userLists.forEach(list => {
+            const listItem = document.createElement('div');
+            listItem.className = 'list-item';
+            listItem.textContent = list.name;
+            listItem.dataset.listId = list.id;
+
+            if (selectedListId === list.id) {
+                listItem.classList.add('active');
+            }
+
+            listItem.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                window.location.href = `/lists/${list.id}/`; // Navigate to list detail
+            });
+
+            container.appendChild(listItem);
+        });
+    }
+
+    // Create new list from dropdown
+    function createNewListFromDropdown() {
+        const listName = prompt('Внесете име за новата листа:');
+        if (!listName) return;
+
+        fetch('/api/lists/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({name: listName})
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    userLists.push({id: data.list_id, name: listName});
+                    renderUserLists();
+                    alert('Листата е успешно креирана!');
+                } else {
+                    alert('Грешка: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Настана грешка при креирање на листата.');
+            });
+    }
+
+
+    async function showListOptions(button) {
+        currentProductId = button.getAttribute('data-product-id');
+
+        // Check authentication
+        {% if not user.is_authenticated %}
+            window.location.href = "{% url 'login' %}?next={{ request.path }}";
+            return;
+        {% endif %}
+
+        // Fetch lists if not already loaded
+        if (userLists.length === 0) {
+            await fetchUserLists();
+        }
+
+        // Populate modal
+        const modal = document.getElementById('listModal');
+        const listsContainer = document.getElementById('listsContainer');
+        listsContainer.innerHTML = '';
+
+        if (userLists.length === 0) {
+            listsContainer.innerHTML = `
+            <p>Немате креирано листи.</p>
+            <div class="create-new-list" onclick="showNewListForm()">Креирај нова листа</div>
+        `;
+        } else {
+            userLists.forEach(list => {
+                const listOption = document.createElement('div');
+                listOption.className = 'list-option';
+                listOption.textContent = list.name;
+                listOption.onclick = () => addProductToList(currentProductId, list.id);
+                listsContainer.appendChild(listOption);
+            });
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    async function showListOptionsModal(productId) {
+        const modal = document.getElementById('listModal');
+        const listsContainer = document.getElementById('listsContainer');
+
+        try {
+            const response = await fetch('/api/lists/');
+            const userLists = await response.json();
+
+            console.log("Fetched user lists:", userLists); // 🔍 ADD THIS LINE HERE
+
+            // Clear old list options
+            listsContainer.innerHTML = '';
+
+            // Add new list options
+            userLists.forEach(list => {
+                console.log("Rendering option →", list.name, list.id); // Optional: log each list's name & id
+
+                const listOption = document.createElement('div');
+                listOption.className = 'list-option';
+                listOption.innerHTML = list.name;
+                listOption.onclick = () => addProductToList(productId, list.id);
+                listsContainer.appendChild(listOption);
+            });
+
+            modal.style.display = 'block';
+        } catch (error) {
+            console.error('Error loading user lists:', error);
+        }
+    }
+
+    async function addProductToList(productId, listId) {
+        if (!productId || !listId) {
+            alert('Недостасува ID на продукт или листа!');
+            return;
+        }
+
+        console.log("Sending to server → Product ID:", productId, "List ID:", listId);
+
+        try {
+            const response = await fetch('/add-to-list/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                    product_id: productId,
+                    list_id: listId
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Продуктот е успешно додаден во листата!');
+                closeModal();
+            } else {
+                alert('Грешка: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Настана грешка при додавање на продуктот.');
+        }
+    }
+
+    // Helper function to get CSRF token from cookies
+    function getCSRFToken() {
+        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    }
+
+
+    // Function to create new list
+    function createNewList() {
+        const listName = document.getElementById('newListName').value.trim();
+        if (!listName) return;
+
+        fetch('/api/lists/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({name: listName})
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    userLists.push({id: data.list_id, name: listName});
+                    showListOptionsModal(currentProductId);
+                    document.getElementById('newListForm').style.display = 'none';
+                    document.getElementById('newListName').value = '';
+                } else {
+                    alert('Грешка: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Настана грешка при креирање на листата.');
+            });
+    }
+
+    function showNewListForm() {
+        document.getElementById('newListForm').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('listModal').style.display = 'none';
+    }
+
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        // Close modal when clicking outside
+        document.getElementById('listModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Pre-fetch user lists if authenticated
+        {% if user.is_authenticated %}
+            fetchUserLists();
+        {% endif %}
+    });
+
+    function toggleMobileMenu() {
+        const menu = document.getElementById("mobile-menu");
+        const overlay = document.getElementById("overlay");
+
+        menu.classList.toggle("open");
+        overlay.classList.toggle("active");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('/api/lists/')
+            .then(response => response.json())
+            .then(data => {
+                const dropdown = document.getElementById('listSelector');
+                data.lists.forEach(list => {
+                    const option = document.createElement('option');
+                    option.value = list.id;
+                    option.text = list.name;
+                    dropdown.appendChild(option);
+                });
+            });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const addToListButtons = document.querySelectorAll('.add-to-list-btn');
+
+        addToListButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const productId = button.dataset.productId;
+                const selectedListId = document.getElementById('listSelector').value;
+
+                if (!selectedListId) {
+                    alert("Ве молиме изберете листа.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/lists/add-product/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken'),
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            list_id: selectedListId
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        {#alert("Производот е додаден во листата!");#}
+                    } else {
+                        alert("Грешка: " + result.message);
+                    }
+                } catch (error) {
+                    console.error("Fetch error:", error);
+                    alert("Настана грешка. Обидете се повторно.");
+                }
+            });
+        });
+
+        // Helper for CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+    document.querySelectorAll('.add-to-list-btn').forEach(button => {
+        button.addEventListener('click', function () {
+            button.classList.remove('pulse-on-click'); // reset animation if applied
+            void button.offsetWidth; // force reflow so animation can be reapplied
+            button.classList.add('pulse-on-click');
+        });
+    });
+
+
+</script>
+</body>
+</html>

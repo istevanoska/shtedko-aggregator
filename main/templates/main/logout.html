@@ -1,0 +1,11 @@
+{% block content %}
+<div class="auth-container" style="max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>You have been logged out successfully!</h2>
+    <div class="border-top pt-3">
+        <small class="text-muted">
+            <a href="{% url 'login' %}">Log In Again</a> or
+            <a href="{% url 'home' %}">Return to Homepage</a>
+        </small>
+    </div>
+</div>
+{% endblock %}
