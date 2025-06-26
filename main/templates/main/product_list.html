@@ -36,6 +36,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            margin-top: 20px;
         }
 
         /* Filters sidebar */
@@ -44,16 +45,11 @@
             padding: 20px;
             background-color: #cea274;
             border-radius: 8px;
-            margin-right: 30px;
+        {#margin-right: 30px;#} margin-left: 20px;
         }
 
-        .filter-section {
-            margin-bottom: 25px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 15px;
-        }
 
-        .filter-section h3 {
+        h3 {
             margin-top: 0;
             margin-bottom: 15px;
             font-size: 16px;
@@ -64,15 +60,54 @@
         }
 
         .price-slider {
+            -webkit-appearance: none; /* Remove default style */
             width: 100%;
+            height: 5px;
+            background-color: rgba(43, 86, 43, 0.93); /* Track background */
+            border-radius: 4px;
+            outline: none;
         }
+
+        /* Chrome, Safari, Opera - Track */
+        .price-slider::-webkit-slider-runnable-track {
+            background: rgba(43, 86, 43, 0.93);
+            border-radius: 4px;
+        }
+
+        /* Firefox - Track */
+        .price-slider::-moz-range-track {
+            background: rgba(43, 86, 43, 0.93);
+            border-radius: 4px;
+        }
+
+        /* Chrome, Safari, Opera - Thumb */
+        .price-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background-color: rgba(42, 82, 42, 0.93); /* Your green color */
+            border-radius: 50%;
+            cursor: pointer;
+            margin-top: -6px; /* Align thumb vertically */
+        }
+
+        /* Firefox - Thumb */
+        .price-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background-color: rgba(42, 82, 42, 0.93); /* Your green color */
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
 
         .price-range {
             display: flex;
             justify-content: space-between;
             margin-top: 5px;
             font-size: 12px;
-            color: #666;
+            color: rgba(31, 63, 31, 0.93);
         }
 
         select {
@@ -91,16 +126,21 @@
             display: flex;
             justify-content: flex-end;
             margin-bottom: 20px;
+            border: rgba(43, 86, 43, 0.93);
+            padding: 5px;
+            border-radius: 5px;
         }
 
         .sorting-options select {
             width: auto;
             margin-left: 10px;
+            background-color: rgba(46, 101, 46, 0.93);
+            color: white;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
             gap: 20px;
         }
 
@@ -111,10 +151,11 @@
             transition: transform 0.2s;
         }
 
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+        {##}
+        {#.product-card:hover {#}
+        {#    transform: translateY(-5px);#}
+        {#    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);#}
+
 
         .product-image {
             height: 180px;
@@ -133,11 +174,6 @@
             margin-bottom: 5px;
         }
 
-        .product-price {
-            color: #007bff;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
 
         .old-price {
             text-decoration: line-through;
@@ -223,12 +259,14 @@
             display: flex;
             justify-content: space-between;
             margin-top: 10px;
+            padding-bottom: -10px;
+            flex-direction: column;
+        {#margin-bottom: -px;#}
         }
 
         .view-product {
             font-size: 12px;
-            color: #007bff;
-            text-decoration: none;
+        {#color: #007bff;#} text-decoration: none;
         }
 
         .search-form {
@@ -269,9 +307,9 @@
         }
 
         .discount-valid {
-            font-size: 0.8em;
+            font-size: 0.7em;
             color: #666;
-            margin-top: 3px;
+            margin-top: 7px;
         }
 
         .search-form {
@@ -309,11 +347,12 @@
             }
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
+        {##}
+        {#.grid {#}
+        {#    display: grid;#}
+        {#    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));#}
+        {#gap: 20px;#}
+
 
         @media (max-width: 600px) {
             .grid {
@@ -338,7 +377,7 @@
             padding: 20px;
             background-color: #f8f8f8;
             border-radius: 8px;
-            margin-right: 30px;
+        {#margin-right: 30px;#} margin-left: 0px;
         }
 
         .filter-toggle {
@@ -801,7 +840,7 @@
 
         /* ===== RESPONSIVENESS ===== */
         @media (max-width: 768px) {
-            #desktop-navbar {
+            .main-header{
                 display: none;
             }
 
@@ -810,38 +849,6 @@
             }
         }
 
-        .mobile-search-form {
-            display: flex;
-            align-items: center;
-            padding: 10px 16px;
-            gap: 8px;
-            background-color: white;
-            border-bottom: 1px solid #eee;
-        }
-
-        .mobile-search-form input {
-            flex: 1;
-            padding: 8px 14px;
-            border-radius: 20px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            outline: none;
-        }
-
-        .mobile-search-form button {
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 50%;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .mobile-search-form button:hover {
-            background-color: #27ae60;
-        }
 
         /* Mobile and smaller screens */
         @media (max-width: 768px) {
@@ -899,13 +906,6 @@
             text-decoration: none;
         }
 
-        .filter-section {
-            margin-bottom: 25px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 15px;
-            max-height: 200px; /* Ограничи максимална висина */
-            overflow-y: auto; /* Овозможи вертикален скрол */
-        }
 
         .filter-section::-webkit-scrollbar {
             width: 8px;
@@ -935,19 +935,6 @@
             scrollbar-color: #888 #f1f1f1;
         }
 
-        .filter-section h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 16px;
-            position: sticky;
-            top: 0;
-            background-color: #cb7e31;
-            padding: 5px 0;
-            z-index: 1;
-            color: white;
-            padding-left: 10px;
-            border-radius: 10px;
-        }
 
         /* Стилови за скролбар за различни прелистувачи */
         .filter-section::-webkit-scrollbar {
@@ -1001,6 +988,646 @@
             animation: pulse 0.4s ease;
         }
 
+        /* Header */
+        .main-header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .logo img {
+            height: 60px;
+        }
+
+        /* Update the header-search styles */
+        .header-search {
+            flex-grow: 1;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .header-search input {
+            width: 98%;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+            background-color: #f5f5f5;
+        }
+
+        .header-search button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .header-search button:hover {
+            color: #2e652e;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-actions a {
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .user-actions a:hover {
+            color: #2e652e;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        /* Navigation */
+        .main-nav {
+            padding: 15px 30px;
+            background-color: #2e652e;
+        }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-nav li {
+            margin-right: 20px;
+        }
+
+        .main-nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 5px 0;
+            position: relative;
+        }
+
+        .main-nav a:hover {
+            color: #fdd835;
+        }
+
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #fdd835;
+            transition: width 0.3s ease;
+        }
+
+        .main-nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Mobile Menu */
+        #mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #2e652e, #1f3f1f);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            position: relative;
+        }
+
+        #mobile-logo img {
+            height: 50px;
+        }
+
+        .menu-toggle {
+            font-size: 28px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 75%;
+            height: 100vh;
+            background: linear-gradient(135deg, #f0f7f0, #e0e8e0);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease;
+            padding: 20px;
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu.open {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            font-size: 28px;
+            color: #2e652e;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #1f3f1f;
+        }
+
+        .mobile-search-form {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 10px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .mobile-search-form input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            background: #f5f5f5;
+        }
+
+        .mobile-search-form button {
+            background-color: #2e652e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .mobile-search-form button:hover {
+            background-color: #1f3f1f;
+            transform: scale(1.1);
+        }
+
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mobile-nav a {
+            color: #2e652e;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .mobile-nav a:hover {
+            background-color: #2e652e;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        #overlay.active {
+            display: block;
+        }
+
+        .category-filter {
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .filters h3 {
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 6px;
+            user-select: none;
+        }
+
+        .price-filter h3 {
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 6px;
+            user-select: none;
+        }
+
+        .store-filter h3 {
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 6px;
+            user-select: none;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .filter-option input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            accent-color: #4CAF50; /* modern browsers */
+            cursor: pointer;
+            transition: transform 0.15s ease-in-out;
+        }
+
+        .filter-option input[type="checkbox"]:hover {
+            transform: scale(1.1);
+        }
+
+        .filter-option label {
+            font-size: 1rem;
+            color: #555;
+            transition: color 0.3s ease;
+        }
+
+        .filter-option:hover label {
+            color: #4CAF50;
+        }
+
+
+        .filters {
+            width: 280px;
+            padding: 25px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            margin-right: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+
+        {##}
+        {#.filter-section h3 {#}
+        {#    background-color: #2e652e;#}
+        {#    color: white;#}
+        {#    padding: 10px 15px;#}
+        {#    border-radius: 5px;#}
+        {#    margin: 0 -15px 15px -15px;#}
+        {#    font-size: 1rem;#}
+
+        {##}
+        {#        .price-filter h3 {#}
+        {#            background-color: #2e652e;#}
+        {#            color: white;#}
+        {#            padding: 10px 15px;#}
+        {#            border-radius: 5px;#}
+        {#            margin: 0 -15px 15px -15px;#}
+        {#            font-size: 1rem;#}
+        {#        }#}
+
+        {#.store-filter h3 {#}
+        {#    background-color: #2e652e;#}
+        {#    color: white;#}
+        {#    padding: 10px 15px;#}
+        {#    border-radius: 5px;#}
+        {#    margin: 0 -15px 15px -15px;#}
+        {#    font-size: 1rem;#}
+        {
+        #}#}
+
+        .filter-submit-btn {
+            background-color: #2e652e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .filter-submit-btn:hover {
+            background-color: #3e7e3e;
+        }
+
+        .product-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: #2e652e;
+        }
+
+        .product-image {
+            height: 200px;
+            background-color: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .product-image img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            color: #2e652e;
+            font-weight: bold;
+            margin-top: 20px;
+            display: flex; /* Use flexbox for vertical stacking */
+            flex-direction: column; /* Stack children vertically */
+            gap: 5px; /* Add spacing between elements */
+        }
+
+        .old-price {
+            color: #999;
+            text-decoration: line-through;
+            font-size: 0.9rem;
+        }
+
+        .discount-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .view-product:hover {
+            color: rgba(57, 146, 47, 0.93);
+        }
+
+
+        /* Alternative ribbon style 1 - corner flag */
+        .ribbon-flag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 0 0 0;
+            border-color: transparent #e74c3c transparent transparent;
+        {#z-index: 1;#} visibility: visible !important; /* Force visibility */
+            opacity: 1 !important; /* Force visibility */
+
+
+        }
+
+        .ribbon-flag-text {
+            position: absolute;
+            top: -4px;
+            right: -10px;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            transform: rotate(70deg);
+            z-index: 5;
+            visibility: visible !important;
+        / opacity: 1 !important; /* Force visibility */
+
+
+        }
+
+        .product-card, .product-image {
+            position: relative;
+        {#overflow: visible !important;#}
+        }
+
+        /* Instruction Modal Styles */
+        /* Enhanced Instruction Modal */
+        .instruction-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            font-family: Arial, sans-serif;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 450px;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            opacity: 0;
+            animation: modalEntrance 0.4s forwards;
+        }
+
+        @keyframes modalEntrance {
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: #2e652e;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .instruction-step {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #f8f8f8;
+        }
+
+        .step-number {
+            background: #2e652e;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .hint-text {
+            color: #666;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .modal-action-btn {
+            background: #2e652e;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            margin: 20px auto;
+            display: block;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .modal-action-btn:hover {
+            background: #3e7e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 101, 46, 0.3);
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        /* Enhanced Arrows */
+        .arrow-pointer {
+        {#position: absolute;#} width: 100px;
+            height: 100px;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+
+        .pulse-arrow {
+            animation: pulse 1.5s infinite, float 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        }
+
 
     </style>
 </head>
@@ -1008,114 +1635,180 @@
 {% load static %}
 <div id="navbar">
 
-    <!-- DESKTOP NAVBAR -->
-    <div id="desktop-navbar">
-        <!-- Logo on the left -->
-        <div id="logo">
-            <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"/></a>
-        </div>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-top">
+            <div class="logo">
+                <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}"
+                                                alt="Штедко лого"/></a>
+            </div>
 
-        <!-- Navigation links on the right -->
-        <div id="nav-links">
-            {#            <a href="{% url 'home' %}">Дома</a>#}
-            <a href="{% url 'product_list' %}">Каталог</a>
-            <a href="#"><img src="{% static 'images/stats.png' %}" width="57px"></a>
-            <a href="{% url 'view_lists' %}"><img src="{% static 'images/lists.png' %}" width="30px"></a>
-            <!-- Add the Листи link here -->
+            <div class="header-search">
+                <form method="GET" action="{% url 'product_list' %}" id="searchForm">
+                    <input type="text" name="search" id="searchInput" placeholder="Пребарај производи..."
+                           value="{{ request.GET.search }}">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <div id="suggestions"
+                     style="position: absolute; background: white; border: 1px solid #ddd; border-radius: 5px; width: 98%; max-height: 200px; overflow-y: auto; display: none; z-index: 2"></div>
+            </div>
 
             <div class="user-actions">
                 {% if user.is_authenticated %}
+                    <a href="{% url 'view_lists' %}" class="list-icon">
+                        {#                        <img src="{% static 'images/final_icon_listi.png' %}" width="60px" alt="Листи">#}
+                        мои листи
+                    </a>
+                    <select id="listSelector" class="form-select">
+                        листа:
+                        <option value="">-- Избери листа --</option>
+                    </select>
+                    {#                    <a href="{% url 'stats' %}" class="stats-icon">#}
+                    {#                        <img src="{% static 'images/stats.png' %}" width="57px" alt="Статистика">#}
+                    {#                    </a>#}
                     <form method="post" action="{% url 'logout' %}">
                         {% csrf_token %}
-                        <button type="submit" class="logout-btn"><img src="{% static 'images/log_out.png' %}"
-                                                                      width="35px"></button>
+                        <button type="submit" class="logout-btn">
+                            <img src="{% static 'images/log_out.png' %}" width="35px" alt="Одјави се">
+                        </button>
                     </form>
                 {% else %}
-                    <a style="padding: 10px" href="{% url 'login' %}" id="login">Login</a>
-                    <a style="padding: 10px" href="{% url 'register' %}" id="signup">Sign Up</a>
+                    <a href="{% url 'login' %}"
+                       style=" padding: 8px 16px; border-radius: 20px; background-color: #f5f5f5; margin-right: -10px"><i
+                            class="fas fa-user"></i> Најави се</a>
+                    <a href="{% url 'register' %}"
+                       style=" padding: 8px 16px; border-radius: 20px; background-color: #f5f5f5"><i
+                            class="fas fa-user-plus"></i> Регистрирај се</a>
                 {% endif %}
             </div>
         </div>
-    </div>
 
-    <!-- MOBILE NAVBAR -->
+        <nav class="main-nav">
+            <ul>
+                <li><a href="{% url 'product_list' %}">Каталог</a></li>
+                <li style="z-index: 0"><a href="{% url 'stats' %}">Статистика</a></li>
+                {#                <li><a href="#">Попусти</a></li>#}
+                {#                <li><a href="#">Продавници</a></li>#}
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Mobile Header -->
     <div id="mobile-header">
         <div id="mobile-logo">
-            <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого" style="height: 30px;">
+            <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого">
         </div>
         <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
     </div>
 
-    <!-- MOBILE SLIDE-IN MENU -->
+    <!-- Mobile Menu -->
     <div id="mobile-menu" class="mobile-menu">
         <div class="mobile-menu-header">
-            <span class="close-btn" onclick="toggleMobileMenu()">✕</span>
+            <span class="close-btn" onclick="toggleMobileMenu()">×</span>
         </div>
-        <form method="get" action="{% url 'product_list' %}" class="mobile-search-form">
-            <input type="text" name="q" placeholder="Пребарај производ..." required/>
-            <button type="submit"><i class="fas fa-magnifying-glass"></i></button>
+
+        <form method="GET" action="{% url 'product_list' %}" class="mobile-search-form" id="mobileSearchForm">
+            <input type="text" name="search" id="mobileSearchInput" placeholder="Пребарај производ..."
+                   value="{{ request.GET.search }}">
+            <button type="submit"><i class="fas fa-search"></i></button>
         </form>
-        <nav>
+
+        <nav class="mobile-nav">
             <a href="{% url 'home' %}">Дома</a>
             <a href="{% url 'product_list' %}">Каталог</a>
-            <a href="#">Статистика</a>
-            <a href="{% url 'view_lists' %}">Листи</a> <!-- Add Листи here as well -->
+            <a href="{% url 'stats' %}">Статистика</a>
+            {#            <a href="#">Попусти</a>#}
+            {#            <a href="#">Продавници</a>#}
+            <a href="{% url 'view_lists' %}">Листи</a>
 
             {% if user.is_authenticated %}
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit">Logout</button>
-                </form>
+                <a href="{% url 'logout' %}">Одјави се</a>
             {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'register' %}">Sign Up</a>
+                <a href="{% url 'login' %}">Најави се</a>
+                <a href="{% url 'register' %}">Регистрирај се</a>
             {% endif %}
         </nav>
     </div>
-    <!-- MOBILE DARK OVERLAY -->
-    <div id="overlay" onclick="toggleMobileMenu()"></div>
-
 </div>
 
-<div id="horizontal_picture"
-     style="background-image: url('{% static 'images/baner1.jpg' %}'); background-size: cover; background-position: center; padding: 50px 30px; text-align: center; color: white; position: relative; z-index: 1;">
-    <!-- Heading Section -->
-    {#    <h2 style="font-size: 3rem; font-weight: bold; margin-bottom: 10px;">Каталог</h2>#}
-    {#    <h3 style="font-size: 1.5rem; font-weight: 300; margin-bottom: 20px;">Избери го вистинското!</h3>#}
+{#    <div id="horizontal_picture"#}
+{#         style="background-image: url('{% static 'images/baner1.jpg' %}');#}
+{#                 background-size: cover;#}
+{#                 background-position: center;#}
+{#                 height: 250px;#}
+{#                 display: flex;#}
+{#                 flex-direction: column;#}
+{#                 justify-content: center;#}
+{#                 align-items: center;#}
+{#                 color: white;#}
+{#                 text-shadow: 2px 2px 4px rgba(0,0,0,0.5);#}
+{#                 margin-bottom: 30px;#}
+{#                 position: relative;">#}
+{##}
+{#        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 0;"></div>#}
+{##}
+{#        <div style="position: relative; z-index: 1; text-align: center; padding: 20px;">#}
+{#            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Нашите Производи</h1>#}
+{#            <p style="font-size: 1.2rem; max-width: 600px;">Откријте ги најдобрите производи по најниски цени</p>#}
+{#        </div>#}
+{#    </div>#}
 
-    <!-- Search Form -->
-    <form method="GET" action="." class="search-form"
-          style="display: inline-block; position: relative; z-index: 2; width: 100%; max-width: 800px;">
-        <input type="text" name="search" placeholder="Пребарај производи по име..."
-               value="{{ request.GET.search }}"
-               style="padding: 12px 20px; width: 80%; max-width: 600px; border-radius: 50px; border: 1px solid #ddd; font-size: 1rem; outline: none; transition: all 0.3s ease;">
-        <button type="submit"
-                style="padding: 12px 30px; color: white; background-color: #cb7e31; border: none; border-radius: 50px; margin-left: 10px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease;">
-            Пребарај
-        </button>
-    </form>
+{#    <div id="overlay" onclick="toggleMobileMenu()"></div>#}
 
-    <!-- Overlay for Text Contrast -->
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 0;"></div>
-</div>
+{#    <div id="horizontal_picture"#}
+{#         style="background-image: url('{% static 'images/baner1.jpg' %}'); background-size: cover;margin-top: 20px; background-position: center; padding: 10px 30px; text-align: center; color: white; position: relative; z-index: 1;">#}
+<!-- Heading Section -->
+{#    <h2 style="font-size: 3rem; font-weight: bold; margin-bottom: 10px;">Каталог</h2>#}
+{#    <h3 style="font-size: 1.5rem; font-weight: 300; margin-bottom: 20px;">Избери го вистинското!</h3>#}
+
+{#        <!-- Search Form -->#}
+{#        <form method="GET" action="." class="search-form"#}
+{#              style="display: inline-block; position: relative; z-index: 2; width: 100%; max-width: 800px;">#}
+{#            <input type="text" name="search" placeholder="Пребарај производи по име..."#}
+{#                   value="{{ request.GET.search }}"#}
+{#                   style="padding: 12px 20px; width: 80%; max-width: 600px; border-radius: 50px; border: 1px solid #ddd; font-size: 1rem; outline: none; transition: all 0.3s ease;">#}
+{#            <button type="submit"#}
+{#                    style="padding: 12px 30px; color: white; background-color: #cb7e31; border: none; border-radius: 50px; margin-left: 10px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease;">#}
+{#                Пребарај#}
+{#            </button>#}
+{#        </form>#}
+
+<!-- Overlay for Text Contrast -->
+{#        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 0;"></div>#}
+{#    </div>#}
 
 <!-- Add this modal at the bottom of your body -->
-<div class="modal-overlay" id="listModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">Избери листа</div>
-            <button class="close-modal" onclick="closeModal()">×</button>
-        </div>
-        <div id="listsContainer">
-            <!-- Lists will be dynamically populated here -->
-        </div>
-        <div class="create-new-list" onclick="showNewListForm()">+ Креирај нова листа</div>
-        <div class="new-list-form" id="newListForm">
-            <input type="text" id="newListName" placeholder="Име на листата">
-            <button onclick="createNewList()">Креирај</button>
-        </div>
-    </div>
-</div>
+{#    <div class="modal-overlay" id="listModal">#}
+{#        <div class="modal-content">#}
+{#            <div class="modal-header">#}
+{#                <div class="modal-title">Избери листа</div>#}
+{#                <button class="close-modal" onclick="closeModal()">×</button>#}
+{#            </div>#}
+{#            <div id="listsContainer">#}
+{#                <!-- Lists will be dynamically populated here -->#}
+{#            </div>#}
+{#            <div class="create-new-list" onclick="showNewListForm()">+ Креирај нова листа</div>#}
+{#            <div class="new-list-form" id="newListForm">#}
+{#                <input type="text" id="newListName" placeholder="Име на листата">#}
+{#                <button onclick="createNewList()">Креирај</button>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{#    <div class="featured-section" style="margin-bottom: 40px;">#}
+{#        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Препорачани Производи</h2>#}
+{#        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">#}
+{#            <!-- Featured products here -->#}
+{#        </div>#}
+{#    </div>#}
+{#    <div class="cta-section"#}
+{#         style="background-color: #f9f9f9; padding: 50px 20px; text-align: center; margin-top: 50px;">#}
+{#        <h2 style="color: #2e652e; margin-bottom: 20px;">Не ги најдовте што го баравте?</h2>#}
+{#        <p style="max-width: 600px; margin: 0 auto 30px; color: #555;">Контактирајте не и ќе ви помогнеме да го најдете#}
+{#            саканиот производ</p>#}
+{#        <a href="#"#}
+{#           style="background-color: #2e652e; color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: bold;">Контактирај#}
+{#            не</a>#}
+{#    </div>#}
 
 <div class="catalog-container">
     <div class="filters">
@@ -1126,28 +1819,41 @@
                 <input type="hidden" name="search" value="{{ request.GET.search }}">
             {% endif %}
 
-            <div class="filter-section">
+            <div class="filter-section category-filter">
                 <h3>Категории</h3>
                 {% for category in categories %}
                     <div class="filter-option">
-                        <input type="checkbox" id="cat-{{ forloop.counter }}" name="category" value="{{ category }}"
-                               {% if category in selected_categories %}checked{% endif %}>
+                        <input
+                                type="checkbox"
+                                id="cat-{{ forloop.counter }}"
+                                name="category"
+                                value="{{ category }}"
+                                {% if category in selected_categories %}checked{% endif %}
+                        >
                         <label for="cat-{{ forloop.counter }}">{{ category|translate_category }}</label>
                     </div>
                 {% endfor %}
             </div>
 
-            <div class="filter-section">
+            <div class="filter-section price-filter">
                 <h3>Цена</h3>
-                <input type="range" min="0" max="1000" value="{{ selected_max_price|default:'1000' }}"
-                       class="price-slider" id="priceRange" name="max_price">
+                <input
+                        type="range"
+                        min="0"
+                        max="6000"
+                        value="{{ selected_max_price|default:'6000' }}"
+                        class="price-slider"
+                        id="priceRange"
+                        name="max_price"
+                        style="width: 270px"
+                />
                 <div class="price-range">
                     <span>0 ден.</span>
-                    <span id="maxPriceDisplay">{{ selected_max_price|default:'1000' }} ден.</span>
+                    <span id="maxPriceDisplay">6000 ден.</span>
                 </div>
             </div>
 
-            <div class="filter-section">
+            <div class="filter-section store-filter">
                 <h3>Продавници</h3>
                 <div class="filter-option">
                     <input type="checkbox" id="store-vero" name="store" value="Vero"
@@ -1164,7 +1870,13 @@
                            {% if 'Ramstore' in selected_stores %}checked{% endif %}>
                     <label for="store-ramstore">Ramstore</label>
                 </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="store-zito" name="store" value="Zito"
+                           {% if 'Zito' in selected_stores %}checked{% endif %}>
+                    <label for="store-zito">Zito</label>
+                </div>
             </div>
+
 
             <input type="hidden" name="sort" id="sortValue" value="{{ selected_sort }}">
 
@@ -1186,25 +1898,37 @@
             </div>
         {% endif %}
         <div class="sorting-options">
-            <label style="margin-top: 7px" for="sort">Сортирај по:</label>
-            <select id="sort" onchange="updateSort()">
-                <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Цена (најниска)
-                </option>
-                <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Цена (највисока)
-                </option>
-                <option value="name_asc" {% if selected_sort == 'name_asc' %}selected{% endif %}>Име (А-Ш)</option>
-                <option value="name_desc" {% if selected_sort == 'name_desc' %}selected{% endif %}>Име (Ш-А)</option>
-                <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Најпопуларни</option>
-            </select>
-            <select id="listSelector" class="form-select">
-                <option value="">-- Избери листа --</option>
-            </select>
+            <b>
+                <label style="margin-top: 7px; color: rgba(43,86,43,0.93)"
+                       for="sort">Сортирај по:</label>
+                <select id="sort" onchange="updateSort()">
+                    <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Најпопуларни</option>
+                    <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Цена (најниска)
+                    </option>
+                    <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Цена
+                        (највисока)
+                    </option>
+                    <option value="name_asc" {% if selected_sort == 'name_asc' %}selected{% endif %}>Име (А-Ш)</option>
+                    <option value="name_desc" {% if selected_sort == 'name_desc' %}selected{% endif %}>Име (Ш-А)
+                    </option>
+                </select>
+                {#            <select id="listSelector" class="form-select">#}
+                {#                <option value="">-- Избери листа --</option>#}
+                {#            </select>#}
+            </b>
         </div>
 
         <!-- Product Grid -->
         <div class="grid">
             {% for product in page_obj %}
                 <div class="product-card">
+                    {% if product.popust %}
+                        <div class="ribbon-flag"></div>
+                        <div class="ribbon-flag-text">
+                            {#                            Попуст!#}
+                            <img src="{% static 'images/novo_disc.png' %}" width="90px">
+                        </div>
+                    {% endif %}
                     <a href="{% url 'product_detail' product.id %}">
                         <div class="product-image">
                             {% if product.image_url %}
@@ -1217,41 +1941,49 @@
                         <div class="product-info">
 
                             <div style="color: rgba(10,12,15,0.71)" class="product-name">{{ product.name }}</div>
-                            <div class="product-price">
-                                {% if product.popust %}
-                                    <span class="old-price">{{ product.price }} ден.</span>
-                                    {{ product.actual_price }} ден.
-                                    <span class="discount-badge">Попуст!</span>
-                                    {% if product.popust_date %}
-                                        <div class="discount-valid">
-                                            Важи до: {{ product.popust_date|date:"d.m.Y" }}
-                                        </div>
+                            <div style="display: block">
+                                <div class="product-price">
+                                    {% if product.popust %}
+
+                                        <span class="old-price">{{ product.price }} ден.</span>
+                                        {{ product.actual_price }} ден.
+                                        <span class="discount-badge"
+                                              style="width: 50px; margin-left: -1px">Попуст!</span>
+                                        {% if product.popust_date %}
+                                            <div class="discount-valid">
+                                                Важи до: {{ product.popust_date|date:"d.m.Y" }}
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        {{ product.price }} ден.
                                     {% endif %}
-                                {% else %}
-                                    {{ product.price }} ден.
-                                {% endif %}
+                                </div>
                             </div>
 
 
                             <div class="product-store">
                                 {% if product.store == 'Vero' %}
-                                    <img src="{% static 'images/vero_logo.png' %}" alt="Vero" style="height: 35px;">
+                                    <img src="{% static 'images/vero_logo1.png' %}" alt="Vero" style="height: 35px;">
                                 {% elif product.store == 'Ramstore' %}
                                     <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore"
                                          style="height: 35px;">
                                 {% elif product.store == 'Reptil' %}
-                                    <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil" style="height: 35px;">
+                                    <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil"
+                                         style="height: 35px;">
+                                {% elif product.store == 'Zito' %}
+                                    <img src="{% static 'images/zito_logo.png' %}" alt="Zito"
+                                         style="height: 35px;">
                                 {% endif %}
                             </div>
                             <div class="product-category">{{ product.category|translate_category }}</div>
                             <div class="product-actions">
-                                <a href="{{ product.product_url }}" target="_blank" class="view-product">Види
+                                <a href="{{ product.product_url }}" target="_blank" class="view-product"
+                                   style="color: rgba(22,53,22,0.93); ">Види
                                     производ</a>
                                 <div class="product-actions">
                                     <button class="btn btn-success add-to-list-btn"
-                                            style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer;"
-                                            data-product-id="{{ product.id }}">Додај
-                                        во листа
+                                            style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer; "
+                                            data-product-id="{{ product.id }}"><b>Додај</b>
                                     </button>
                                 </div>
 
@@ -1269,9 +2001,9 @@
 
         {% if page_obj.has_other_pages %}
             <div class="pagination">
-        <span class="step-links" style="margin-bottom: 40px">
-            {% if page_obj.has_previous %}
-                <a href="?page=1
+            <span class="step-links" style="margin-bottom: 40px">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1
 
 
 
@@ -1338,8 +2070,6 @@
 
 
 
-                        {% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo;</a>
-                <a href="?page=
 
 
 
@@ -1384,6 +2114,8 @@
 
 
 
+                            {% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo;</a>
+                    <a href="?page=
 
 
 
@@ -1406,152 +2138,328 @@
 
 
 
-                        {{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&lsaquo;</a>
-            {% endif %}
 
-            <span class="current">
-                Страна {{ page_obj.number }} од {{ page_obj.paginator.num_pages }}.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            {{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&lsaquo;</a>
+                {% endif %}
+
+                <span class="current">
+                    Страна {{ page_obj.number }} од {{ page_obj.paginator.num_pages }}.
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a href="?page=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            {{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&rsaquo;</a>
+                    <a href="?page=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            {{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&raquo;</a>
+                {% endif %}
             </span>
-
-            {% if page_obj.has_next %}
-                <a href="?page=
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        {{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&rsaquo;</a>
-                <a href="?page=
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        {{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&raquo;</a>
-            {% endif %}
-        </span>
             </div>
         {% endif %}
     </div>
@@ -1805,9 +2713,9 @@
 
         if (userLists.length === 0) {
             listsContainer.innerHTML = `
-            <p>Немате креирано листи.</p>
-            <div class="create-new-list" onclick="showNewListForm()">Креирај нова листа</div>
-        `;
+                <p>Немате креирано листи.</p>
+                <div class="create-new-list" onclick="showNewListForm()">Креирај нова листа</div>
+            `;
         } else {
             userLists.forEach(list => {
                 const listOption = document.createElement('div');
@@ -2030,8 +2938,293 @@
             button.classList.add('pulse-on-click');
         });
     });
+    {#// Add this to your existing JavaScript#}
+    {#document.addEventListener('DOMContentLoaded', function () {#}
+    {#    // Handle navbar search form submission#}
+    {#    const navbarSearchForm = document.querySelector('.header-search form');#}
+    {#    if (navbarSearchForm) {#}
+    {#        navbarSearchForm.addEventListener('submit', function (e) {#}
+    {#            const searchInput = this.querySelector('input[name="search"]');#}
+    {#            if (searchInput.value.trim() === '') {#}
+    {#                e.preventDefault(); // Prevent empty searches#}
+    {#            }#}
+    {#        });#}
+    {#    }#}
 
+    // Handle mobile search form submission
+    {#    const mobileSearchForm = document.querySelector('.mobile-search-form');#}
+    {#    if (mobileSearchForm) {#}
+    {#        mobileSearchForm.addEventListener('submit', function (e) {#}
+    {#            const searchInput = this.querySelector('input[name="search"]');#}
+    {#            if (searchInput.value.trim() === '') {#}
+    {#                e.preventDefault(); // Prevent empty searches#}
+    {#            }#}
+    {#        });#}
+    {#    }#}
+    {#{}#}
+    {#);#}
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Desktop search elements
+        const searchInput = document.getElementById('searchInput');
+        const suggestionsDiv = document.getElementById('suggestions');
+        const searchForm = document.getElementById('searchForm');
+
+        // Mobile search elements
+        const mobileSearchInput = document.getElementById('mobileSearchInput');
+        const mobileSearchForm = document.getElementById('mobileSearchForm');
+
+        // Extended transliteration with typo correction
+        function transliterateLatinToCyrillic(text) {
+            const map = {
+                'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
+                'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
+                'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
+                'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
+                'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
+                'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
+                's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
+                'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
+                'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
+            };
+
+            const typoPatterns = [
+                {pattern: /sampon/gi, replace: 'shampon'},
+                {pattern: /cresi/gi, replace: 'creshi'},
+                {pattern: /stipki/gi, replace: 'shtipki'},
+                {pattern: /sch/gi, replace: 'sh'},
+                {pattern: /ck/gi, replace: 'k'},
+                {pattern: /ph/gi, replace: 'f'},
+                {pattern: /th/gi, replace: 't'},
+                {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
+                {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
+                {pattern: /([a-z])\1/gi, replace: '$1'}
+            ];
+
+            let normalizedText = text.toLowerCase();
+            for (const {pattern, replace} of typoPatterns) {
+                normalizedText = normalizedText.replace(pattern, replace);
+            }
+
+            let result = '';
+            let i = 0;
+            while (i < normalizedText.length) {
+                if (map[normalizedText.substring(i, i + 3)]) {
+                    result += map[normalizedText.substring(i, i + 3)];
+                    i += 3;
+                } else if (map[normalizedText.substring(i, i + 2)]) {
+                    result += map[normalizedText.substring(i, i + 2)];
+                    i += 2;
+                } else if (map[normalizedText[i]]) {
+                    result += map[normalizedText[i]];
+                    i++;
+                } else {
+                    result += normalizedText[i];
+                    i++;
+                }
+            }
+            return result;
+        }
+
+        function setupSearch(input, form) {
+            input.addEventListener('input', function () {
+                const query = this.value.trim();
+                if (query.length < 2) {
+                    suggestionsDiv.style.display = 'none';
+                    return;
+                }
+
+                fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsDiv.innerHTML = '';
+                        if (data.suggestions.length > 0) {
+                            data.suggestions.forEach(suggestion => {
+                                const div = document.createElement('div');
+                                div.textContent = suggestion;
+                                div.style.padding = '5px 10px';
+                                div.style.cursor = 'pointer';
+                                div.addEventListener('click', function () {
+                                    input.value = transliterateLatinToCyrillic(suggestion);
+                                    suggestionsDiv.style.display = 'none';
+                                    form.submit();
+                                });
+                                suggestionsDiv.appendChild(div);
+                            });
+                            suggestionsDiv.style.display = 'block';
+                        } else {
+                            suggestionsDiv.style.display = 'none';
+                        }
+                    });
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    suggestionsDiv.style.display = 'none';
+                    input.value = transliterateLatinToCyrillic(input.value);
+                    form.submit();
+                }
+            });
+        }
+
+        setupSearch(searchInput, searchForm);
+        setupSearch(mobileSearchInput, mobileSearchForm);
+
+        document.addEventListener('click', function (e) {
+            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
+                !mobileSearchInput.contains(e.target)) {
+                suggestionsDiv.style.display = 'none';
+            }
+        });
+    });
+    const priceRange = document.getElementById('priceRange');
+    const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+
+    priceRange.addEventListener('input', () => {
+        maxPriceDisplay.textContent = priceRange.value + ' ден.';
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if this is the first visit to the catalog page
+        if (!localStorage.getItem('catalogTourShown')) {
+            // Show the instruction modal after a short delay
+            setTimeout(showInstructionModal, 1000);
+
+            // Mark that the tour has been shown
+            localStorage.setItem('catalogTourShown', 'true');
+        }
+
+        // Close button handler
+        document.getElementById('closeInstruction')?.addEventListener('click', function () {
+            document.getElementById('instructionModal').style.display = 'none';
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if first visit
+        if (!localStorage.getItem('catalogTourShown')) {
+            setTimeout(showEnhancedTour, 1000);
+            localStorage.setItem('catalogTourShown', 'true');
+        }
+
+        // Close button
+        document.getElementById('closeInstruction')?.addEventListener('click', closeTour);
+        document.getElementById('gotItBtn')?.addEventListener('click', closeTour);
+
+        // Optional: Replay button
+        document.getElementById('showInstructionsAgain')?.addEventListener('click', showEnhancedTour);
+    });
+
+    function showEnhancedTour() {
+        const modal = document.getElementById('instructionModal');
+        const listArrow = document.getElementById('listArrow');
+        const navArrow = document.getElementById('navArrow');
+        const listSelector = document.getElementById('listSelector');
+        const navLists = document.querySelector('.user-actions .list-icon');
+        // In showEnhancedTour():
+        {#listArrow.style.left = '300px';  // Fixed test position#}
+        {#listArrow.style.top = '100px';#}
+        {#navArrow.style.left = '200px';#}
+        {#navArrow.style.top = '200px';#}
+
+        if (modal && listArrow && navArrow) {
+            // Position arrows
+            if (listSelector) {
+                const listRect = listSelector.getBoundingClientRect();
+                listArrow.style.left = `${listRect.left + listRect.width / 2 - 50}px`; // Adjust X position
+                listArrow.style.top = `${listRect.top - 80}px`; // Adjust Y position
+            }
+
+            if (navLists) {
+                const navRect = navLists.getBoundingClientRect();
+                navArrow.style.left = `${navRect.left + navRect.width / 2 - 50}px`; // Adjust X position
+                navArrow.style.top = `${navRect.bottom - 30}px`; // Adjust Y position
+            }
+
+            // Show modal and arrows
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                listArrow.style.opacity = '1';
+                navArrow.style.opacity = '1';
+            }, 500);
+        }
+    }
+
+    function closeTour() {
+        const modal = document.getElementById('instructionModal');
+        if (modal) {
+            modal.style.animation = 'modalExit 0.3s forwards';
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // Add to your existing CSS:
+    {#@keyframes#}
+    {#modalExit#}
+    {#{#}
+    {#    to#}
+    {#    {#}
+    {#        transform: scale(0.9);#}
+    {#        opacity: 0;#}
+    {#    }#}
+
+
+    document.getElementById('showInstructionsAgain')?.addEventListener('click', showInstructionModal);
 
 </script>
+<!-- Instruction Modal - Enhanced -->
+<div id="instructionModal" class="instruction-modal">
+    <div class="modal-content">
+        <div class="modal-header" style="border-radius: 7px;">
+            <h3>Како да ги користите листите?</h3>
+            <button id="closeInstruction" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+            {#            <p>Како да користите листи:</p>#}
+            <div class="instruction-step">
+                <div class="step-number">1</div>
+                <p>Изберете листа од паѓачкото мени!</p>
+            </div>
+            <div class="instruction-step">
+                <div class="step-number">2</div>
+                <p>Кликнете на <strong>"Додај"</strong> за да го додадете производот во листа.</p>
+            </div>
+            <div class="instruction-step">
+                <div class="step-number">3</div>
+                <p>Пристапете ги вашите листи од менито <strong>"Мои листи"</strong><span
+                        class="hint-text">(горе десно)</span></p>
+            </div>
+        </div>
+        <button id="gotItBtn" class="modal-action-btn">Разбрав!</button>
+    </div>
+
+    <!-- Arrow pointing to list selector -->
+    <div id="listArrow" class="arrow-pointer pulse-arrow"
+         style="width: 60px; height: 60px; position: absolute;">
+        <svg viewBox="0 0 24 24" style="width: 100%; height: 100%;" preserveAspectRatio="xMidYMid meet"
+             xmlns="http://www.w3.org/2000/svg">
+            <path d="m14.707 12.707-4 4a1 1 0 0 1-1.414-1.414L12.586 12 9.293 8.707a1 1 0 1 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414z"
+                  style="fill:rgba(31,63,31,0.93)"/>
+        </svg>
+    </div>
+
+
+    <div id="navArrow" class="arrow-pointer pulse-arrow"
+         style="position: absolute; width: 50px; height: 50px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet"
+             style="width: 100%; height: 100%;">
+            <path d="M16 15a1 1 0 0 1-.707-.293L12 11.414l-3.293 3.293a1 1 0 1 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4A1 1 0 0 1 16 15z"
+                  style="fill:rgba(31,63,31,0.93)"/>
+        </svg>
+    </div>
+
+
+</div>
+<button id="showInstructionsAgain"
+        style="position: fixed; bottom: 20px; right: 20px; background: #2e652e; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px;">
+    ?
+</button>
 </body>
 </html>

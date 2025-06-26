@@ -1,54 +1,918 @@
+{% load static %}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Nearby Stores</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Најблиски продавници</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
     <style>
+        /* Common Styles */
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: url('{% static "images/baner1.jpg" %}') no-repeat center center fixed;
+            background-size: cover;
         }
 
-        h1, h2 {
-            color: #2c3e50;
+        /* Header */
+        .main-header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e5e5e5;
         }
 
-        th, td {
-            padding: 12px;
+        .logo img {
+            height: 60px;
+        }
+
+        .header-search {
+            flex-grow: 1;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .header-search input {
+            width: 97%;
+            padding: 12px 20px;
             border: 1px solid #ddd;
-            text-align: left;
+            border-radius: 30px;
+            font-size: 16px;
+            background-color: #f5f5f5;
         }
 
-        tr:nth-child(even) {
-            background-color: #f8f8f8;
+        .header-search button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-actions a {
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .user-actions a:hover {
+            color: #2e652e;
+        }
+
+        .logout-btn {
+            background-color: #2e652e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            background-color: #1f3f1f;
+        }
+
+        /* Navigation */
+        .main-nav {
+            padding: 15px 30px;
+            background-color: #2e652e;
+        }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-nav li {
+            margin-right: 20px;
+        }
+
+        .main-nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 5px 0;
+            position: relative;
+        }
+
+        .main-nav a:hover {
+            color: #fdd835;
+        }
+
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #fdd835;
+            transition: width 0.3s ease;
+        }
+
+        .main-nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Nearby Stores Page Styles */
+        .stores-wrapper {
+            flex: 1;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .stores-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stores-main-title {
+            background: linear-gradient(135deg, #2e652e, #1f3f1f);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .back-button {
+            margin-bottom: 20px;
+        }
+
+        .back-button a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background-color: #e8f5e9;
+            color: #2e652e;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #c8e6c9;
+        }
+
+        .back-button a:hover {
+            background-color: #d0f0d0;
+            border-color: #b2dfdb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .store-search-form {
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2e652e;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #aed581;
+            border-radius: 6px;
+            font-size: 16px;
+            background-color: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            border-color: #2e652e;
+            outline: none;
+            box-shadow: 0 0 8px rgba(46, 101, 46, 0.3);
+        }
+
+        .form-actions {
+            text-align: center;
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .action-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .primary-button {
+            background-color: #2e652e;
+            color: white;
+            border-color: #2e652e;
+        }
+
+        .primary-button:hover {
+            background-color: #1f3f1f;
+            border-color: #1f3f1f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .secondary-button {
+            background-color: #e8f5e9;
+            color: #2e652e;
+            border-color: #c8e6c9;
+        }
+
+        .secondary-button:hover {
+            background-color: #d0f0d0;
+            border-color: #b2dfdb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stores-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .store-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #81c784;
+        }
+
+        .store-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .store-title {
+            color: #2e652e;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .store-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #555;
+        }
+
+        .meta-item i {
+            color: #2e652e;
+            width: 20px;
+            text-align: center;
+        }
+
+        .no-stores {
+            text-align: center;
+            padding: 30px;
+            background-color: #fff3e0;
+            border-radius: 8px;
+            color: #e65100;
+            border-left: 4px solid #e65100;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .no-stores i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: #e65100;
+        }
+
+        .no-stores p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        /* Map Styles */
+         /* Mobile Menu */
+        #mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #2e652e, #1f3f1f);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            position: relative;
+        }
+
+        #mobile-logo img {
+            height: 50px;
+        }
+
+        .menu-toggle {
+            font-size: 28px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 75%;
+            height: 100vh;
+            background: linear-gradient(135deg, #f0f7f0, #e0e8e0);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease;
+            padding: 20px;
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu.open {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            font-size: 28px;
+            color: #2e652e;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #1f3f1f;
+        }
+
+        .mobile-search-form {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 10px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .mobile-search-form input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            background: #f5f5f5;
+        }
+
+        .mobile-search-form button {
+            background-color: #2e652e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .mobile-search-form button:hover {
+            background-color: #1f3f1f;
+            transform: scale(1.1);
+        }
+
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mobile-nav a {
+            color: #2e652e;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .mobile-nav a:hover {
+            background-color: #2e652e;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        #overlay.active {
+            display: block;
+        }        /* Responsiveness */
+        @media (max-width: 768px) {
+            .main-header {
+                display: none;
+            }
+
+            #mobile-header {
+                display: flex;
+            }
+
+            .stores-container {
+                padding: 20px;
+                margin-top: 20px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .stores-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #map-container {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stores-main-title {
+                font-size: 20px;
+                padding: 12px;
+            }
+
+            .back-button a {
+                padding: 8px 15px;
+                font-size: 14px;
+            }
+
+            .action-button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .form-input {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
 <body>
-<h2>Nearby Stores</h2>
 
-<p>Your location: Latitude {{ latitude }}, Longitude {{ longitude }}</p>
-<p>Your car's fuel consumption: {{ fuel_usage }} L/100km</p>
-<p>Store chain: {{ selected_store }}</p>
+<!-- Header -->
+<header class="main-header">
+    <div class="header-top">
+        <div class="logo">
+            <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"/></a>
+        </div>
+        <div class="header-search">
+            <input type="text" placeholder="Пребарај производи...">
+            <button type="submit"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="user-actions">
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}" class="auth-form">
+                    {% csrf_token %}
+                    <button type="submit" class="auth-btn logout">
+                        <i class="fas fa-sign-out-alt"></i> Одјави се
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="auth-btn">
+                    <i class="fas fa-user"></i> Најави се
+                </a>
+                <a href="{% url 'register' %}" class="auth-btn">
+                    <i class="fas fa-user-plus"></i> Регистрирај се
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="{% url 'home' %}">Дома</a></li>
+            <li><a href="{% url 'product_list' %}">Каталог</a></li>
+            <li><a href="{% url 'stats' %}">Статистика</a></li>
+            <li><a href="{% url 'nearby_stores' %}">Најблиски продавници</a></li>
+        </ul>
+    </nav>
+</header>
 
-{% if nearby_stores %}
-    <h3>Closest Stores:</h3>
-    <ul>
-        {% for store in nearby_stores %}
-            <li>
-                {{ store.name }} -
-                {{ store.distance|floatformat:2 }} km away -
-                {{ store.fuel|floatformat:2 }} liters used
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No stores found for the selected chain.</p>
-{% endif %}
+<!-- Mobile Menu -->
+<div id="mobile-header">
+    <div id="mobile-logo">
+        <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого">
+    </div>
+    <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
+</div>
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="mobile-menu">
+    <div class="mobile-menu-header">
+        <span class="close-btn" onclick="toggleMobileMenu()">×</span>
+    </div>
+
+    <form method="GET" action="{% url 'product_list' %}" class="mobile-search-form">
+        <input type="text" name="search" placeholder="Пребарај производ..." value="{{ request.GET.search }}">
+        <button type="submit"><i class="fas fa-search"></i></button>
+    </form>
+
+    <nav class="mobile-nav">
+        <a href="{% url 'home' %}">Дома</a>
+        <a href="{% url 'product_list' %}">Каталог</a>
+        <a href="{% url 'stats' %}">Статистика</a>
+        <a href="{% url 'nearby_stores' %}">Најблиски продавници</a>
+        <a href="{% url 'view_lists' %}">Листи</a>
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Одјави се</a>
+        {% else %}
+            <a href="{% url 'login' %}">Најави се</a>
+            <a href="{% url 'register' %}">Регистрирај се</a>
+        {% endif %}
+    </nav>
+</div>
+<div id="overlay" onclick="toggleMobileMenu()"></div>
+
+<!-- Nearby Stores Content -->
+<div class="stores-wrapper">
+    <div class="stores-container">
+        <div class="back-button">
+            <a href="javascript:history.back()" class="action-button secondary-button">
+                <i class="fas fa-arrow-left"></i> Назад
+            </a>
+        </div>
+
+        <h1 class="stores-main-title">Најблиски продавници</h1>
+
+        <form method="get" action="{% url 'nearby_stores' %}" class="store-search-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="latitude">Latitude:</label>
+                    <input type="text" id="latitude" name="latitude" required class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude:</label>
+                    <input type="text" id="longitude" name="longitude" required class="form-input">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fuel_consumption">Потрошувачка на гориво (L/100km):</label>
+                    <input type="number" step="0.1" id="fuel_consumption" name="fuel_consumption" required
+                           class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="store_chain">Продавничка мрежа:</label>
+                    <select name="store_chain" id="store_chain" required class="form-input">
+                        <option value="Reptil">Reptil</option>
+                        <option value="Vero">Vero</option>
+                        <option value="Ramstore">Ramstore</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" onclick="getLocation()" class="action-button secondary-button">
+                    <i class="fas fa-location-arrow"></i> Користи моја локација
+                </button>
+                <button type="submit" class="action-button primary-button">
+                    <i class="fas fa-search"></i> Пронајди
+                </button>
+            </div>
+        </form>
+
+        {% if nearest_stores %}
+            <h2 style="color: #2e652e; font-size: 20px; margin-top: 30px; margin-bottom: 15px;">Најблиски
+                продавници</h2>
+            <div class="stores-grid">
+                {% for store in nearest_stores|slice:":5" %}
+                    <div class="store-card">
+                        <h3 class="store-title">{{ store.store }}</h3>
+                        <div class="store-meta">
+                            <span class="meta-item"><i class="fas fa-route"></i> Растојание: {{ store.distance_km }} km</span>
+                            <span class="meta-item"><i class="fas fa-clock"></i> Време: {{ store.duration }}</span>
+                            <span class="meta-item"><i
+                                    class="fas fa-gas-pump"></i> Гориво: {{ store.gas_used }} L</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if nearest_stores %}
+                <div style="display: none;">
+                    <h3>Debug Store Data:</h3>
+                    {% for store in nearest_stores %}
+                        <p>
+                            {{ store.store }} -
+                            Lat: {{ store.latitude }},
+                            Lng: {{ store.longitude }}
+                        </p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <!-- Map Container -->
+            <div id="map-container">
+                <div id="map"></div>
+            </div>
+
+            <!-- Add a button to center map on user location -->
+            <div class="form-actions" style="margin-top: 15px;">
+                <button onclick="centerMapOnUser()" class="action-button secondary-button">
+                    <i class="fas fa-location-arrow"></i> Центрирај на мојата локација
+                </button>
+            </div>
+        {% else %}
+            <div class="no-stores">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Нема пронајдени продавници.</p>
+            </div>
+        {% endif %}
+
+        {% if least_gas_stores %}
+            <h2 style="color: #2e652e; font-size: 20px; margin-top: 30px; margin-bottom: 15px;">Продавници со најмало
+                користење на гориво</h2>
+            <div class="stores-grid">
+                {% for store in least_gas_stores|slice:":5" %}
+                    <div class="store-card">
+                        <h3 class="store-title">{{ store.store }}</h3>
+                        <div class="store-meta">
+                            <span class="meta-item"><i class="fas fa-route"></i> Растојание: {{ store.distance_km }} km</span>
+                            <span class="meta-item"><i class="fas fa-clock"></i> Време: {{ store.duration }}</span>
+                            <span class="meta-item"><i
+                                    class="fas fa-gas-pump"></i> Гориво: {{ store.gas_used }} L</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+
+<script>
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                document.getElementById("latitude").value = position.coords.latitude;
+                document.getElementById("longitude").value = position.coords.longitude;
+            }, function (error) {
+                alert("Грешка при геолокација: " + error.message);
+            });
+        } else {
+            alert("Геолокацијата не е поддржана од овој пребарувач.");
+        }
+    }
+
+    function toggleMobileMenu() {
+        const menu = document.getElementById("mobile-menu");
+        const overlay = document.getElementById("overlay");
+        menu.classList.toggle("open");
+        overlay.classList.toggle("active");
+    }
+
+    // Map variables
+    let map;
+    let userMarker;
+    let storeMarkers = [];
+    let routeLines = [];
+
+    // Initialize map when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        // Check if nearest_stores exists and initialize map
+        {% if nearest_stores %}
+            initMap();
+        {% else %}
+            console.log("No nearest_stores data available to initialize map.");
+        {% endif %}
+    });
+
+    function initMap() {
+        try {
+            // Get coordinates from form or use first store as center if form is empty
+            const userLat = parseFloat(document.getElementById('latitude').value) || {{ nearest_stores.0.latitude|default:41.9981 }};
+            const userLng = parseFloat(document.getElementById('longitude').value) || {{ nearest_stores.0.longitude|default:21.4254 }};
+
+            // Create map
+            map = L.map('map', {
+                center: [userLat, userLng],
+                zoom: 13
+            });
+
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 18
+            }).addTo(map);
+
+            // Add user marker
+            userMarker = L.marker([userLat, userLng], {
+                icon: L.icon({
+                    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34]
+                })
+            }).addTo(map);
+            userMarker.bindPopup("<b>Вашата локација</b>").openPopup();
+
+            // Clear previous markers and lines
+            storeMarkers.forEach(marker => map.removeLayer(marker));
+            routeLines.forEach(line => map.removeLayer(line));
+            storeMarkers = [];
+            routeLines = [];
+
+            // Add store markers
+            const stores = [
+                {% for store in nearest_stores %}
+                    {
+                        name: "{{ store.store|escapejs }}",
+                        latitude: {{ store.latitude }},
+                        longitude: {{ store.longitude }},
+                        distance: {{ store.distance_km }},
+                        duration: "{{ store.duration|escapejs }}",
+                        gasUsed: {{ store.gas_used }}
+                    },
+                {% empty %}
+                    // Fallback coordinates if no stores (e.g., Skopje center)
+                    { name: "No stores", latitude: 41.9981, longitude: 21.4254, distance: 0, duration: "N/A", gasUsed: 0 },
+                {% endfor %}
+            ];
+
+            stores.forEach(store => {
+                const storeMarker = L.marker([store.latitude, store.longitude], {
+                    icon: L.icon({
+                        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34]
+                    })
+                }).addTo(map);
+                storeMarker.bindPopup(
+                    `<b>${store.name}</b><br>` +
+                    `Растојание: ${store.distance} km<br>` +
+                    `Време: ${store.duration}<br>` +
+                    `Гориво: ${store.gasUsed} L`
+                );
+                storeMarkers.push(storeMarker);
+
+                // Add route line
+                const line = L.polyline(
+                    [[userLat, userLng], [store.latitude, store.longitude]],
+                    {color: '#2e652e', weight: 2, dashArray: '5, 5'}
+                ).addTo(map);
+                routeLines.push(line);
+            });
+
+            console.log("Map initialized successfully with center:", [userLat, userLng]);
+        } catch (error) {
+            console.error("Error initializing map:", error);
+            alert("Грешка при иницијализација на мапата. Проверете ги координатите или податоците.");
+        }
+    }
+
+    function centerMapOnUser() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+                const userLat = position.coords.latitude;
+                const userLng = position.coords.longitude;
+
+                // Update form fields
+                document.getElementById('latitude').value = userLat;
+                document.getElementById('longitude').value = userLng;
+
+                // Update map view and markers
+                if (map) {
+                    userMarker.setLatLng([userLat, userLng]);
+                    userMarker.bindPopup("<b>Вашата локација</b>").openPopup();
+
+                    routeLines.forEach((line, index) => {
+                        const storeMarker = storeMarkers[index];
+                        if (storeMarker) {
+                            const storeLatLng = storeMarker.getLatLng();
+                            line.setLatLngs([[userLat, userLng], [storeLatLng.lat, storeLatLng.lng]]);
+                        }
+                    });
+
+                    map.setView([userLat, userLng], 13);
+                } else {
+                    initMap();
+                }
+            }, function (error) {
+                alert("Грешка при геолокација: " + error.message);
+            });
+        } else {
+            alert("Геолокацијата не е поддржана од овој пребарувач.");
+        }
+    }
+
+    // Reinitialize map on form submission if needed
+    document.querySelector('.store-search-form').addEventListener('submit', function () {
+        if (map) {
+            setTimeout(initMap, 100); // Slight delay to ensure form data is processed
+        }
+    });
+</script>
 </body>
 </html>

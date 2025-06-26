@@ -1,7 +1,5 @@
 from django import template
-
 register = template.Library()
-
 CATEGORY_TRANSLATIONS = {
     'snacks': 'Грицки',
     'sweets': 'Слатки',
@@ -24,10 +22,8 @@ CATEGORY_TRANSLATIONS = {
     'canned food': 'Конзервирана Храна',
     'frozen food': 'Замрзната Храна',
     'baby food': 'Храна за Бебиња',
-    # Add all other categories
 }
 
 @register.filter(name='translate_category')
 def translate_category(category):
-    # Convert to lowercase and strip whitespace for reliable matching
     return CATEGORY_TRANSLATIONS.get(category.lower().strip(), category)

@@ -21,19 +21,19 @@ class Item(models.Model):
 #sega odime so komanda python manage.py makemigrations
 class Products2(models.Model):
     name = models.CharField(max_length=255)
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # This will be the "old_price"
+    price = models.DecimalField(max_digits=10, decimal_places=2)
     actual_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=0.00  # Add this line
-    )  # Current price (discounted if applicable)
+    )
     category = models.CharField(max_length=100)
     image_url = models.CharField(max_length=255)
     product_url = models.CharField(max_length=255)
     store = models.CharField(max_length=255)
     popust = models.BooleanField(default=False)
     popust_date = models.DateField(null=True, blank=True)
-    embedding = models.BinaryField()  # Make sure this is a BinaryField to store pickled embeddings
+    embedding = models.BinaryField()
 
 
     class Meta:
@@ -51,6 +51,8 @@ class ShoppingList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    db_collation = 'utf8mb4_unicode_ci'
+
 
 class ShoppingListItem(models.Model):
     shopping_list = models.ForeignKey(ShoppingList, on_delete=models.CASCADE)

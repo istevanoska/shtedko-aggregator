@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from decouple import config
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,6 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-y5s^rl54gumkkg1m&uwin81&#jb2uy712ai$1tvrt*190+fpo8'
+
+load_dotenv()  # loads .env
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
+# HUGGINGFACE_TOKEN = config('HUGGINGFACE_TOKEN')
+HUGGINGFACE_TOKEN="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"
+
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -35,11 +45,24 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main.apps.MainConfig',
+    'social_django',
 ]
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
+    'social_core.backends.google.GoogleOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
 ]
+# Add to bottom of settings.py
+SOCIAL_AUTH_FACEBOOK_KEY = 'your-facebook-app-id'       # App ID
+SOCIAL_AUTH_FACEBOOK_SECRET = 'your-facebook-app-secret'  # App Secret
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'public_profile']
+SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {'fields': 'id, name, email'}
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = 'your-google-client-id'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'your-google-client-secret'
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile']
 
 LOGIN_REDIRECT_URL = 'home'  # Redirect to home after login
 LOGIN_URL = 'login'

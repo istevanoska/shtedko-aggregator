@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div id="fridge-suggester">
+  <h3>What’s in your fridge?</h3>
+  <textarea id="fridge-input" rows="3" placeholder="e.g. eggs, milk, flour"></textarea>
+  <button id="fridge-btn">Suggest Recipes</button>
+  <div id="fridge-recipes"></div>
+</div>
+<script>
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+    document.getElementById('fridge-btn').onclick = () => {
+  const ingredients = document.getElementById('fridge-input').value;
+  fetch('/fridge-recipes/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken'),
+    },
+    body: JSON.stringify({ ingredients }),
+  })
+  .then(res => res.json())
+  .then(data => {
+    const div = document.getElementById('fridge-recipes');
+    div.innerHTML = data.recipes.map(r =>
+      `<div><h4>${r.title}</h4><p>${r.description}</p></div>`
+    ).join('');
+  });
+};
+
+</script>
+</body>
+</html>

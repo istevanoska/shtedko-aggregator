@@ -4,7 +4,8 @@ from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
 
-from .views import custom_logout, remove_from_list, get_store_products, stats_view, nearby_stores_view
+from .views import custom_logout, remove_from_list, get_store_products, stats_view
+
 
 # from .views import test_db_connection
 # prethodnoto znaci deka od momentalniot folder (main) go vnesuvame views.py
@@ -32,6 +33,13 @@ urlpatterns = [
     path('get-store-products/', get_store_products, name='get_store_products'),
     path('statistics/', stats_view, name='stats'),
     path('nearby-stores/', views.nearby_stores_view, name='nearby_stores'),
+    # path("recepies/", views.recipe_generator, name="recipe_generator"),
+    path('fridge-recipes/', views.fridge_recipes, name='fridge_recipes'),
+    # path('admin/', admin.site.urls),
+    path('search-suggestions/', views.search_suggestions, name='search_suggestions'),
+
+    # django-allauth urls:
+
 
 ]
 # prethodnoto znaci deka koga odime na pocetna strana nema nisto "" i ne nosi na funkcijata

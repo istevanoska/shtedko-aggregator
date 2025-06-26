@@ -1,443 +1,409 @@
 {% load static %}
+{% load category_filters %}
+{% load custom_filters %}
 
-{% block content %}
-    <div class="lists-wrapper">
-        <div class="back-button">
-            <a href="javascript:history.back()" class="action-button secondary-button">
-                <i class="fas fa-arrow-left"></i> Назад
-            </a>
-        </div>
-
-        <div class="lists-container">
-            <h1 class="lists-main-title" style="padding: 10px; color: white; border-radius: 10px; background: linear-gradient(135deg, #1f3f1f, #2e652e);
-">Мои листи </h1>
-
-            <div class="lists-actions">
-                <button id="create-list-btn" class="action-button primary-button">
-                    <i class="fas fa-plus"></i> Нова листа
-                </button>
-
-                <div id="create-list-form" class="create-list-form" style="display: none;">
-                    <form method="post" action="{% url 'create_list' %}">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <input type="text" name="list_name" placeholder="Име на листата" required
-                                   class="form-input">
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="action-button submit-button">Креирај</button>
-                            <button type="button" id="cancel-create" class="action-button secondary-button">Откажи
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <div class="lists-grid">
-                {% for list in user_lists %}
-                    <div class="list-card">
-                        <a href="{% url 'view_list' list.id %}" class="list-card-link">
-                            <h3 class="list-title">{{ list.name }}</h3>
-                            <div class="list-meta">
-                            <span class="meta-item">
-                                <i class="fas fa-shopping-basket"></i> {{ list.items.count }} продукти
-                            </span>
-                                <span class="meta-item">
-                                <i class="far fa-calendar-alt"></i> {{ list.created_at|date:"d.m.Y" }}
-                            </span>
-                            </div>
-                        </a>
-                        <form method="post" action="{% url 'delete_list' list.id %}" class="delete-list-form">
-                            {% csrf_token %}
-                            <button type="submit" class="action-button danger-button small-button">
-                                <i class="fas fa-trash-alt"></i> Избриши
-                            </button>
-                        </form>
-                    </div>
-                {% empty %}
-                    <div class="empty-lists-message">
-                        <i class="far fa-folder-open"></i>
-                        <p>Немате креирано листи.</p>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
+<!DOCTYPE html>
+<html lang="mk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Мои листи</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
-       html, body {
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-image: url('{% static "images/baner1.jpg" %}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            position: relative;
-            overflow-x: hidden;
-       }
-
-        /* Base Styles - Consistent with shopping list */
-        .lists-wrapper {
-            width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-            background: url('/static/images/background.jpg') no-repeat center center fixed;
-            background-size: cover;
+        /* Common Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
             min-height: 100vh;
+            background-color: #f5f5f5;
         }
 
-        .back-button {
+        /* Header */
+        .main-header {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .logo img {
+            height: 60px;
+        }
+
+        .header-search {
+            flex-grow: 1;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .header-search input {
+            width: 97%;
+            padding: 12px 20px;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 16px;
+            background-color: #f5f5f5;
+        }
+
+        .header-search button {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 18px;
         }
 
-        .lists-container {
+        .user-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-actions a, .user-actions button {
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .user-actions a:hover {
+            color: #2e652e;
+        }
+
+        .logout-btn {
+            background-color: #2e652e;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .logout-btn:hover {
+            background-color: #1f3f1f;
+        }
+
+        /* Navigation */
+        .main-nav {
+            padding: 15px 30px;
+            background-color: #2e652e;
+        }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-nav li {
+            margin-right: 20px;
+        }
+
+        .main-nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 5px 0;
+            position: relative;
+        }
+
+        .main-nav a:hover {
+            color: #fdd835;
+        }
+
+        .main-nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #fdd835;
+            transition: width 0.3s ease;
+        }
+
+        .main-nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Mobile Menu */
+        #mobile-header {
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #2e652e, #1f3f1f);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            position: relative;
+        }
+
+        #mobile-logo img {
+            height: 50px;
+        }
+
+        .menu-toggle {
+            font-size: 28px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 75%;
+            height: 100vh;
+            background: linear-gradient(135deg, #f0f7f0, #e0e8e0);
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+            transition: right 0.3s ease;
+            padding: 20px;
+            z-index: 1002;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu.open {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            font-size: 28px;
+            color: #2e652e;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #1f3f1f;
+        }
+
+        .mobile-search-form {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            gap: 10px;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .mobile-search-form input {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            background: #f5f5f5;
+        }
+
+        .mobile-search-form button {
+            background-color: #2e652e;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .mobile-search-form button:hover {
+            background-color: #1f3f1f;
+            transform: scale(1.1);
+        }
+
+        .mobile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .mobile-nav a {
+            color: #2e652e;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .mobile-nav a:hover {
+            background-color: #2e652e;
+            color: white;
+            transform: translateX(5px);
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        #overlay.active {
+            display: block;
+        }
+
+        /* Message Styling */
+        .message-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            position: relative;
+            background-color: #f8f9fa;
+            border-left: 4px solid #6c757d;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+        }
+
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
             max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.85); /* Semi-transparent background */
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            margin-top: 60px;
+            margin: 20px auto;
+            padding: 0 15px;
+            flex-grow: 1;
+        }
+
+        .content-area {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 20px;
         }
 
         .lists-main-title {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 28px;
+            font-size: 1.5rem;
             font-weight: 600;
+            color: #2e652e;
+            margin-bottom: 10px;
         }
 
-        /* Action Buttons - Consistent style */
+        .header-decoration {
+            height: 4px;
+            width: 80px;
+            background: linear-gradient(to right, #2e652e, #4caf50);
+            margin: 0 auto;
+            border-radius: 2px;
+        }
+
         .lists-actions {
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             text-align: center;
         }
 
         .action-button {
+            padding: 10px 25px;
+            font-size: 1rem;
+            background-color: #2e652e;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 25px;
-            border-radius: 6px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
         }
 
-        .primary-button {
-            background-color: #3498db;
-            color: white;
-            border-color: #3498db;
-        }
-
-        .primary-button:hover {
-            background-color: #2980b9;
-            border-color: #2980b9;
+        .action-button:hover {
+            background-color: #1f3f1f;
+            transform: translateY(-2px);
         }
 
         .secondary-button {
-            background-color: #f8f9fa;
-            color: #495057;
-            border-color: #dee2e6;
+            background-color: #f5f5f5;
+            color: #2e652e;
         }
 
         .secondary-button:hover {
-            background-color: #e9ecef;
-            border-color: #ced4da;
+            background-color: #e0e8e0;
         }
 
         .danger-button {
             background-color: #e74c3c;
-            color: white;
-            border-color: #e74c3c;
-        }
-
-        .danger-button:hover {
-            background-color: #c0392b;
-            border-color: #c0392b;
-        }
-
-        .submit-button {
-            background-color: #28a745;
-            color: white;
-            border-color: #28a745;
-        }
-
-        .submit-button:hover {
-            background-color: #218838;
-            border-color: #218838;
-        }
-
-        .small-button {
-            padding: 8px 15px;
-            font-size: 14px;
-        }
-
-        /* Create List Form */
-        .create-list-form {
-            max-width: 500px;
-            margin: 20px auto 0;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .form-input:focus {
-            border-color: #3498db;
-            outline: none;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-
-        /* Lists Grid */
-        .lists-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-        }
-
-        /* List Card */
-        .list-card {
-            position: relative;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .list-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .list-card-link {
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .list-title {
-            color: #2c3e50;
-            margin: 0 0 15px 0;
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .list-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            color: #6c757d;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-
-        .delete-list-form {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-        }
-
-        /* Empty State */
-        .empty-lists-message {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
-        }
-
-        .empty-lists-message i {
-            font-size: 40px;
-            margin-bottom: 15px;
-            color: #adb5bd;
-        }
-
-        .empty-lists-message p {
-            font-size: 18px;
-            margin: 0;
-        }
-
-        /* Icons */
-        i {
-            font-size: 14px;
-        }
-
-        /* Responsive Styles */
-        @media (max-width: 768px) {
-            .lists-container {
-                padding: 20px;
-            }
-
-            .lists-main-title {
-                font-size: 24px;
-            }
-
-            .lists-grid {
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            }
-        }
-
-        @media (max-width: 480px) {
-            .lists-container {
-                padding: 15px;
-            }
-
-            .lists-main-title {
-                font-size: 20px;
-            }
-
-            .action-button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .form-actions button {
-                width: 100%;
-            }
-        }
-    </style>
-    <style>
-        .lists-wrapper {
-            width: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-            {#background: linear-gradient(to right, #3ba431, #2e652e);#}
-            background-size: cover;
-            min-height: 100vh;
-        }
-
-        .back-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-        }
-
-        .lists-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
-            padding: 30px;
-            margin-top: 60px;
-        }
-
-        .lists-main-title {
-            text-align: center;
-            color: #2e7d32; /* Darker green */
-            margin-bottom: 30px;
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .lists-actions {
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .action-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 25px;
-            border-radius: 6px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 2px solid transparent;
-        }
-
-        .primary-button {
-            background-color: #43a047; /* Green */
-            color: white;
-            border-color: #43a047;
-        }
-
-        .primary-button:hover {
-            background-color: #388e3c;
-            border-color: #388e3c;
-        }
-
-        .secondary-button {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border-color: #c8e6c9;
-        }
-
-        .secondary-button:hover {
-            background-color: #d0f0d0;
-            border-color: #b2dfdb;
-        }
-
-        .danger-button {
-            background-color: #ef5350;
-            color: white;
-            border-color: #ef5350;
         }
 
         .danger-button:hover {
             background-color: #c62828;
-            border-color: #c62828;
-        }
-
-        .submit-button {
-            background-color: #66bb6a;
-            color: white;
-            border-color: #66bb6a;
-        }
-
-        .submit-button:hover {
-            background-color: #43a047;
-            border-color: #43a047;
-        }
-
-        .small-button {
-            padding: 8px 15px;
-            font-size: 14px;
         }
 
         .create-list-form {
             max-width: 500px;
-            margin: 20px auto 0;
-            padding: 20px;
-            background: #f1f8e9;
+            margin: 20px auto;
+            padding: 15px;
+            background: #f9f9f9;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
         }
 
         .form-group {
@@ -447,16 +413,16 @@
         .form-input {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #aed581;
+            border: 1px solid #ddd;
             border-radius: 6px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-            background-color: #ffffff;
+            font-size: 1rem;
+            background-color: #f5f5f5;
         }
 
         .form-input:focus {
-            border-color: #66bb6a;
+            border-color: #2e652e;
             outline: none;
+            box-shadow: 0 0 0 3px rgba(46, 101, 46, 0.2);
         }
 
         .form-actions {
@@ -467,106 +433,207 @@
 
         .lists-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 20px;
         }
 
         .list-card {
-            position: relative;
-            background: #ffffff;
-            border-left: 5px solid #81c784;
+            background: white;
             border-radius: 8px;
-            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
         }
 
         .list-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         .list-card-link {
             text-decoration: none;
             color: inherit;
             display: block;
+            padding: 15px;
+        }
+
+        .list-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #f0f7f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+            color: #2e652e;
+            font-size: 1rem;
         }
 
         .list-title {
-            color: #2e652e;
-            margin: 0 0 15px 0;
-            font-size: 20px;
-            font-weight: 600;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .list-meta {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            color: #549249;
+            gap: 5px;
+            font-size: 12px;
+            color: #666;
         }
 
         .meta-item {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
+            gap: 5px;
         }
 
         .delete-list-form {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 10px;
+            right: 10px;
+        }
+
+        .delete-list-form .action-button {
+            padding: 5px 10px;
+            font-size: 0.85rem;
         }
 
         .empty-lists-message {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 40px 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
             color: #2e652e;
         }
 
-        .empty-lists-message i {
-            font-size: 40px;
-            margin-bottom: 15px;
-            color: #549249;
+        .empty-lists-message h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #2e652e;
         }
 
         .empty-lists-message p {
-            font-size: 18px;
-            margin: 0;
+            font-size: 0.9rem;
+            color: #666;
         }
 
-        i {
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #2e652e, #1f3f1f);
+            color: white;
+            padding: 40px 20px;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            color: #fdd835;
+        }
+
+        .footer-section p, .footer-section a {
+            color: #ddd;
+            margin-bottom: 10px;
+            display: block;
+            text-decoration: none;
+            transition: color 0.3s ease;
             font-size: 14px;
         }
 
+        .footer-section a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .footer-section.social a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        /* Responsiveness */
         @media (max-width: 768px) {
-            .lists-container {
-                padding: 20px;
+            .main-header {
+                display: none;
+            }
+
+            #mobile-header {
+                display: flex;
+            }
+
+            .main-content {
+                padding: 10px;
+            }
+
+            .content-area {
+                padding: 15px;
+                border-radius: 15px;
             }
 
             .lists-main-title {
-                font-size: 26px;
+                font-size: 1.2rem;
             }
 
             .lists-grid {
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            }
-        }
-
-        @media (max-width: 480px) {
-            .lists-container {
-                padding: 15px;
+                grid-template-columns: 1fr;
+                gap: 15px;
             }
 
-            .lists-main-title {
-                font-size: 22px;
+            .list-card {
+                border-radius: 15px;
+            }
+
+            .list-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .list-title {
+                font-size: 16px;
+            }
+
+            .list-meta {
+                font-size: 14px;
             }
 
             .action-button {
                 width: 100%;
                 justify-content: center;
+                padding: 12px;
+                border-radius: 25px;
             }
 
             .form-actions {
@@ -576,22 +643,391 @@
             .form-actions button {
                 width: 100%;
             }
+
+            .create-list-form {
+                padding: 20px;
+                border-radius: 15px;
+            }
+
+            .form-input {
+                padding: 10px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .lists-main-title {
+                font-size: 1rem;
+            }
+
+            .list-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .list-title {
+                font-size: 14px;
+            }
+
+            .list-meta {
+                font-size: 12px;
+            }
+
+            .empty-icon {
+                font-size: 1.5rem;
+            }
+
+            .empty-lists-message h3 {
+                font-size: 1rem;
+            }
+
+            .empty-lists-message p {
+                font-size: 0.8rem;
+            }
         }
     </style>
+</head>
+<body>
+<!-- Message Container -->
+<div class="message-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+                <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
 
+<!-- Header -->
+<header class="main-header">
+    <div class="header-top">
+        <div class="logo">
+            <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"/></a>
+        </div>
+        <div class="header-search">
+            <form method="GET" action="{% url 'product_list' %}" id="searchForm">
+                <input type="text" name="search" id="searchInput" placeholder="Пребарај производи..."
+                       value="{{ request.GET.search }}">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+            <div id="suggestions"
+                 style="position: absolute; background: white; border: 1px solid #ddd; border-radius: 5px; width: 98%; max-height: 200px; overflow-y: auto; display: none; z-index: 2;"></div>
+        </div>
+        <div class="user-actions">
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}" class="auth-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn" style="color: white">
+                        <i class="fas fa-sign-out-alt"></i> Одјави се
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="auth-btn">
+                    <i class="fas fa-user"></i> Најави се
+                </a>
+                <a href="{% url 'register' %}" class="auth-btn">
+                    <i class="fas fa-user-plus"></i> Регистрирај се
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    <nav class="main-nav">
+        <ul>
+            {#                <li><a href="{% url 'home' %}">Дома</a></li>#}
+            <li><a href="{% url 'product_list' %}">Каталог</a></li>
+            <li><a href="{% url 'stats' %}">Статистика</a></li>
+            <li><a href="{% url 'view_lists' %}">Листи</a></li>
+        </ul>
+    </nav>
+</header>
 
-    <script>
-        document.getElementById('create-list-btn').addEventListener('click', function () {
-            document.getElementById('create-list-form').style.display = 'block';
-            this.style.display = 'none';
+<!-- Mobile Menu -->
+<div id="mobile-header">
+    <div id="mobile-logo">
+        <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого">
+    </div>
+    <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
+</div>
+<div id="mobile-menu" class="mobile-menu">
+    <div class="mobile-menu-header">
+        <span class="close-btn" onclick="toggleMobileMenu()">×</span>
+    </div>
+     <form method="GET" action="{% url 'product_list' %}" class="mobile-search-form" id="mobileSearchForm">
+        <input type="text" name="search" id="mobileSearchInput" placeholder="Пребарај производ..."
+               value="{{ request.GET.search }}">
+        <button type="submit"><i class="fas fa-search"></i></button>
+    </form>
+    <nav class="mobile-nav">
+        <a href="{% url 'home' %}">Дома</a>
+        <a href="{% url 'product_list' %}">Каталог</a>
+        <a href="{% url 'stats' %}">Статистика</a>
+        <a href="{% url 'view_lists' %}">Листи</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Одјави се</a>
+        {% else %}
+            <a href="{% url 'login' %}">Најави се</a>
+            <a href="{% url 'register' %}">Регистрирај се</a>
+        {% endif %}
+    </nav>
+</div>
+<div id="overlay" onclick="toggleMobileMenu()"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <main class="content-area">
+        <div class="page-header">
+            <h1 class="lists-main-title">Мои листи</h1>
+            <div class="header-decoration"></div>
+        </div>
+        <div class="lists-actions">
+            <button id="create-list-btn" class="action-button">
+                <i class="fas fa-plus"></i> Нова листа
+            </button>
+            <div id="create-list-form" class="create-list-form">
+                <form method="post" action="{% url 'create_list' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="text" name="list_name" placeholder="Име на листата" required
+                               class="form-input">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="action-button">Креирај</button>
+                        <button type="button" id="cancel-create" class="action-button secondary-button">Откажи</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="lists-grid">
+            {% for list in user_lists %}
+                <div class="list-card">
+                    <a href="{% url 'view_list' list.id %}" class="list-card-link">
+                        <div class="list-icon">
+                            <i class="fas fa-list-ul"></i>
+                        </div>
+                        <h3 class="list-title">{{ list.name }}</h3>
+                        <div class="list-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-shopping-basket"></i> {{ list.items.count }} продукти
+                                </span>
+                            <span class="meta-item">
+                                    <i class="far fa-calendar-alt"></i> {{ list.created_at|date:"d.m.Y" }}
+                                </span>
+                        </div>
+                    </a>
+                    <form method="post" action="{% url 'delete_list' list.id %}" class="delete-list-form">
+                        {% csrf_token %}
+                        <button type="submit" class="action-button danger-button">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </form>
+                </div>
+            {% empty %}
+                <div class="empty-lists-message">
+                    <div class="empty-icon">
+                        <i class="far fa-folder-open"></i>
+                    </div>
+                    <h3>Немате креирано листи</h3>
+                    <p>Кликнете на "Нова листа" за да креирате ваша прва листа</p>
+                </div>
+            {% endfor %}
+        </div>
+    </main>
+</div>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>За нас</h3>
+            <p>Ние сме водечка онлајн продавница со најдобри цени и квалитетни производи.</p>
+        </div>
+        <div class="footer-section">
+            <h3>Контакт</h3>
+            <p>Телефон: +389 70 123 456</p>
+            <p>Email: kontakt@nasataprodavnica.com</p>
+            <p>Адреса: Улица ББ, Скопје</p>
+        </div>
+        <div class="footer-section">
+            <h3>Брзи линкови</h3>
+            <a href="{% url 'home' %}">Дома</a>
+            <a href="{% url 'product_list' %}">Каталог</a>
+            <a href="#">Услови на користење</a>
+            <a href="#">Политика на приватност</a>
+        </div>
+        <div class="footer-section social">
+            <h3>Следете нè</h3>
+            <a href="#" target="_blank"><i class="fab fa-facebook-f"></i> Facebook</a>
+            <a href="#" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
+            <a href="#" target="_blank"><i class="fab fa-twitter"></i> Twitter</a>
+        </div>
+    </div>
+    <div class="copyright">
+        © 2023 Нашата Продавница. Сите права се задржани.
+    </div>
+</footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Create list form toggle
+        const createBtn = document.getElementById('create-list-btn');
+        const createForm = document.getElementById('create-list-form');
+        const cancelBtn = document.getElementById('cancel-create');
+
+        if (createBtn && createForm && cancelBtn) {
+            createBtn.addEventListener('click', function () {
+                createForm.style.display = 'block';
+                this.style.display = 'none';
+            });
+
+            cancelBtn.addEventListener('click', function () {
+                createForm.style.display = 'none';
+                createBtn.style.display = 'inline-flex';
+            });
+        }
+
+        // Auto-dismiss messages
+        setTimeout(() => {
+            document.querySelectorAll('.alert').forEach(alert => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            });
+        }, 5000);
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const overlay = document.getElementById('overlay');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+
+        const menuToggle = document.querySelector('.menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const overlay = document.getElementById('overlay');
+
+        if (menuToggle && mobileMenu && overlay) {
+            menuToggle.addEventListener('click', toggleMobileMenu);
+            overlay.addEventListener('click', toggleMobileMenu);
+            document.querySelector('.close-btn').addEventListener('click', toggleMobileMenu);
+        }
+
+        // Search suggestions and transliteration
+        document.addEventListener('DOMContentLoaded', function () {
+            // Desktop search elements
+            const searchInput = document.getElementById('searchInput');
+            const suggestionsDiv = document.getElementById('suggestions');
+            const searchForm = document.getElementById('searchForm');
+
+            // Mobile search elements
+            const mobileSearchInput = document.getElementById('mobileSearchInput');
+            const mobileSearchForm = document.getElementById('mobileSearchForm');
+
+            // Extended transliteration with typo correction
+            function transliterateLatinToCyrillic(text) {
+                const map = {
+                    'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
+                    'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
+                    'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
+                    'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
+                    'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
+                    'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
+                    's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
+                    'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
+                    'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
+                };
+
+                const typoPatterns = [
+                    {pattern: /sampon/gi, replace: 'shampon'},
+                    {pattern: /cresi/gi, replace: 'creshi'},
+                    {pattern: /stipki/gi, replace: 'shtipki'},
+                    {pattern: /sch/gi, replace: 'sh'},
+                    {pattern: /ck/gi, replace: 'k'},
+                    {pattern: /ph/gi, replace: 'f'},
+                    {pattern: /th/gi, replace: 't'},
+                    {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
+                    {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
+                    {pattern: /([a-z])\1/gi, replace: '$1'}
+                ];
+
+                let normalizedText = text.toLowerCase();
+                for (const {pattern, replace} of typoPatterns) {
+                    normalizedText = normalizedText.replace(pattern, replace);
+                }
+
+                let result = '';
+                let i = 0;
+                while (i < normalizedText.length) {
+                    if (map[normalizedText.substring(i, i + 3)]) {
+                        result += map[normalizedText.substring(i, i + 3)];
+                        i += 3;
+                    } else if (map[normalizedText.substring(i, i + 2)]) {
+                        result += map[normalizedText.substring(i, i + 2)];
+                        i += 2;
+                    } else if (map[normalizedText[i]]) {
+                        result += map[normalizedText[i]];
+                        i++;
+                    } else {
+                        result += normalizedText[i];
+                        i++;
+                    }
+                }
+                return result;
+            }
+
+            function setupSearch(input, form) {
+                input.addEventListener('input', function () {
+                    const query = this.value.trim();
+                    if (query.length < 2) {
+                        suggestionsDiv.style.display = 'none';
+                        return;
+                    }
+
+                    fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            suggestionsDiv.innerHTML = '';
+                            if (data.suggestions.length > 0) {
+                                data.suggestions.forEach(suggestion => {
+                                    const div = document.createElement('div');
+                                    div.textContent = suggestion;
+                                    div.style.padding = '5px 10px';
+                                    div.style.cursor = 'pointer';
+                                    div.addEventListener('click', function () {
+                                        input.value = transliterateLatinToCyrillic(suggestion);
+                                        suggestionsDiv.style.display = 'none';
+                                        form.submit();
+                                    });
+                                    suggestionsDiv.appendChild(div);
+                                });
+                                suggestionsDiv.style.display = 'block';
+                            } else {
+                                suggestionsDiv.style.display = 'none';
+                            }
+                        });
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        suggestionsDiv.style.display = 'none';
+                        input.value = transliterateLatinToCyrillic(input.value);
+                        form.submit();
+                    }
+                });
+            }
+
+            setupSearch(searchInput, searchForm);
+            setupSearch(mobileSearchInput, mobileSearchForm);
+
+            document.addEventListener('click', function (e) {
+                if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
+                    !mobileSearchInput.contains(e.target)) {
+                    suggestionsDiv.style.display = 'none';
+                }
+            });
         });
-
-        document.getElementById('cancel-create').addEventListener('click', function () {
-            document.getElementById('create-list-form').style.display = 'none';
-            document.getElementById('create-list-btn').style.display = 'inline-flex';
-        });
-    </script>
-
-    <!-- Include Font Awesome for icons (add this in your base template) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-{% endblock %}
+</script>
+</body>
+</html>

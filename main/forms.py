@@ -8,3 +8,9 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ["username", "email", "password1", "password2"]
+
+class IngredientForm(forms.Form):
+    ingredients = forms.CharField(
+        label="Што имаш во фрижидерот?",
+        widget=forms.Textarea(attrs={"placeholder": "Јајца, млеко, брашно...", "rows": 5})
+    )
