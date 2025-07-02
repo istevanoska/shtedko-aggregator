@@ -116,7 +116,7 @@ DATABASES = {
         'NAME': 'marketi_database',
         'HOST': '127.0.0.1',
         'PORT': '3306',
-        'USER': 'ilina_stevanoska',
+        'USER': 'root',
         'PASSWORD': 'P@ssw0rdilina123',
         'OPTIONS': {
             'charset': 'utf8mb4',
