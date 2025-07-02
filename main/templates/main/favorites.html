@@ -1,0 +1,139 @@
+{% extends 'main/header.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 20px;">
+    <h1 style="text-align: center; margin-bottom: 30px; color: #2e652e; position: relative; padding-bottom: 15px;">
+        <span style="padding: 0 20px; position: relative; z-index: 1;">Твоите Омилени</span>
+        <span style="content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, transparent, #2e652e, transparent); z-index: 0;"></span>
+    </h1>
+
+    <div class="grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+        {% for favorite in favorites %}
+        <div class="product-card" style="border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; transition: all 0.3s ease; background: white;">
+            <a href="{% url 'product_detail' favorite.product.id %}" style="text-decoration: none; color: inherit;">
+                <div class="product-image" style="height: 200px; background-color: #f9f9f9; display: flex; align-items: center; justify-content: center; padding: 15px; position: relative;">
+                    {% if favorite.product.image_url %}
+                        <img src="{{ favorite.product.image_url }}" alt="{{ favorite.product.name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                    {% else %}
+                        <span style="color: #666;">[No Image]</span>
+                    {% endif %}
+                    <button class="favorite-btn" onclick="event.preventDefault(); toggleFavorite(this, {{ favorite.product.id }});" style="position: absolute; top: 10px; right: 10px; background: rgba(255, 255, 255, 0.9); border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);">
+                        <i class="fas fa-heart" style="color: #e74c3c; font-size: 18px;"></i>
+                    </button>
+                </div>
+                <div class="product-info" style="padding: 20px;">
+                    <div class="product-name" style="font-weight: bold; margin-bottom: 5px; color: #333; font-size: 0.95rem; line-height: 1.3; height: 2.6em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                        {{ favorite.product.name }}
+                    </div>
+                    <div class="product-price" style="font-size: 1.2rem; color: #2e652e; font-weight: bold; margin-top: 10px;">
+                        {% if favorite.product.popust %}
+                            <span style="color: #999; text-decoration: line-through; font-size: 0.9rem;">{{ favorite.product.price }} ден.</span>
+                            {{ favorite.product.actual_price }} ден.
+                            <span style="background-color: #e74c3c; color: white; padding: 3px 8px; border-radius: 3px; font-size: 0.8rem; margin-left: 8px;">Попуст!</span>
+                        {% else %}
+                            {{ favorite.product.price }} ден.
+                        {% endif %}
+                    </div>
+                    <div class="product-store" style="margin-top: 10px;">
+                        {% if favorite.product.store == 'Vero' %}
+                            <img src="{% static 'images/vero_logo1.png' %}" alt="Vero" style="height: 35px;">
+                        {% elif favorite.product.store == 'Ramstore' %}
+                            <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore" style="height: 35px;">
+                        {% elif favorite.product.store == 'Reptil' %}
+                            <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil" style="height: 35px;">
+                        {% elif favorite.product.store == 'Zito' %}
+                            <img src="{% static 'images/zito_logo.png' %}" alt="Zito" style="height: 35px;">
+                        {% endif %}
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #666; background: rgba(255, 255, 255, 0.8); border-radius: 10px; margin: 20px 0;">
+            <p style="font-size: 1.2rem;">Се уште немаш омилени продукти</p>
+            <a href="{% url 'product_list' %}" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #2e652e; color: white; border-radius: 5px; text-decoration: none;">Разгледај продукти</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function toggleFavorite(button, productId) {
+    const icon = button.querySelector('i');
+    const isFavorite = icon.classList.contains('fas');
+
+    fetch('/toggle-favorite/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            product_id: productId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (data.is_favorite) {
+                icon.classList.add('fas', 'active');
+                icon.classList.remove('far');
+                button.classList.add('pulse');
+                setTimeout(() => button.classList.remove('pulse'), 600);
+            } else {
+                icon.classList.remove('fas', 'active');
+                icon.classList.add('far');
+                // Optional: Remove the product card from DOM if on favorites page
+                if (window.location.pathname.includes('favorites')) {
+                    button.closest('.product-card').remove();
+                }
+            }
+        }
+    });
+}
+</script>
+
+<style>
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 15px !important;
+    }
+    .product-card {
+        border-radius: 8px !important;
+    }
+    .product-image {
+        height: 150px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+    h1 {
+        font-size: 1.5rem !important;
+        padding-bottom: 10px !important;
+    }
+}
+
+@keyframes pulseHeart {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+.pulse {
+    animation: pulseHeart 0.6s ease;
+}
+body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+        }
+</style>
+{% endblock %}

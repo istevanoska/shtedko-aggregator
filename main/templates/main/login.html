@@ -2,12 +2,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Login</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', Arial, sans-serif;
             margin: 0;
             padding: 0;
             height: 100vh;
@@ -18,130 +24,162 @@
             background-size: cover;
             background-position: center;
             position: relative;
+            color: #444;
         }
 
         body::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: inherit;
-            filter: blur(8px);
+            filter: blur(8px) brightness(0.7);
             z-index: -1;
         }
 
         .auth-container {
+            position: relative;
             width: 100%;
             max-width: 400px;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            margin: 20px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px 35px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            text-align: center;
         }
 
         .auth-container h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: #333;
-            font-size: 28px;
+            font-weight: 600;
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            color: #2e652e;
+            letter-spacing: 1px;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            text-align: left;
         }
 
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            font-weight: bold;
-            color: #555;
+            font-weight: 600;
+            color: #2e652e;
+            font-size: 1rem;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            box-sizing: border-box;
+            padding: 14px 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+            outline: none;
         }
 
         button[type="submit"] {
             width: 100%;
-            padding: 12px;
-            background-color: #28a745;
+            padding: 14px;
+            background-color: #2e652e;
             color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            letter-spacing: 1px;
         }
 
-        button[type="submit"]:hover {
-            background-color: #218838;
+        button[type="submit"]:hover,
+        button[type="submit"]:focus {
+            background-color: #1f3f1f;
+            transform: scale(1.03);
+            outline: none;
         }
 
         .register-link {
-            text-align: center;
-            margin-top: 20px;
+            margin-top: 25px;
+            font-size: 0.9rem;
+            color: #555;
         }
 
         .register-link a {
-            color: #007bff;
+            color: #2e652e;
             text-decoration: none;
-            transition: color 0.3s;
+            font-weight: 600;
+            transition: color 0.3s ease;
         }
 
-        .register-link a:hover {
-            color: #0056b3;
+        .register-link a:hover,
+        .register-link a:focus {
+            color: #1f3f1f;
             text-decoration: underline;
         }
 
         .errorlist {
+            background: #ffe6e6;
+            border: 1px solid #dc3545;
             color: #dc3545;
-            margin-bottom: 15px;
-            padding-left: 20px;
+            padding: 12px 15px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            list-style: none;
+            font-weight: 600;
+            font-size: 0.9rem;
         }
 
         .errorlist li {
-            list-style-type: none;
-            margin-bottom: 5px;
+            margin: 0;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 450px) {
+            .auth-container {
+                padding: 30px 20px;
+                border-radius: 12px;
+            }
+
+            .auth-container h2 {
+                font-size: 1.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="auth-container">
-        <h2>Login</h2>
+        <h2>Најави се</h2>
 
         {% if form.errors %}
         <ul class="errorlist">
-            <li>Your username and password didn't match. Please try again.</li>
+            <li>Вашето корисничко име или лозинка не се точни. Обидете се повторно.</li>
         </ul>
         {% endif %}
 
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
+            <div class="form-group">
+                <label for="id_username">Корисничко име</label>
+                <input type="text" name="username" id="id_username" required autofocus autocomplete="username" />
+            </div>
 
             <div class="form-group">
-                <label for="id_username">Username</label>
-                <input type="text" name="username" id="id_username" required>
+                <label for="id_password">Лозинка</label>
+                <input type="password" name="password" id="id_password" required autocomplete="current-password" />
             </div>
 
-            <div class="form-group">
-                <label for="id_password">Password</label>
-                <input type="password" name="password" id="id_password" required>
-            </div>
-
-            <button type="submit">Login</button>
-
-            <div class="register-link">
-                <a href="{% url 'register' %}">Don't have an account? Register</a>
-            </div>
+            <button type="submit">Најави се</button>
         </form>
+
+        <div class="register-link">
+            Немате корисничка сметка? <a href="{% url 'register' %}">Регистрирај се</a>
+        </div>
     </div>
 </body>
 </html>

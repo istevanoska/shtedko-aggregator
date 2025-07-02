@@ -38,7 +38,9 @@ urlpatterns = [
     # path('admin/', admin.site.urls),
     path('search-suggestions/', views.search_suggestions, name='search_suggestions'),
 
-    # django-allauth urls:
+    path('header/', views.header, name='header'),
+    path('toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
+    path('favorites/', views.favorites_list, name='favorites_list'),
 
 
 ]

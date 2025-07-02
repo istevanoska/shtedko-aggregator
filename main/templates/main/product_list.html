@@ -1,2006 +1,1968 @@
+{% extends 'main\header.html' %}
 {% load static %}
-{% load category_filters %}  <!-- Change this line -->
+{% load category_filters %}
+{% block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <meta name="csrf-token" content="{{ csrf_token }}">
-    <title>Product Catalog</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <meta name="csrf-token" content="{{ csrf_token }}">
+        <title>Product Catalog</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+            {#background-color: rgba(35,99,35,0.76);#}
+            }
 
-        /* Header image */
-        #horizontal_picture {
-            display: block;
-            text-align: center;
-            background-image: url('{% static "images/baner1.jpg" %}');
-            background-size: cover; /* Cover the entire element */
-            background-position: center; /* Center the image */
-            background-repeat: no-repeat;
-            height: 170px;
-            padding-top: 30px;
-            padding-bottom: 30px;
-            margin-bottom: 30px;
-        }
-
-        /* Main content layout */
-        .catalog-container {
-            display: flex;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            margin-top: 20px;
-        }
-
-        /* Filters sidebar */
-        .filters {
-            width: 250px;
-            padding: 20px;
-            background-color: #cea274;
-            border-radius: 8px;
-        {#margin-right: 30px;#} margin-left: 20px;
-        }
-
-
-        h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .filter-option {
-            margin-bottom: 10px;
-        }
-
-        .price-slider {
-            -webkit-appearance: none; /* Remove default style */
-            width: 100%;
-            height: 5px;
-            background-color: rgba(43, 86, 43, 0.93); /* Track background */
-            border-radius: 4px;
-            outline: none;
-        }
-
-        /* Chrome, Safari, Opera - Track */
-        .price-slider::-webkit-slider-runnable-track {
-            background: rgba(43, 86, 43, 0.93);
-            border-radius: 4px;
-        }
-
-        /* Firefox - Track */
-        .price-slider::-moz-range-track {
-            background: rgba(43, 86, 43, 0.93);
-            border-radius: 4px;
-        }
-
-        /* Chrome, Safari, Opera - Thumb */
-        .price-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 15px;
-            height: 15px;
-            background-color: rgba(42, 82, 42, 0.93); /* Your green color */
-            border-radius: 50%;
-            cursor: pointer;
-            margin-top: -6px; /* Align thumb vertically */
-        }
-
-        /* Firefox - Thumb */
-        .price-slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            background-color: rgba(42, 82, 42, 0.93); /* Your green color */
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-
-        .price-range {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 5px;
-            font-size: 12px;
-            color: rgba(31, 63, 31, 0.93);
-        }
-
-        select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-        }
-
-        /* Products grid */
-        .products-grid {
-            flex: 1;
-        }
-
-        .sorting-options {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-            border: rgba(43, 86, 43, 0.93);
-            padding: 5px;
-            border-radius: 5px;
-        }
-
-        .sorting-options select {
-            width: auto;
-            margin-left: 10px;
-            background-color: rgba(46, 101, 46, 0.93);
-            color: white;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-            gap: 20px;
-        }
-
-        .product-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.2s;
-        }
-
-        {##}
-        {#.product-card:hover {#}
-        {#    transform: translateY(-5px);#}
-        {#    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);#}
-
-
-        .product-image {
-            height: 180px;
-            background-color: #eee;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .product-info {
-            padding: 15px;
-        }
-
-        .product-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-
-        .old-price {
-            text-decoration: line-through;
-            color: #999;
-            font-size: 0.9em;
-            margin-right: 5px;
-        }
-
-        .discount-badge {
-            background-color: #ff4444;
-            color: white;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            margin-left: 5px;
-        }
-
-        .product-category {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-
-
-        /* Pagination */
-        .pagination {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .pagination .step-links {
-            display: inline-block;
-        }
-
-        .pagination .step-links a {
-            text-decoration: none;
-            color: #549249;
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin: 0 5px 20px;
-        }
-
-        .pagination .step-links a:hover {
-            background-color: #f0f0f0;
-        }
-
-        .pagination .current {
-            font-weight: bold;
-            padding: 5px 10px;
-            background-color: #2e652e;
-            color: white;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
+            /* Main content layout */
             .catalog-container {
-                flex-direction: column;
+                display: flex;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 20px;
+                margin-top: 20px;
             }
 
+            /* Enhanced Filters sidebar */
             .filters {
-                width: auto;
-                margin-right: 0;
-                margin-bottom: 20px;
+                width: 280px;
+                padding: 25px;
+                background: linear-gradient(145deg, #f5f5f5, #ffffff);
+                border-radius: 15px;
+                margin-right: 30px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                border: 1px solid #e0e0e0;
+                transition: all 0.3s ease;
+                position: sticky;
+                top: 20px;
+                height: fit-content;
+                max-height: 90vh;
+                overflow-y: auto;
             }
 
-            .grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-        }
-
-        .no-products {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .product-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-            padding-bottom: -10px;
-            flex-direction: column;
-        {#margin-bottom: -px;#}
-        }
-
-        .view-product {
-            font-size: 12px;
-        {#color: #007bff;#} text-decoration: none;
-        }
-
-        .search-form {
-            margin: 20px auto;
-            max-width: 800px;
-        }
-
-        .search-form input {
-            padding: 10px;
-            width: 70%;
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            font-size: 16px;
-        }
-
-        .search-form button {
-            padding: 10px 20px;
-            background-color: #cb7e31;
-            color: white;
-            border: none;
-            border-radius: 20px;
-            margin-left: 10px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .search-form button:hover {
-            background-color: #cb7e31;
-        }
-
-        .discount-badge {
-            background-color: #ff4444;
-            color: white;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            margin-left: 5px;
-        }
-
-        .discount-valid {
-            font-size: 0.7em;
-            color: #666;
-            margin-top: 7px;
-        }
-
-        .search-form {
-            margin: 20px auto;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0 15px;
-        }
-
-        .search-form input {
-            padding: 12px;
-            width: 100%;
-            max-width: 500px;
-            border-radius: 20px;
-            border: 1px solid #ddd;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        .search-form button {
-            padding: 12px 24px;
-            width: auto;
-        }
-
-        @media (min-width: 768px) {
-            .search-form {
-                flex-direction: row;
+            .filters:hover {
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+                transform: translateY(-2px);
             }
 
-            .search-form input {
-                margin-bottom: 0;
-                margin-right: 10px;
-            }
-        }
-
-        {##}
-        {#.grid {#}
-        {#    display: grid;#}
-        {#    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));#}
-        {#gap: 20px;#}
-
-
-        @media (max-width: 600px) {
-            .grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
+            .filters::-webkit-scrollbar {
+                width: 6px;
             }
 
-            .product-image {
-                height: 140px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-
-        .filters {
-            width: 250px;
-            padding: 20px;
-            background-color: #f8f8f8;
-            border-radius: 8px;
-        {#margin-right: 30px;#} margin-left: 0px;
-        }
-
-        .filter-toggle {
-            display: none;
-            background: #cb7e31;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            width: 100%;
-            margin-bottom: 15px;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .catalog-container {
-                flex-direction: column;
+            .filters::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
             }
 
-            .filters {
-                width: 90%;
-                margin-right: 0;
-                margin-bottom: 20px;
+            .filters::-webkit-scrollbar-thumb {
+                background: #2e652e;
+                border-radius: 10px;
             }
 
-            .filter-toggle {
-                display: block;
+            .filters h3 {
+                font-weight: 600;
+                font-size: 1.2rem;
+                margin-bottom: 15px;
+                color: #333;
+                position: relative;
+                padding-bottom: 8px;
+                user-select: none;
+            }
+
+            .filters h3::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 50px;
+                height: 3px;
+                background: linear-gradient(90deg, #2e652e, #4CAF50);
+                border-radius: 3px;
             }
 
             .filter-section {
-                display: none;
+                margin-bottom: 25px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+                padding-bottom: 15px;
+                max-height: 200px;
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: #2e652e #f1f1f1;
             }
 
-            .filter-section.active {
-                display: block;
-            }
-        }
-
-        #other a:hover, #other button:hover {
-            color: lightgreen;
-        }
-
-        /* Mobile styles */
-        @media (max-width: 768px) {
-            #navbar {
-                flex-wrap: wrap;
+            .filter-section:last-child {
+                border-bottom: none;
             }
 
-            #mobile-header {
+            .filter-option {
                 display: flex;
+                align-items: center;
+                margin-bottom: 12px;
+                padding: 8px 10px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                background: rgba(255, 255, 255, 0.7);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            }
+
+            .filter-option:hover {
+                background: rgba(46, 101, 46, 0.1);
+                transform: translateX(5px);
+            }
+
+            .filter-option input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                margin-right: 12px;
+                cursor: pointer;
+                appearance: none;
+                -webkit-appearance: none;
+                border: 2px solid #ddd;
+                border-radius: 4px;
+                outline: none;
+                transition: all 0.2s;
+                position: relative;
+            }
+
+            .filter-option input[type="checkbox"]:checked {
+                background-color: #2e652e;
+                border-color: #2e652e;
+            }
+
+            .filter-option input[type="checkbox"]:checked::after {
+                content: '✓';
+                position: absolute;
+                color: white;
+                font-size: 12px;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .filter-option label {
+                font-size: 0.95rem;
+                color: #555;
+                transition: color 0.3s ease;
+                cursor: pointer;
+                flex-grow: 1;
+            }
+
+            .filter-option:hover label {
+                color: #2e652e;
+                font-weight: 500;
+            }
+
+            /* Price slider enhancements */
+            .price-slider-container {
+                padding: 15px 10px;
+                background: rgba(255, 255, 255, 0.7);
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .price-slider {
+                -webkit-appearance: none;
+                width: 100%;
+                height: 8px;
+                background: #e0e0e0;
+                border-radius: 10px;
+                outline: none;
+                margin: 15px 0;
+                transition: all 0.3s;
+            }
+
+            .price-slider:hover {
+                background: #d0d0d0;
+            }
+
+            .price-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                background: #2e652e;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                transition: all 0.2s;
+                border: 2px solid white;
+            }
+
+            .price-slider::-webkit-slider-thumb:hover {
+                transform: scale(1.1);
+                background: #3e7e3e;
+            }
+
+            .price-range {
+                display: flex;
+                justify-content: space-between;
+                font-size: 0.9rem;
+                color: #666;
+                margin-top: 5px;
+            }
+
+            .price-range span {
+                background: rgba(46, 101, 46, 0.1);
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-weight: 500;
+            }
+
+            /* Filter submit button */
+            .filter-submit-btn {
+                background: linear-gradient(135deg, #2e652e, #4CAF50);
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 8px;
+                width: 100%;
+                font-size: 1rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                box-shadow: 0 4px 15px rgba(46, 101, 46, 0.3);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-top: 10px;
+            }
+
+            .filter-submit-btn:hover {
+                background: linear-gradient(135deg, #3e7e3e, #5CBF50);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(46, 101, 46, 0.4);
+            }
+
+            .filter-submit-btn:active {
+                transform: translateY(0);
+            }
+
+            /* Mobile filter toggle */
+            .filter-toggle {
+                display: none;
+                background: linear-gradient(135deg, #2e652e, #4CAF50);
+                color: white;
+                padding: 12px 20px;
+                border: none;
+                border-radius: 8px;
+                width: 100%;
+                margin-bottom: 15px;
+                cursor: pointer;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s;
+            }
+
+            .filter-toggle:hover {
+                background: linear-gradient(135deg, #3e7e3e, #5CBF50);
+            }
+
+            /* Reset filters button */
+            .reset-filters {
+                background: transparent;
+                color: #e74c3c;
+                border: 1px solid #e74c3c;
+                padding: 10px 15px;
+                border-radius: 8px;
+                width: 100%;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.3s;
+                margin-top: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .reset-filters:hover {
+                background: rgba(231, 76, 60, 0.1);
+            }
+
+            /* Favorite button styles */
+            .favorite-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(255, 255, 255, 0.9);
+                border: none;
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 2;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+            }
+
+            .favorite-btn:hover {
+                background: white;
+                transform: scale(1.1);
+            }
+
+            .favorite-btn i {
+                font-size: 18px;
+                color: #ccc;
+                transition: all 0.3s ease;
+            }
+
+            .favorite-btn.active i {
+                color: #e74c3c;
+            }
+
+            .favorite-btn.pulse {
+                animation: pulseHeart 0.6s ease;
+            }
+
+            @keyframes pulseHeart {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.3);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            /* Products grid */
+            .products-grid {
+                flex: 1;
+            }
+
+            .sorting-options {
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 20px;
+                padding: 10px;
+                border-radius: 10px;
+                background: rgba(255, 255, 255, 0.8);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
+
+            .sorting-options select {
+                width: auto;
+                margin-left: 10px;
+                padding: 8px 15px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                background: white;
+                color: #333;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .sorting-options select:hover {
+                border-color: #2e652e;
+            }
+
+            .sorting-options select:focus {
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(46, 101, 46, 0.3);
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 20px;
+            }
+
+            .product-card {
+                border: 1px solid #e0e0e0;
+                border-radius: 12px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                background: white;
+                position: relative;
+            }
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                border-color: #2e652e;
+            }
+
+            .product-image {
+                height: 200px;
+                background-color: #f9f9f9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 15px;
+                position: relative;
+            }
+
+            .product-image img {
+                max-height: 100%;
+                max-width: 100%;
+                object-fit: contain;
+                transition: transform 0.3s ease;
+            }
+
+            .product-card:hover .product-image img {
+                transform: scale(1.05);
+            }
+
+            .product-info {
+                padding: 15px;
+            }
+
+            .product-name {
+                font-weight: bold;
+                margin-bottom: 5px;
+                color: #333;
+                font-size: 0.95rem;
+                line-height: 1.3;
+                height: 2.6em;
+                overflow: hidden;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+            }
+
+            .product-price {
+                font-size: 1.1rem;
+                color: #2e652e;
+                font-weight: bold;
+                margin-top: 10px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .old-price {
+                color: #999;
+                text-decoration: line-through;
+                font-size: 0.9rem;
+            }
+
+            .discount-badge {
+                background: linear-gradient(135deg, #e74c3c, #c0392b);
+                color: white;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                display: inline-block;
+                margin-top: 5px;
+            }
+
+            .product-store {
+                margin-top: 10px;
+            }
+
+            .product-category {
+                font-size: 0.8rem;
+                color: #777;
+                margin-bottom: 10px;
+            }
+
+            .product-actions {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 10px;
+            }
+
+            .view-product {
+                font-size: 0.85rem;
+                color: #2e652e;
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.3s;
+            }
+
+            .view-product:hover {
+                color: #4CAF50;
+                text-decoration: underline;
+            }
+
+            .add-to-list-btn {
+                background: linear-gradient(135deg, #2e652e, #4CAF50);
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 6px;
+                font-size: 0.85rem;
+                font-weight: 500;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .add-to-list-btn:hover {
+                background: linear-gradient(135deg, #3e7e3e, #5CBF50);
+                transform: translateY(-2px);
+            }
+
+            /* Pagination */
+            .pagination {
+                margin-top: 30px;
+                text-align: center;
+            }
+
+            .pagination .step-links {
+                display: inline-block;
+            }
+
+            .pagination .step-links a {
+                text-decoration: none;
+                color: #549249;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                margin: 0 3px;
+                transition: all 0.3s;
+            }
+
+            .pagination .step-links a:hover {
+                background-color: #f0f0f0;
+                color: #2e652e;
+            }
+
+            .pagination .current {
+                font-weight: bold;
+                padding: 8px 12px;
+                background: linear-gradient(135deg, #2e652e, #4CAF50);
+                color: white;
+                border-radius: 6px;
+                margin: 0 3px;
+            }
+
+            /* No products message */
+            .no-products {
+                grid-column: 1 / -1;
+                text-align: center;
+                padding: 40px;
+                color: #666;
+                background: rgba(255, 255, 255, 0.8);
+                border-radius: 10px;
+                margin: 20px 0;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .catalog-container {
+                    flex-direction: column;
+                }
+
+                .filters {
+                    width: 100%;
+                    margin-right: 0;
+                    margin-bottom: 20px;
+                    position: static;
+                    max-height: none;
+                }
+
+                .filter-toggle {
+                    display: block;
+                }
+
+                .filter-section {
+                    display: none;
+                    max-height: none;
+                }
+
+                .filter-section.active {
+                    display: block;
+                }
+
+                .grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 15px;
+                }
+
+                .product-image {
+                    height: 160px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .grid {
+                    grid-template-columns: 1fr;
+                }
+
+                .sorting-options {
+                    flex-direction: column;
+                    gap: 10px;
+                }
+
+                .sorting-options select {
+                    width: 100%;
+                    margin-left: 0;
+                }
+            }
+
+            /* Ribbon styles */
+            .ribbon-flag {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 0 0 0 0;
+                border-color: transparent #e74c3c transparent transparent;
+                z-index: 1;
+                visibility: visible !important;
+                opacity: 1 !important;
+            }
+
+            .ribbon-flag-text {
+                position: absolute;
+                top: -4px;
+                right: -10px;
+                color: white;
+                font-size: 15px;
+                font-weight: bold;
+                transform: rotate(70deg);
+                z-index: 5;
+                visibility: visible !important;
+            }
+
+            /* Instruction Modal Styles */
+            .instruction-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.85);
+                z-index: 9999;
+                font-family: Arial, sans-serif;
+            }
+
+            .modal-content {
+                background: white;
+                border-radius: 15px;
                 width: 90%;
+                max-width: 450px;
+                margin: auto;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                transform: scale(0.9);
+                opacity: 0;
+                animation: modalEntrance 0.4s forwards;
+            }
+
+            @keyframes modalEntrance {
+                to {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .modal-header {
+                background: linear-gradient(135deg, #2e652e, #4CAF50);
+                color: white;
+                padding: 20px;
+                display: flex;
                 justify-content: space-between;
                 align-items: center;
             }
 
-            #logo {
-                margin-right: 0;
-                order: 2;
-                flex-grow: 1;
-                text-align: center;
+            .modal-header h3 {
+                margin: 0;
+                font-size: 1.4rem;
             }
 
-            .menu-toggle {
+            .modal-body {
+                padding: 20px;
+            }
+
+            .instruction-step {
+                display: flex;
+                align-items: flex-start;
+                margin-bottom: 15px;
+                padding: 15px;
+                border-radius: 8px;
+                background: #f8f8f8;
+                transition: all 0.3s;
+            }
+
+            .instruction-step:hover {
+                background: #f0f0f0;
+                transform: translateX(5px);
+            }
+
+            .step-number {
+                background: linear-gradient(135deg, #2e652e, #4CAF50);
+                color: white;
+                width: 25px;
+                height: 25px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-right: 15px;
+                font-weight: bold;
+                flex-shrink: 0;
+            }
+
+            .hint-text {
+                color: #666;
+                font-size: 0.9em;
+                font-style: italic;
+            }
+
+            .modal-action-btn {
+                background: linear-gradient(135deg, #2e652e, #4CAF50);
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                border-radius: 30px;
+                margin: 20px auto;
                 display: block;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .modal-action-btn:hover {
+                background: linear-gradient(135deg, #3e7e3e, #5CBF50);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(46, 101, 46, 0.3);
+            }
+
+            .modal-close-btn {
+                background: none;
+                border: none;
+                color: white;
                 font-size: 1.8rem;
                 cursor: pointer;
-                padding: 5px 15px;
-                order: 1;
+                padding: 0 10px;
+                transition: transform 0.3s;
             }
 
-            #other {
-                display: none;
-                width: 100%;
-                flex-direction: column;
-                margin-top: 10px;
-                padding: 0;
-                background: none;
-                border-radius: 0;
-                margin-left: 0;
+            .modal-close-btn:hover {
+                transform: rotate(90deg);
             }
 
-            #other.active {
+            /* Arrow animations */
+            .arrow-pointer {
+                width: 100px;
+                height: 100px;
+                pointer-events: none;
+                z-index: 10000;
+            }
+
+            .pulse-arrow {
+                animation: pulse 1.5s infinite, float 3s ease-in-out infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.2);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+
+
+            /* Main content layout */
+            .catalog-container {
                 display: flex;
-            }
-
-            #other a, #other button {
-                padding: 12px 20px;
-                border-bottom: 1px solid #eee;
-                text-align: center;
-            }
-
-            .user-actions {
-                margin-top: 10px;
-                border-top: 1px solid #eee;
-                padding-top: 10px;
-                flex-direction: column;
-                gap: 10px;
-            }
-        }
-
-
-        /* Add these new styles for the modal */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 400px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .close-modal {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        .create-new-list {
-            margin-top: 15px;
-            padding: 10px;
-            text-align: center;
-            border: 1px dashed #549249;
-            border-radius: 4px;
-            cursor: pointer;
-            color: #549249;
-        }
-
-        .create-new-list:hover {
-            background-color: #f0f8ff;
-        }
-
-        .new-list-form {
-            margin-top: 15px;
-            display: none;
-        }
-
-        .new-list-form input {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        .new-list-form button {
-            padding: 8px 15px;
-            background-color: #b42824;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-
-        .remember-choice input {
-            margin-right: 8px;
-        }
-
-        .lists-header h4 {
-            margin: 0;
-        }
-
-        .lists-header button {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-
-        /* Quantity input styles in modal */
-        .quantity-input label {
-            margin-right: 10px;
-        }
-
-        .quantity-input input {
-            width: 60px;
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-
-        #horizontal_picture {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        #horizontal_picture:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.25);
-        }
-
-        #horizontal_picture {
-            position: relative;
-            text-align: center;
-            background-image: url('{% static "images/baner1.jpg" %}');
-            background-size: cover;
-            background-position: center;
-            height: 170px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-            margin-bottom: 30px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); /* ← Floating shadow */
-            border-radius: 10px; /* Optional: rounded edges look cleaner */
-        }
-
-        /* ===== DESKTOP NAVBAR ===== */
-        #desktop-navbar {
-            display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            padding: 15px 40px;
-            background-color: white;
-            border-bottom: 1px solid #e2e2e2; /* design line under links */
-            position: sticky;
-            top: 0;
-            z-index: 999;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); /* ← Floating shadow */
-
-        }
-
-        #logo img {
-            height: 90px;
-        }
-
-        #other {
-            display: flex;
-            align-items: center;
-        }
-
-        #other a,
-        .user-actions a,
-        .user-actions button {
-            margin-left: 10px;
-            text-decoration: none;
-            font-weight: 600;
-            color: black;
-        }
-
-        .user-actions button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        /* ===== MOBILE HEADER ===== */
-        #mobile-header {
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background-color: white;
-            border-bottom: 1px solid #e2e2e2;
-            z-index: 1001;
-            position: relative;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5); /* ← Floating shadow */
-
-        }
-
-        #mobile-logo img {
-            height: 40px;
-        }
-
-        .menu-toggle {
-            font-size: 28px;
-            cursor: pointer;
-        }
-
-        /* ===== MOBILE SLIDE MENU ===== */
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 75%;
-            height: 100vh;
-            background-color: white;
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
-            transition: right 0.3s ease;
-            padding: 20px;
-            z-index: 1002;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mobile-menu.open {
-            right: 0;
-        }
-
-        .mobile-menu-header {
-            display: flex;
-            justify-content: flex-end;
-            font-size: 24px;
-        }
-
-        .close-btn {
-            cursor: pointer;
-        }
-
-        .mobile-search input {
-            width: 100%;
-            padding: 10px;
-            margin: 15px 0;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .mobile-menu nav a,
-        .mobile-menu nav button {
-            display: block;
-            margin: 15px 0;
-            font-size: 18px;
-            text-decoration: none;
-            color: black;
-            background: none;
-            border: none;
-            text-align: left;
-        }
-
-        #desktop-navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 50px;
-            background-color: white;
-            border-bottom: 2px solid #e5e5e5;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        /* Logo on the left */
-        #logo img {
-            height: 90px;
-        }
-
-        /* Links on the right */
-        #nav-links {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-
-        /* Style all links and buttons */
-        #nav-links a,
-        .user-actions a,
-        .user-actions button {
-            color: black;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        /* Hover color */
-        #nav-links a:hover,
-        .user-actions a:hover,
-        .user-actions button:hover {
-            color: #2ecc71; /* Green hover */
-        }
-
-        /* Group login/register or logout properly */
-        .user-actions {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        .logout-btn {
-            background-color: #2ecc71; /* Green background */
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .logout-btn:hover {
-        {#background-color: #27ae60;#}
-        }
-
-
-        #login:hover {
-            color: #cb7e31 !important;
-
-        }
-
-        #signup:hover {
-            color: black !important;
-        }
-
-        #signup {
-            background-color: #cb7e31 !important;
-            padding: 10px !important;
-            border-radius: 10px;
-            color: white !important;
-        }
-
-        #signup:hover {
-            color: black !important;
-
-        }
-
-
-        /* ===== OVERLAY FOR MOBILE ===== */
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 1000;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
-
-        }
-
-        #overlay.active {
-            display: block;
-        }
-
-        /* ===== RESPONSIVENESS ===== */
-        @media (max-width: 768px) {
-            .main-header{
-                display: none;
-            }
-
-            #mobile-header {
-                display: flex;
-            }
-        }
-
-
-        /* Mobile and smaller screens */
-        @media (max-width: 768px) {
-            #horizontal_picture {
-                padding: 40px 10px; /* Reduce padding for smaller screens */
-            }
-
-            #horizontal_picture h2 {
-                font-size: 2.5rem; /* Smaller font size */
-            }
-
-            #horizontal_picture h3 {
-                font-size: 1.2rem;
-            }
-
-            .search-form {
-                width: 90%;
-                max-width: 100%;
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 0 20px;
                 margin-top: 20px;
             }
 
+            /* Filters sidebar */
+            .filters {
+                width: 250px;
+                padding: 20px;
+                background-color: #cea274;
+                border-radius: 8px;
+            {#margin-right: 30px;#} margin-left: 20px;
+            }
+
+
+            h3 {
+                margin-top: 0;
+                margin-bottom: 15px;
+                font-size: 16px;
+            }
+
+            .filter-option {
+                margin-bottom: 10px;
+            }
+
+            .price-slider {
+                -webkit-appearance: none;
+                width: 100%;
+                height: 5px;
+                background-color: rgba(43, 86, 43, 0.93);
+                border-radius: 4px;
+                outline: none;
+            }
+
+            /* Chrome, Safari, Opera - Track */
+            .price-slider::-webkit-slider-runnable-track {
+                background: rgba(43, 86, 43, 0.93);
+                border-radius: 4px;
+            }
+
+            /* Firefox - Track */
+            .price-slider::-moz-range-track {
+                background: rgba(43, 86, 43, 0.93);
+                border-radius: 4px;
+            }
+
+            /* Chrome, Safari, Opera - Thumb */
+            .price-slider::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 15px;
+                height: 15px;
+                background-color: rgba(42, 82, 42, 0.93); /* Your green color */
+                border-radius: 50%;
+                cursor: pointer;
+                margin-top: -6px; /* Align thumb vertically */
+            }
+
+            /* Firefox - Thumb */
+            .price-slider::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                background-color: rgba(42, 82, 42, 0.93); /* Your green color */
+                border-radius: 50%;
+                cursor: pointer;
+            }
+
+
+            .price-range {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 5px;
+                font-size: 12px;
+                color: rgba(31, 63, 31, 0.93);
+            }
+
+            select {
+                width: 100%;
+                padding: 8px;
+                border-radius: 4px;
+                border: 1px solid #ddd;
+            }
+
+            /* Products grid */
+            .products-grid {
+                flex: 1;
+            }
+
+            .sorting-options {
+                display: flex;
+                justify-content: flex-end;
+                margin-bottom: 20px;
+                border: rgba(43, 86, 43, 0.93);
+                padding: 5px;
+                border-radius: 5px;
+            }
+
+            .sorting-options select {
+                width: auto;
+                margin-left: 10px;
+                background-color: rgba(46, 101, 46, 0.93);
+                color: white;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+                gap: 20px;
+            }
+
+            .product-card {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
+                transition: transform 0.2s;
+            }
+
+            .product-image {
+                height: 180px;
+                background-color: #eee;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .product-info {
+                padding: 15px;
+            }
+
+            .product-name {
+                font-weight: bold;
+                margin-bottom: 5px;
+            }
+
+
+            .old-price {
+                text-decoration: line-through;
+                color: #999;
+                font-size: 0.9em;
+                margin-right: 5px;
+            }
+
+            .discount-badge {
+                background-color: #ff4444;
+                color: white;
+                padding: 2px 5px;
+                border-radius: 3px;
+                font-size: 0.8em;
+                margin-left: 5px;
+            }
+
+            .product-category {
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 10px;
+            }
+
+
+            /* Pagination */
+            .pagination {
+                margin-top: 30px;
+                text-align: center;
+            }
+
+            .pagination .step-links {
+                display: inline-block;
+            }
+
+            .pagination .step-links a {
+                text-decoration: none;
+                color: #549249;
+                padding: 5px 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                margin: 0 5px 20px;
+            }
+
+            .pagination .step-links a:hover {
+                background-color: #f0f0f0;
+            }
+
+            .pagination .current {
+                font-weight: bold;
+                padding: 5px 10px;
+                background-color: #2e652e;
+                color: white;
+                border-radius: 4px;
+                margin-bottom: 20px;
+            }
+
+            /* Responsive adjustments */
+            @media (max-width: 768px) {
+                .catalog-container {
+                    flex-direction: column;
+                }
+
+                .filters {
+                    width: auto;
+                    margin-right: 0;
+                    margin-bottom: 20px;
+                }
+
+                .grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 10px;
+                }
+            }
+
+            .no-products {
+                grid-column: 1 / -1;
+                text-align: center;
+                padding: 40px;
+                color: #666;
+            }
+
+            .product-actions {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 10px;
+                padding-bottom: -10px;
+                flex-direction: column;
+            }
+
+            .view-product {
+                font-size: 12px;
+                text-decoration: none;
+            }
+
+
+            .search-form button:hover {
+                background-color: #cb7e31;
+            }
+
+            .discount-badge {
+                background-color: #ff4444;
+                color: white;
+                padding: 2px 5px;
+                border-radius: 3px;
+                font-size: 0.8em;
+                margin-left: 5px;
+            }
+
+            .discount-valid {
+                font-size: 0.7em;
+                color: #666;
+                margin-top: 7px;
+            }
+
+
             .search-form input {
-                padding: 10px 15px;
-                font-size: 0.9rem;
+                padding: 12px;
+                width: 100%;
+                max-width: 500px;
+                border-radius: 20px;
+                border: 1px solid #ddd;
+                font-size: 16px;
+                margin-bottom: 10px;
             }
 
             .search-form button {
-                padding: 10px 25px;
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (min-width: 769px) and (max-width: 1024px) {
-            #horizontal_picture {
-                padding: 50px 20px;
+                padding: 12px 24px;
+                width: auto;
             }
 
-            .search-form {
-                width: 80%;
-            }
-        }
+            @media (min-width: 768px) {
 
-        /* Large screens */
-        @media (min-width: 1025px) {
-            #horizontal_picture {
-                padding: 50px 20px;
+                .search-form input {
+                    margin-bottom: 0;
+                    margin-right: 10px;
+                }
             }
 
-            .search-form {
-                width: 60%;
+            @media (max-width: 600px) {
+                .grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 10px;
+                }
+
+                .product-image {
+                    height: 140px;
+                }
             }
-        }
 
-        a {
-            text-decoration: none;
-        }
-
-
-        .filter-section::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .filter-section::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        .filter-section::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
-
-        .filter-section::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        .filter-section {
-            margin-bottom: 25px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #888 #f1f1f1;
-        }
+            @media (max-width: 400px) {
+                .grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
 
 
-        /* Стилови за скролбар за различни прелистувачи */
-        .filter-section::-webkit-scrollbar {
-            width: 8px;
-        }
+            .filters {
+                width: 250px;
+                padding: 20px;
+                background-color: #f8f8f8;
+                border-radius: 8px;
+                margin-left: 0px;
+            }
 
-        .filter-section::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
+            .filter-toggle {
+                display: none;
+                background: #cb7e31;
+                color: white;
+                padding: 12px;
+                border: none;
+                border-radius: 5px;
+                width: 100%;
+                margin-bottom: 15px;
+                cursor: pointer;
+            }
 
-        .filter-section::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-        }
+            @media (max-width: 768px) {
+                .catalog-container {
+                    flex-direction: column;
+                }
 
-        .filter-section::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+                .filters {
+                    width: 90%;
+                    margin-right: 0;
+                    margin-bottom: 20px;
+                }
 
-        .filter-option {
-            margin-bottom: 10px;
-            padding: 5px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
+                .filter-toggle {
+                    display: block;
+                }
 
-        .filter-option:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
+                .filter-section {
+                    display: none;
+                }
 
-        @media (max-width: 768px) {
+                .filter-section.active {
+                    display: block;
+                }
+            }
+
+            #other a:hover, #other button:hover {
+                color: lightgreen;
+            }
+
+            .modal-content {
+                background-color: white;
+                padding: 20px;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 400px;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .new-list-form input {
+                width: 100%;
+                padding: 8px;
+                margin-bottom: 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+            .new-list-form button {
+                padding: 8px 15px;
+                background-color: #b42824;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+
+            .remember-choice input {
+                margin-right: 8px;
+            }
+
+            .quantity-input label {
+                margin-right: 10px;
+            }
+
+            .quantity-input input {
+                width: 60px;
+                padding: 5px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+            }
+
+            a {
+                text-decoration: none;
+            }
+
+            .filter-section::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .filter-section::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+
+            .filter-section::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 10px;
+            }
+
+            .filter-section::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
             .filter-section {
-                max-height: 150px; /* Помал скрол контејнер за мобилни */
+                margin-bottom: 25px;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 15px;
+                max-height: 200px;
+                overflow-y: auto;
+                scrollbar-width: thin;
+                scrollbar-color: #888 #f1f1f1;
             }
-        }
 
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
+            /* Стилови за скролбар за различни прелистувачи */
+            .filter-section::-webkit-scrollbar {
+                width: 8px;
             }
-            50% {
+
+            .filter-section::-webkit-scrollbar-track {
+                background: #f1f1f1;
+                border-radius: 10px;
+            }
+
+            .filter-section::-webkit-scrollbar-thumb {
+                background: #888;
+                border-radius: 10px;
+            }
+
+            .filter-section::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+
+            .filter-option {
+                margin-bottom: 10px;
+                padding: 5px;
+                border-radius: 4px;
+                transition: background-color 0.2s;
+            }
+
+            .filter-option:hover {
+                background-color: rgba(0, 0, 0, 0.05);
+            }
+
+            @media (max-width: 768px) {
+                .filter-section {
+                    max-height: 150px;
+                }
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.1);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            .pulse-on-click {
+                animation: pulse 0.4s ease;
+            }
+
+            .category-filter {
+                padding: 15px 20px;
+                background: #f9f9f9;
+                border-radius: 12px;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+                max-width: 300px;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            }
+
+            .filters h3 {
+                font-weight: 600;
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+                color: #333;
+                border-bottom: 2px solid #4CAF50;
+                padding-bottom: 6px;
+                user-select: none;
+            }
+
+            .price-filter h3 {
+                font-weight: 600;
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+                color: #333;
+                border-bottom: 2px solid #4CAF50;
+                padding-bottom: 6px;
+                user-select: none;
+            }
+
+            .store-filter h3 {
+                font-weight: 600;
+                font-size: 1.3rem;
+                margin-bottom: 15px;
+                color: #333;
+                border-bottom: 2px solid #4CAF50;
+                padding-bottom: 6px;
+                user-select: none;
+            }
+
+            .filter-option {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+                cursor: pointer;
+                user-select: none;
+            }
+
+            .filter-option input[type="checkbox"] {
+                width: 18px;
+                height: 18px;
+                margin-right: 12px;
+                accent-color: #4CAF50; /* modern browsers */
+                cursor: pointer;
+                transition: transform 0.15s ease-in-out;
+            }
+
+            .filter-option input[type="checkbox"]:hover {
                 transform: scale(1.1);
             }
-            100% {
-                transform: scale(1);
+
+            .filter-option label {
+                font-size: 1rem;
+                color: #555;
+                transition: color 0.3s ease;
             }
-        }
 
-        .pulse-on-click {
-            animation: pulse 0.4s ease;
-        }
-
-        /* Header */
-        .main-header {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        .logo img {
-            height: 60px;
-        }
-
-        /* Update the header-search styles */
-        .header-search {
-            flex-grow: 1;
-            margin: 0 20px;
-            position: relative;
-        }
-
-        .header-search input {
-            width: 98%;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            font-size: 16px;
-            background-color: #f5f5f5;
-        }
-
-        .header-search button {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        .header-search button:hover {
-            color: #2e652e;
-        }
-
-        .user-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-actions a {
-            color: #333;
-            text-decoration: none;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .user-actions a:hover {
-            color: #2e652e;
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-        }
-
-        /* Navigation */
-        .main-nav {
-            padding: 15px 30px;
-            background-color: #2e652e;
-        }
-
-        .main-nav ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .main-nav li {
-            margin-right: 20px;
-        }
-
-        .main-nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 5px 0;
-            position: relative;
-        }
-
-        .main-nav a:hover {
-            color: #fdd835;
-        }
-
-        .main-nav a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: #fdd835;
-            transition: width 0.3s ease;
-        }
-
-        .main-nav a:hover::after {
-            width: 100%;
-        }
-
-        /* Mobile Menu */
-        #mobile-header {
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #2e652e, #1f3f1f);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            z-index: 1001;
-            position: relative;
-        }
-
-        #mobile-logo img {
-            height: 50px;
-        }
-
-        .menu-toggle {
-            font-size: 28px;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .menu-toggle:hover {
-            transform: scale(1.1);
-        }
-
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 75%;
-            height: 100vh;
-            background: linear-gradient(135deg, #f0f7f0, #e0e8e0);
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
-            transition: right 0.3s ease;
-            padding: 20px;
-            z-index: 1002;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mobile-menu.open {
-            right: 0;
-        }
-
-        .mobile-menu-header {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-        }
-
-        .close-btn {
-            cursor: pointer;
-            font-size: 28px;
-            color: #2e652e;
-            transition: color 0.3s ease;
-        }
-
-        .close-btn:hover {
-            color: #1f3f1f;
-        }
-
-        .mobile-search-form {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            gap: 10px;
-            background: white;
-            border-radius: 25px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .mobile-search-form input {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 20px;
-            font-size: 14px;
-            outline: none;
-            background: #f5f5f5;
-        }
-
-        .mobile-search-form button {
-            background-color: #2e652e;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 50%;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
-        .mobile-search-form button:hover {
-            background-color: #1f3f1f;
-            transform: scale(1.1);
-        }
-
-        .mobile-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .mobile-nav a {
-            color: #2e652e;
-            text-decoration: none;
-            font-size: 18px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .mobile-nav a:hover {
-            background-color: #2e652e;
-            color: white;
-            transform: translateX(5px);
-        }
-
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        #overlay.active {
-            display: block;
-        }
-
-        .category-filter {
-            padding: 15px 20px;
-            background: #f9f9f9;
-            border-radius: 12px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            max-width: 300px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .filters h3 {
-            font-weight: 600;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 6px;
-            user-select: none;
-        }
-
-        .price-filter h3 {
-            font-weight: 600;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 6px;
-            user-select: none;
-        }
-
-        .store-filter h3 {
-            font-weight: 600;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 6px;
-            user-select: none;
-        }
-
-        .filter-option {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .filter-option input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            margin-right: 12px;
-            accent-color: #4CAF50; /* modern browsers */
-            cursor: pointer;
-            transition: transform 0.15s ease-in-out;
-        }
-
-        .filter-option input[type="checkbox"]:hover {
-            transform: scale(1.1);
-        }
-
-        .filter-option label {
-            font-size: 1rem;
-            color: #555;
-            transition: color 0.3s ease;
-        }
-
-        .filter-option:hover label {
-            color: #4CAF50;
-        }
-
-
-        .filters {
-            width: 280px;
-            padding: 25px;
-            background-color: #f5f5f5;
-            border-radius: 10px;
-            margin-right: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e0e0e0;
-        }
-
-        {##}
-        {#.filter-section h3 {#}
-        {#    background-color: #2e652e;#}
-        {#    color: white;#}
-        {#    padding: 10px 15px;#}
-        {#    border-radius: 5px;#}
-        {#    margin: 0 -15px 15px -15px;#}
-        {#    font-size: 1rem;#}
-
-        {##}
-        {#        .price-filter h3 {#}
-        {#            background-color: #2e652e;#}
-        {#            color: white;#}
-        {#            padding: 10px 15px;#}
-        {#            border-radius: 5px;#}
-        {#            margin: 0 -15px 15px -15px;#}
-        {#            font-size: 1rem;#}
-        {#        }#}
-
-        {#.store-filter h3 {#}
-        {#    background-color: #2e652e;#}
-        {#    color: white;#}
-        {#    padding: 10px 15px;#}
-        {#    border-radius: 5px;#}
-        {#    margin: 0 -15px 15px -15px;#}
-        {#    font-size: 1rem;#}
-        {
-        #}#}
-
-        .filter-submit-btn {
-            background-color: #2e652e;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            width: 100%;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .filter-submit-btn:hover {
-            background-color: #3e7e3e;
-        }
-
-        .product-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-            border-color: #2e652e;
-        }
-
-        .product-image {
-            height: 200px;
-            background-color: #f9f9f9;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-        }
-
-        .product-image img {
-            max-height: 100%;
-            max-width: 100%;
-            object-fit: contain;
-        }
-
-        .product-info {
-            padding: 20px;
-        }
-
-        .product-price {
-            font-size: 1.2rem;
-            color: #2e652e;
-            font-weight: bold;
-            margin-top: 20px;
-            display: flex; /* Use flexbox for vertical stacking */
-            flex-direction: column; /* Stack children vertically */
-            gap: 5px; /* Add spacing between elements */
-        }
-
-        .old-price {
-            color: #999;
-            text-decoration: line-through;
-            font-size: 0.9rem;
-        }
-
-        .discount-badge {
-            background-color: #e74c3c;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 0.8rem;
-            margin-left: 8px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
+            .filter-option:hover label {
+                color: #4CAF50;
             }
-            100% {
-                transform: rotate(360deg);
+
+
+            .filters {
+                width: 280px;
+                padding: 25px;
+                background-color: #f5f5f5;
+                border-radius: 10px;
+                margin-right: 30px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid #e0e0e0;
             }
-        }
 
-        .view-product:hover {
-            color: rgba(57, 146, 47, 0.93);
-        }
-
-
-        /* Alternative ribbon style 1 - corner flag */
-        .ribbon-flag {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 0 0 0 0;
-            border-color: transparent #e74c3c transparent transparent;
-        {#z-index: 1;#} visibility: visible !important; /* Force visibility */
-            opacity: 1 !important; /* Force visibility */
-
-
-        }
-
-        .ribbon-flag-text {
-            position: absolute;
-            top: -4px;
-            right: -10px;
-            color: white;
-            font-size: 15px;
-            font-weight: bold;
-            transform: rotate(70deg);
-            z-index: 5;
-            visibility: visible !important;
-        / opacity: 1 !important; /* Force visibility */
-
-
-        }
-
-        .product-card, .product-image {
-            position: relative;
-        {#overflow: visible !important;#}
-        }
-
-        /* Instruction Modal Styles */
-        /* Enhanced Instruction Modal */
-        .instruction-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.85);
-            z-index: 9999;
-            font-family: Arial, sans-serif;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 450px;
-            margin: auto;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transform: scale(0.9);
-            opacity: 0;
-            animation: modalEntrance 0.4s forwards;
-        }
-
-        @keyframes modalEntrance {
-            to {
-                transform: scale(1);
-                opacity: 1;
+            .filter-submit-btn {
+                background-color: #2e652e;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                width: 100%;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: background-color 0.3s;
             }
-        }
 
-        .modal-header {
-            background: #2e652e;
-            color: white;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.4rem;
-        }
-
-        .modal-body {
-            padding: 20px;
-        }
-
-        .instruction-step {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            background: #f8f8f8;
-        }
-
-        .step-number {
-            background: #2e652e;
-            color: white;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 15px;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        .hint-text {
-            color: #666;
-            font-size: 0.9em;
-            font-style: italic;
-        }
-
-        .modal-action-btn {
-            background: #2e652e;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 30px;
-            margin: 20px auto;
-            display: block;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .modal-action-btn:hover {
-            background: #3e7e3e;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(46, 101, 46, 0.3);
-        }
-
-        .modal-close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.8rem;
-            cursor: pointer;
-            padding: 0 10px;
-        }
-
-        /* Enhanced Arrows */
-        .arrow-pointer {
-        {#position: absolute;#} width: 100px;
-            height: 100px;
-            pointer-events: none;
-            z-index: 10000;
-        }
-
-
-        .pulse-arrow {
-            animation: pulse 1.5s infinite, float 3s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
+            .filter-submit-btn:hover {
+                background-color: #3e7e3e;
             }
-            50% {
-                transform: scale(1.2);
+
+            .product-card {
+                border: 1px solid #e0e0e0;
+                border-radius: 10px;
+                overflow: hidden;
+                transition: all 0.3s ease;
+                background: white;
             }
-            100% {
-                transform: scale(1);
+
+            .product-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                border-color: #2e652e;
             }
-        }
 
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
+            .product-image {
+                height: 200px;
+                background-color: #f9f9f9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 15px;
             }
-            50% {
-                transform: translateY(-10px);
+
+            .product-image img {
+                max-height: 100%;
+                max-width: 100%;
+                object-fit: contain;
             }
-        }
 
-        }
+            .product-info {
+                padding: 20px;
+            }
+
+            .product-price {
+                font-size: 1.2rem;
+                color: #2e652e;
+                font-weight: bold;
+                margin-top: 20px;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .old-price {
+                color: #999;
+                text-decoration: line-through;
+                font-size: 0.9rem;
+            }
+
+            .discount-badge {
+                background-color: #e74c3c;
+                color: white;
+                padding: 3px 8px;
+                border-radius: 3px;
+                font-size: 0.8rem;
+                margin-left: 8px;
+            }
+
+            @keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            .view-product:hover {
+                color: rgba(57, 146, 47, 0.93);
+            }
 
 
-    </style>
-</head>
-<body>
-{% load static %}
-<div id="navbar">
+            /* Alternative ribbon style 1 - corner flag */
+            .ribbon-flag {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 0 0 0 0;
+                border-color: transparent #e74c3c transparent transparent;
+            {#z-index: 1;#} visibility: visible !important; /* Force visibility */
+                opacity: 1 !important; /* Force visibility */
 
-    <!-- Header -->
-    <header class="main-header">
-        <div class="header-top">
-            <div class="logo">
-                <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}"
-                                                alt="Штедко лого"/></a>
-            </div>
 
-            <div class="header-search">
-                <form method="GET" action="{% url 'product_list' %}" id="searchForm">
-                    <input type="text" name="search" id="searchInput" placeholder="Пребарај производи..."
-                           value="{{ request.GET.search }}">
-                    <button type="submit"><i class="fas fa-search"></i></button>
-                </form>
-                <div id="suggestions"
-                     style="position: absolute; background: white; border: 1px solid #ddd; border-radius: 5px; width: 98%; max-height: 200px; overflow-y: auto; display: none; z-index: 2"></div>
-            </div>
+            }
 
-            <div class="user-actions">
-                {% if user.is_authenticated %}
-                    <a href="{% url 'view_lists' %}" class="list-icon">
-                        {#                        <img src="{% static 'images/final_icon_listi.png' %}" width="60px" alt="Листи">#}
-                        мои листи
-                    </a>
-                    <select id="listSelector" class="form-select">
-                        листа:
-                        <option value="">-- Избери листа --</option>
-                    </select>
-                    {#                    <a href="{% url 'stats' %}" class="stats-icon">#}
-                    {#                        <img src="{% static 'images/stats.png' %}" width="57px" alt="Статистика">#}
-                    {#                    </a>#}
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-btn">
-                            <img src="{% static 'images/log_out.png' %}" width="35px" alt="Одјави се">
-                        </button>
-                    </form>
-                {% else %}
-                    <a href="{% url 'login' %}"
-                       style=" padding: 8px 16px; border-radius: 20px; background-color: #f5f5f5; margin-right: -10px"><i
-                            class="fas fa-user"></i> Најави се</a>
-                    <a href="{% url 'register' %}"
-                       style=" padding: 8px 16px; border-radius: 20px; background-color: #f5f5f5"><i
-                            class="fas fa-user-plus"></i> Регистрирај се</a>
+            .ribbon-flag-text {
+                position: absolute;
+                top: -4px;
+                right: -10px;
+                color: white;
+                font-size: 15px;
+                font-weight: bold;
+                transform: rotate(70deg);
+                z-index: 5;
+                visibility: visible !important;
+            / opacity: 1 !important; /* Force visibility */
+
+
+            }
+
+            .product-card, .product-image {
+                position: relative;
+            {#overflow: visible !important;#}
+            }
+
+            /* Instruction Modal Styles */
+            /* Enhanced Instruction Modal */
+            .instruction-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.85);
+                z-index: 9999;
+                font-family: Arial, sans-serif;
+            }
+
+            .modal-content {
+                background: white;
+                border-radius: 15px;
+                width: 90%;
+                max-width: 450px;
+                margin: auto;
+                position: relative;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                transform: scale(0.9);
+                opacity: 0;
+                animation: modalEntrance 0.4s forwards;
+            }
+
+            @keyframes modalEntrance {
+                to {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+            }
+
+            .modal-header {
+                background: #2e652e;
+                color: white;
+                padding: 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .modal-header h3 {
+                margin: 0;
+                font-size: 1.4rem;
+            }
+
+            .modal-body {
+                padding: 20px;
+            }
+
+            .instruction-step {
+                display: flex;
+                align-items: flex-start;
+                margin-bottom: 15px;
+                padding: 10px;
+                border-radius: 8px;
+                background: #f8f8f8;
+            }
+
+            .step-number {
+                background: #2e652e;
+                color: white;
+                width: 25px;
+                height: 25px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-right: 15px;
+                font-weight: bold;
+                flex-shrink: 0;
+            }
+
+            .hint-text {
+                color: #666;
+                font-size: 0.9em;
+                font-style: italic;
+            }
+
+            .modal-action-btn {
+                background: #2e652e;
+                color: white;
+                border: none;
+                padding: 12px 25px;
+                border-radius: 30px;
+                margin: 20px auto;
+                display: block;
+                font-size: 1rem;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+
+            .modal-action-btn:hover {
+                background: #3e7e3e;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(46, 101, 46, 0.3);
+            }
+
+            .modal-close-btn {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 1.8rem;
+                cursor: pointer;
+                padding: 0 10px;
+            }
+
+            /* Enhanced Arrows */
+            .arrow-pointer {
+                width: 100px;
+                height: 100px;
+                pointer-events: none;
+                z-index: 10000;
+            }
+
+
+            .pulse-arrow {
+                animation: pulse 1.5s infinite, float 3s ease-in-out infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.2);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0);
+                }
+                50% {
+                    transform: translateY(-10px);
+                }
+            }
+
+            /* Favorite button styles */
+            .favorite-btn {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                background: rgba(255, 255, 255, 0.9);
+                border: none;
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 2;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+            }
+
+            .favorite-btn:hover {
+                background: white;
+                transform: scale(1.1);
+            }
+
+            .favorite-btn i {
+                font-size: 18px;
+                color: #ccc;
+                transition: all 0.3s ease;
+            }
+
+            .favorite-btn.active i {
+                color: #e74c3c;
+            }
+
+            .favorite-btn.pulse {
+                animation: pulseHeart 0.6s ease;
+            }
+
+            @keyframes pulseHeart {
+                0% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.3);
+                }
+                100% {
+                    transform: scale(1);
+                }
+            }
+        </style>
+    </head>
+    <body>
+    {% load static %}
+
+    <div class="catalog-container">
+        <div class="filters">
+            <button class="filter-toggle" onclick="toggleFilters()">☰ Филтри</button>
+            <form id="filterForm" method="GET" action=".">
+
+                {% if request.GET.search %}
+                    <input type="hidden" name="search" value="{{ request.GET.search }}">
                 {% endif %}
-            </div>
-        </div>
 
-        <nav class="main-nav">
-            <ul>
-                <li><a href="{% url 'product_list' %}">Каталог</a></li>
-                <li style="z-index: 0"><a href="{% url 'stats' %}">Статистика</a></li>
-                {#                <li><a href="#">Попусти</a></li>#}
-                {#                <li><a href="#">Продавници</a></li>#}
-            </ul>
-        </nav>
-    </header>
+                <div class="filter-section category-filter">
+                    <h3>Категории</h3>
+                    {% for category in categories %}
+                        <div class="filter-option">
+                            <input
+                                    type="checkbox"
+                                    id="cat-{{ forloop.counter }}"
+                                    name="category"
+                                    value="{{ category }}"
+                                    {% if category in selected_categories %}checked{% endif %}
+                            >
+                            <label for="cat-{{ forloop.counter }}">{{ category|translate_category }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
 
-    <!-- Mobile Header -->
-    <div id="mobile-header">
-        <div id="mobile-logo">
-            <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого">
-        </div>
-        <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
-    </div>
+                <div class="filter-section price-filter">
+                    <h3>Цена</h3>
+                    <input
+                            type="range"
+                            min="0"
+                            max="6000"
+                            value="{{ selected_max_price|default:'6000' }}"
+                            class="price-slider"
+                            id="priceRange"
+                            name="max_price"
+                            style="width: 270px"
+                    />
+                    <div class="price-range">
+                        <span>0 ден.</span>
+                        <span id="maxPriceDisplay">6000 ден.</span>
+                    </div>
+                </div>
 
-    <!-- Mobile Menu -->
-    <div id="mobile-menu" class="mobile-menu">
-        <div class="mobile-menu-header">
-            <span class="close-btn" onclick="toggleMobileMenu()">×</span>
-        </div>
-
-        <form method="GET" action="{% url 'product_list' %}" class="mobile-search-form" id="mobileSearchForm">
-            <input type="text" name="search" id="mobileSearchInput" placeholder="Пребарај производ..."
-                   value="{{ request.GET.search }}">
-            <button type="submit"><i class="fas fa-search"></i></button>
-        </form>
-
-        <nav class="mobile-nav">
-            <a href="{% url 'home' %}">Дома</a>
-            <a href="{% url 'product_list' %}">Каталог</a>
-            <a href="{% url 'stats' %}">Статистика</a>
-            {#            <a href="#">Попусти</a>#}
-            {#            <a href="#">Продавници</a>#}
-            <a href="{% url 'view_lists' %}">Листи</a>
-
-            {% if user.is_authenticated %}
-                <a href="{% url 'logout' %}">Одјави се</a>
-            {% else %}
-                <a href="{% url 'login' %}">Најави се</a>
-                <a href="{% url 'register' %}">Регистрирај се</a>
-            {% endif %}
-        </nav>
-    </div>
-</div>
-
-{#    <div id="horizontal_picture"#}
-{#         style="background-image: url('{% static 'images/baner1.jpg' %}');#}
-{#                 background-size: cover;#}
-{#                 background-position: center;#}
-{#                 height: 250px;#}
-{#                 display: flex;#}
-{#                 flex-direction: column;#}
-{#                 justify-content: center;#}
-{#                 align-items: center;#}
-{#                 color: white;#}
-{#                 text-shadow: 2px 2px 4px rgba(0,0,0,0.5);#}
-{#                 margin-bottom: 30px;#}
-{#                 position: relative;">#}
-{##}
-{#        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); z-index: 0;"></div>#}
-{##}
-{#        <div style="position: relative; z-index: 1; text-align: center; padding: 20px;">#}
-{#            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">Нашите Производи</h1>#}
-{#            <p style="font-size: 1.2rem; max-width: 600px;">Откријте ги најдобрите производи по најниски цени</p>#}
-{#        </div>#}
-{#    </div>#}
-
-{#    <div id="overlay" onclick="toggleMobileMenu()"></div>#}
-
-{#    <div id="horizontal_picture"#}
-{#         style="background-image: url('{% static 'images/baner1.jpg' %}'); background-size: cover;margin-top: 20px; background-position: center; padding: 10px 30px; text-align: center; color: white; position: relative; z-index: 1;">#}
-<!-- Heading Section -->
-{#    <h2 style="font-size: 3rem; font-weight: bold; margin-bottom: 10px;">Каталог</h2>#}
-{#    <h3 style="font-size: 1.5rem; font-weight: 300; margin-bottom: 20px;">Избери го вистинското!</h3>#}
-
-{#        <!-- Search Form -->#}
-{#        <form method="GET" action="." class="search-form"#}
-{#              style="display: inline-block; position: relative; z-index: 2; width: 100%; max-width: 800px;">#}
-{#            <input type="text" name="search" placeholder="Пребарај производи по име..."#}
-{#                   value="{{ request.GET.search }}"#}
-{#                   style="padding: 12px 20px; width: 80%; max-width: 600px; border-radius: 50px; border: 1px solid #ddd; font-size: 1rem; outline: none; transition: all 0.3s ease;">#}
-{#            <button type="submit"#}
-{#                    style="padding: 12px 30px; color: white; background-color: #cb7e31; border: none; border-radius: 50px; margin-left: 10px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease;">#}
-{#                Пребарај#}
-{#            </button>#}
-{#        </form>#}
-
-<!-- Overlay for Text Contrast -->
-{#        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 0;"></div>#}
-{#    </div>#}
-
-<!-- Add this modal at the bottom of your body -->
-{#    <div class="modal-overlay" id="listModal">#}
-{#        <div class="modal-content">#}
-{#            <div class="modal-header">#}
-{#                <div class="modal-title">Избери листа</div>#}
-{#                <button class="close-modal" onclick="closeModal()">×</button>#}
-{#            </div>#}
-{#            <div id="listsContainer">#}
-{#                <!-- Lists will be dynamically populated here -->#}
-{#            </div>#}
-{#            <div class="create-new-list" onclick="showNewListForm()">+ Креирај нова листа</div>#}
-{#            <div class="new-list-form" id="newListForm">#}
-{#                <input type="text" id="newListName" placeholder="Име на листата">#}
-{#                <button onclick="createNewList()">Креирај</button>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-{#    <div class="featured-section" style="margin-bottom: 40px;">#}
-{#        <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Препорачани Производи</h2>#}
-{#        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">#}
-{#            <!-- Featured products here -->#}
-{#        </div>#}
-{#    </div>#}
-{#    <div class="cta-section"#}
-{#         style="background-color: #f9f9f9; padding: 50px 20px; text-align: center; margin-top: 50px;">#}
-{#        <h2 style="color: #2e652e; margin-bottom: 20px;">Не ги најдовте што го баравте?</h2>#}
-{#        <p style="max-width: 600px; margin: 0 auto 30px; color: #555;">Контактирајте не и ќе ви помогнеме да го најдете#}
-{#            саканиот производ</p>#}
-{#        <a href="#"#}
-{#           style="background-color: #2e652e; color: white; padding: 12px 30px; border-radius: 5px; text-decoration: none; font-weight: bold;">Контактирај#}
-{#            не</a>#}
-{#    </div>#}
-
-<div class="catalog-container">
-    <div class="filters">
-        <button class="filter-toggle" onclick="toggleFilters()">☰ Филтри</button>
-        <form id="filterForm" method="GET" action=".">
-
-            {% if request.GET.search %}
-                <input type="hidden" name="search" value="{{ request.GET.search }}">
-            {% endif %}
-
-            <div class="filter-section category-filter">
-                <h3>Категории</h3>
-                {% for category in categories %}
+                <div class="filter-section store-filter">
+                    <h3>Продавници</h3>
                     <div class="filter-option">
-                        <input
-                                type="checkbox"
-                                id="cat-{{ forloop.counter }}"
-                                name="category"
-                                value="{{ category }}"
-                                {% if category in selected_categories %}checked{% endif %}
-                        >
-                        <label for="cat-{{ forloop.counter }}">{{ category|translate_category }}</label>
+                        <input type="checkbox" id="store-vero" name="store" value="Vero"
+                               {% if 'Vero' in selected_stores %}checked{% endif %}>
+                        <label for="store-vero">Vero</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="store-reptil" name="store" value="Reptil"
+                               {% if 'Reptil' in selected_stores %}checked{% endif %}>
+                        <label for="store-reptil">Reptil</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="store-ramstore" name="store" value="Ramstore"
+                               {% if 'Ramstore' in selected_stores %}checked{% endif %}>
+                        <label for="store-ramstore">Ramstore</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="store-zito" name="store" value="Zito"
+                               {% if 'Zito' in selected_stores %}checked{% endif %}>
+                        <label for="store-zito">Zito</label>
+                    </div>
+                    <div class="filter-option">
+                        <input type="checkbox" id="store-kam" name="store" value="Kam"
+                               {% if 'Kam' in selected_stores %}checked{% endif %}>
+                        <label for="store-kam">Kam</label>
+                    </div>
+                </div>
+                <input type="hidden" name="sort" id="sortValue" value="{{ selected_sort }}">
+
+                <button type="submit" class="filter-submit-btn"
+                        style="background-color: #2e652e; border-radius: 10px; padding: 7px; color:white; border-color: white">
+                    Филтрирај
+                </button>
+            </form>
+        </div>
+
+
+        <!-- Products Grid -->
+        <div class="products-grid">
+            <!-- Sorting Options -->
+            {% if request.GET.search %}
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <h3>Резултати за пребарување: "<strong>{{ request.GET.search }}</strong>"</h3>
+                    <a href="?" style="color: #666; text-decoration: none;">× Откажи пребарување</a>
+                </div>
+
+
+
+            {% endif %}
+            <div class="sorting-options">
+                <b>
+                    <label style="margin-top: 7px; color: rgba(31,70,31,0.9)"
+                           for="sort">Сортирај по:</label>
+                    <select id="sort" onchange="updateSort()">
+                        <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Најпопуларни
+                        </option>
+                        <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Цена
+                            (најниска)
+                        </option>
+                        <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Цена
+                            (највисока)
+                        </option>
+                        <option value="name_asc" {% if selected_sort == 'name_asc' %}selected{% endif %}>Име (А-Ш)
+                        </option>
+                        <option value="name_desc" {% if selected_sort == 'name_desc' %}selected{% endif %}>Име (Ш-А)
+                        </option>
+                    </select>
+                    {#            <select id="listSelector" class="form-select">#}
+                    {#                <option value="">-- Избери листа --</option>#}
+                    {#            </select>#}
+                </b>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="grid">
+                {% for product in page_obj %}
+                    <div class="product-card">
+                        {% if product.popust %}
+                            <div class="ribbon-flag"></div>
+                            <div class="ribbon-flag-text">
+                                {#                            Попуст!#}
+                                <img src="{% static 'images/novo_disc.png' %}" width="90px">
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'product_detail' product.id %}">
+                            <div class="product-image">
+                                {% if product.image_url %}
+                                    <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                                         style="max-width: 100%; max-height: 100%;">
+                                {% else %}
+                                    [No Image]
+                                {% endif %}
+                            </div>
+                            <div class="product-info">
+
+                                <div style="color: rgba(10,12,15,0.71)" class="product-name">{{ product.name }}</div>
+                                <div style="display: block">
+                                    <div class="product-price">
+                                        {% if product.popust %}
+
+                                            <span class="old-price">{{ product.price }} ден.</span>
+                                            {{ product.actual_price }} ден.
+                                            <span class="discount-badge"
+                                                  style="width: 50px; margin-left: -1px">Попуст!</span>
+                                            {% if product.popust_date %}
+                                                <div class="discount-valid">
+                                                    Важи до: {{ product.popust_date|date:"d.m.Y" }}
+                                                </div>
+                                            {% endif %}
+                                        {% else %}
+                                            {{ product.price }} ден.
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+
+                                <div class="product-store">
+                                    {% if product.store == 'Vero' %}
+                                        <img src="{% static 'images/vero_logo1.png' %}" alt="Vero"
+                                             style="height: 35px;">
+                                    {% elif product.store == 'Ramstore' %}
+                                        <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore"
+                                             style="height: 35px;">
+                                    {% elif product.store == 'Reptil' %}
+                                        <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil"
+                                             style="height: 35px;">
+                                    {% elif product.store == 'Zito' %}
+                                        <img src="{% static 'images/zito_logo.png' %}" alt="Zito"
+                                             style="height: 35px;">
+                                    {% endif %}
+                                </div>
+                                <div class="product-category"
+                                     style="color: rgba(42,82,42,0.76)">{{ product.category|translate_category }}</div>
+                                <div class="product-actions">
+                                    <a href="{{ product.product_url }}" target="_blank" class="view-product"
+                                       style="color: rgba(22,53,22,0.93); ">Види
+                                        производ</a>
+                                    <div class="product-actions">
+                                        <button class="btn btn-success add-to-list-btn"
+                                                style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer; "
+                                                data-product-id="{{ product.id }}"><b>Додај</b>
+                                        </button>
+                                        <button onclick="toggleFavorite(this, {{ product.id }})" class="favorite-btn">
+                                            <i class="far fa-heart"></i>
+                                        </button>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% empty %}
+                    <div class="no-products">
+                        Нема пронајдени продукти што ги задоволуваат избраните филтри
                     </div>
                 {% endfor %}
             </div>
 
-            <div class="filter-section price-filter">
-                <h3>Цена</h3>
-                <input
-                        type="range"
-                        min="0"
-                        max="6000"
-                        value="{{ selected_max_price|default:'6000' }}"
-                        class="price-slider"
-                        id="priceRange"
-                        name="max_price"
-                        style="width: 270px"
-                />
-                <div class="price-range">
-                    <span>0 ден.</span>
-                    <span id="maxPriceDisplay">6000 ден.</span>
-                </div>
-            </div>
-
-            <div class="filter-section store-filter">
-                <h3>Продавници</h3>
-                <div class="filter-option">
-                    <input type="checkbox" id="store-vero" name="store" value="Vero"
-                           {% if 'Vero' in selected_stores %}checked{% endif %}>
-                    <label for="store-vero">Vero</label>
-                </div>
-                <div class="filter-option">
-                    <input type="checkbox" id="store-reptil" name="store" value="Reptil"
-                           {% if 'Reptil' in selected_stores %}checked{% endif %}>
-                    <label for="store-reptil">Reptil</label>
-                </div>
-                <div class="filter-option">
-                    <input type="checkbox" id="store-ramstore" name="store" value="Ramstore"
-                           {% if 'Ramstore' in selected_stores %}checked{% endif %}>
-                    <label for="store-ramstore">Ramstore</label>
-                </div>
-                <div class="filter-option">
-                    <input type="checkbox" id="store-zito" name="store" value="Zito"
-                           {% if 'Zito' in selected_stores %}checked{% endif %}>
-                    <label for="store-zito">Zito</label>
-                </div>
-            </div>
-
-
-            <input type="hidden" name="sort" id="sortValue" value="{{ selected_sort }}">
-
-            <button type="submit" class="filter-submit-btn"
-                    style="background-color: #2e652e; border-radius: 10px; padding: 7px; color:white; border-color: white">
-                Филтрирај
-            </button>
-        </form>
-    </div>
-
-
-    <!-- Products Grid -->
-    <div class="products-grid">
-        <!-- Sorting Options -->
-        {% if request.GET.search %}
-            <div style="margin-bottom: 15px; text-align: center;">
-                <h3>Резултати за пребарување: "<strong>{{ request.GET.search }}</strong>"</h3>
-                <a href="?" style="color: #666; text-decoration: none;">× Откажи пребарување</a>
-            </div>
-        {% endif %}
-        <div class="sorting-options">
-            <b>
-                <label style="margin-top: 7px; color: rgba(43,86,43,0.93)"
-                       for="sort">Сортирај по:</label>
-                <select id="sort" onchange="updateSort()">
-                    <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Најпопуларни</option>
-                    <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Цена (најниска)
-                    </option>
-                    <option value="price_desc" {% if selected_sort == 'price_desc' %}selected{% endif %}>Цена
-                        (највисока)
-                    </option>
-                    <option value="name_asc" {% if selected_sort == 'name_asc' %}selected{% endif %}>Име (А-Ш)</option>
-                    <option value="name_desc" {% if selected_sort == 'name_desc' %}selected{% endif %}>Име (Ш-А)
-                    </option>
-                </select>
-                {#            <select id="listSelector" class="form-select">#}
-                {#                <option value="">-- Избери листа --</option>#}
-                {#            </select>#}
-            </b>
-        </div>
-
-        <!-- Product Grid -->
-        <div class="grid">
-            {% for product in page_obj %}
-                <div class="product-card">
-                    {% if product.popust %}
-                        <div class="ribbon-flag"></div>
-                        <div class="ribbon-flag-text">
-                            {#                            Попуст!#}
-                            <img src="{% static 'images/novo_disc.png' %}" width="90px">
-                        </div>
-                    {% endif %}
-                    <a href="{% url 'product_detail' product.id %}">
-                        <div class="product-image">
-                            {% if product.image_url %}
-                                <img src="{{ product.image_url }}" alt="{{ product.name }}"
-                                     style="max-width: 100%; max-height: 100%;">
-                            {% else %}
-                                [No Image]
-                            {% endif %}
-                        </div>
-                        <div class="product-info">
-
-                            <div style="color: rgba(10,12,15,0.71)" class="product-name">{{ product.name }}</div>
-                            <div style="display: block">
-                                <div class="product-price">
-                                    {% if product.popust %}
-
-                                        <span class="old-price">{{ product.price }} ден.</span>
-                                        {{ product.actual_price }} ден.
-                                        <span class="discount-badge"
-                                              style="width: 50px; margin-left: -1px">Попуст!</span>
-                                        {% if product.popust_date %}
-                                            <div class="discount-valid">
-                                                Важи до: {{ product.popust_date|date:"d.m.Y" }}
-                                            </div>
-                                        {% endif %}
-                                    {% else %}
-                                        {{ product.price }} ден.
-                                    {% endif %}
-                                </div>
-                            </div>
-
-
-                            <div class="product-store">
-                                {% if product.store == 'Vero' %}
-                                    <img src="{% static 'images/vero_logo1.png' %}" alt="Vero" style="height: 35px;">
-                                {% elif product.store == 'Ramstore' %}
-                                    <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore"
-                                         style="height: 35px;">
-                                {% elif product.store == 'Reptil' %}
-                                    <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil"
-                                         style="height: 35px;">
-                                {% elif product.store == 'Zito' %}
-                                    <img src="{% static 'images/zito_logo.png' %}" alt="Zito"
-                                         style="height: 35px;">
+            <!-- Add similar products section -->
+            {% if similar_products %}
+                <div style="margin: 30px 0;">
+                    <h3 style="text-align: center;
+                  padding-bottom: 15px;
+                  margin-bottom: 30px;
+                  font-size: 28px;
+                  font-weight: 600;
+                  color: #2e652e;
+                  position: relative;
+                  letter-spacing: 1px;">
+                        <span style="background: #f8f9fa; padding: 0 20px; position: relative; z-index: 1;">Слични продукти</span>
+                        <span style="content: '';
+                        position: absolute;
+                        bottom: 0;
+                        left: 0;
+                        right: 0;
+                        height: 3px;
+                        background: linear-gradient(90deg, transparent, #2e652e, transparent);
+                        z-index: 0;"></span>
+                    </h3>
+                    <div class="grid">
+                        {% for product in similar_products %}
+                            <div class="product-card">
+                                {% if product.popust %}
+                                    <div class="ribbon-flag"></div>
+                                    <div class="ribbon-flag-text">
+                                        <img src="{% static 'images/novo_disc.png' %}" width="90px">
+                                    </div>
                                 {% endif %}
+                                <a href="{% url 'product_detail' product.id %}">
+                                    <div class="product-image">
+                                        {% if product.image_url %}
+                                            <img src="{{ product.image_url }}" alt="{{ product.name }}"
+                                                 style="max-width: 100%; max-height: 100%;">
+                                        {% else %}
+                                            [No Image]
+                                        {% endif %}
+                                    </div>
+                                    <div class="product-info">
+                                        <div style="color: rgba(10,12,15,0.71)"
+                                             class="product-name">{{ product.name }}</div>
+                                        <div style="display: block">
+                                            <div class="product-price">
+                                                {% if product.popust %}
+                                                    <span class="old-price">{{ product.price }} ден.</span>
+                                                    {{ product.actual_price }} ден.
+                                                    <span class="discount-badge"
+                                                          style="width: 50px; margin-left: -1px">Попуст!</span>
+                                                    {% if product.popust_date %}
+                                                        <div class="discount-valid">
+                                                            Важи до: {{ product.popust_date|date:"d.m.Y" }}
+                                                        </div>
+                                                    {% endif %}
+                                                {% else %}
+                                                    {{ product.price }} ден.
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="product-store">
+                                            {% if product.store == 'Vero' %}
+                                                <img src="{% static 'images/vero_logo1.png' %}" alt="Vero"
+                                                     style="height: 35px;">
+                                            {% elif product.store == 'Ramstore' %}
+                                                <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore"
+                                                     style="height: 35px;">
+                                            {% elif product.store == 'Reptil' %}
+                                                <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil"
+                                                     style="height: 35px;">
+                                            {% elif product.store == 'Zito' %}
+                                                <img src="{% static 'images/zito_logo.png' %}" alt="Zito"
+                                                     style="height: 35px;">
+                                            {% endif %}
+                                        </div>
+                                        <div class="product-category">{{ product.category|translate_category }}</div>
+                                        <div class="product-actions">
+                                            <a href="{{ product.product_url }}" target="_blank" class="view-product"
+                                               style="color: rgba(22,53,22,0.93); ">Види производ</a>
+                                            <div class="product-actions">
+                                                <button class="btn btn-success add-to-list-btn"
+                                                        style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer; "
+                                                        data-product-id="{{ product.id }}"><b>Додај</b>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
                             </div>
-                            <div class="product-category">{{ product.category|translate_category }}</div>
-                            <div class="product-actions">
-                                <a href="{{ product.product_url }}" target="_blank" class="view-product"
-                                   style="color: rgba(22,53,22,0.93); ">Види
-                                    производ</a>
-                                <div class="product-actions">
-                                    <button class="btn btn-success add-to-list-btn"
-                                            style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer; "
-                                            data-product-id="{{ product.id }}"><b>Додај</b>
-                                    </button>
-                                </div>
-
-
-                            </div>
-                        </div>
-                    </a>
+                        {% endfor %}
+                    </div>
                 </div>
-            {% empty %}
-                <div class="no-products">
-                    Нема пронајдени продукти што ги задоволуваат избраните филтри
-                </div>
-            {% endfor %}
-        </div>
+            {% endif %}
 
-        {% if page_obj.has_other_pages %}
-            <div class="pagination">
+            {% if page_obj.has_other_pages %}
+                <div class="pagination">
             <span class="step-links" style="margin-bottom: 40px">
                 {% if page_obj.has_previous %}
                     <a href="?page=1
@@ -2114,8 +2076,42 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             {% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo;</a>
                     <a href="?page=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2345,8 +2341,42 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                             {{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&rsaquo;</a>
                     <a href="?page=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2460,469 +2490,692 @@
                             {{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&raquo;</a>
                 {% endif %}
             </span>
-            </div>
-        {% endif %}
+                </div>
+            {% endif %}
+        </div>
     </div>
-</div>
-
-<script>
-    function toggleMenu() {
-        const menu = document.getElementById('other');
-        menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
 
 
-    // Filter toggle for mobile
-    function toggleFilters() {
-        document.querySelectorAll('.filter-section').forEach(section => {
-            section.classList.toggle('active');
-        });
-    }
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('other');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        // Initialize filters as collapsed on mobile
-        if (window.innerWidth <= 768) {
+
+        // Filter toggle for mobile
+        function toggleFilters() {
             document.querySelectorAll('.filter-section').forEach(section => {
-                section.classList.remove('active');
+                section.classList.toggle('active');
             });
         }
 
-        // Close filters when clicking outside
-        document.addEventListener('click', function (e) {
-            if (!e.target.closest('.filters') && !e.target.classList.contains('filter-toggle')) {
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize filters as collapsed on mobile
+            if (window.innerWidth <= 768) {
                 document.querySelectorAll('.filter-section').forEach(section => {
                     section.classList.remove('active');
                 });
             }
-        });
-    });
-    document.addEventListener('DOMContentLoaded', function () {
-        // Price range slider functionality
-        const priceSlider = document.getElementById('priceRange');
-        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
 
-        if (priceSlider && maxPriceDisplay) {
-            // Set initial value if filter is active
-            if ("{{ selected_max_price }}" && "{{ selected_max_price }}" !== "1000") {
-                priceSlider.value = "{{ selected_max_price }}";
-                maxPriceDisplay.textContent = "{{ selected_max_price }}" + ' ден.';
-            }
-
-            // Update display when slider moves
-            priceSlider.addEventListener('input', function () {
-                maxPriceDisplay.textContent = this.value + ' ден.';
-            });
-        }
-
-        // Connect the sorting dropdown
-        const sortSelect = document.getElementById('sort');
-        if (sortSelect) {
-            sortSelect.addEventListener('change', function () {
-                // Get the selected sort value
-                const sortValue = this.value;
-
-                // Get current URL parameters
-                const urlParams = new URLSearchParams(window.location.search);
-
-                // Update or add the sort parameter
-                urlParams.set('sort', sortValue);
-
-                // Reset to first page when changing sort
-                urlParams.set('page', '1');
-
-                // Reload the page with new parameters
-                window.location.search = urlParams.toString();
-            });
-        }
-
-        // Function to handle checkbox changes (immediate filter application)
-        document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(checkbox => {
-            checkbox.addEventListener('change', function () {
-                document.getElementById('filterForm').submit();
-            });
-        });
-
-        // Ensure form submits properly
-        document.getElementById('filterForm').addEventListener('submit', function (e) {
-            // You can add any pre-submit logic here if needed
-        });
-
-        // Add to shopping list functionality
-        document.querySelectorAll('.add-to-list').forEach(button => {
-            button.addEventListener('click', function () {
-                const productId = this.getAttribute('data-product-id');
-
-                // Send AJAX request to add to shopping list
-                fetch('/add-to-list/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    body: JSON.stringify({
-                        product_id: productId
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Продуктот е додаден во вашата листа!');
-                        } else {
-                            alert('Грешка: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Настана грешка при додавање на продуктот.');
+            // Close filters when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!e.target.closest('.filters') && !e.target.classList.contains('filter-toggle')) {
+                    document.querySelectorAll('.filter-section').forEach(section => {
+                        section.classList.remove('active');
                     });
+                }
             });
         });
-    });
-    // Global variables for list management
+        document.addEventListener('DOMContentLoaded', function () {
+            // Price range slider functionality
+            const priceSlider = document.getElementById('priceRange');
+            const maxPriceDisplay = document.getElementById('maxPriceDisplay');
 
-    let selectedListId = null;
-    let rememberChoice = localStorage.getItem('rememberListChoice') === 'true';
-
-    // Toggle lists dropdown
-    function toggleListsDropdown() {
-        const dropdown = document.getElementById('listsDropdown');
-        dropdown.classList.toggle('show');
-
-        // Load lists if not already loaded
-        if (dropdown.classList.contains('show') && userLists.length === 0) {
-            fetchUserLists();
-        }
-    }
-
-    // Close dropdown when clicking outside
-    window.addEventListener('click', function (e) {
-        if (!e.target.closest('.lists-dropdown') && !e.target.classList.contains('lists-toggle')) {
-            const dropdown = document.getElementById('listsDropdown');
-            dropdown.classList.remove('show');
-        }
-    });
-
-    // Fetch user's shopping lists
-    let userLists = [];
-    let currentProductId = null;
-
-    // Fetch user's lists
-    async function fetchUserLists() {
-        try {
-            const response = await fetch('/api/lists/');
-            const data = await response.json();
-            console.log("Fetched data from /api/lists/:", data); // 🔍 Check structure
-
-            // Access the lists properly based on the received data structure
-            if (data.lists && Array.isArray(data.lists)) {
-                userLists = data.lists;  // Now userLists gets the correct array
-            } else {
-                console.error("Unexpected response format:", data);
-                userLists = []; // Fallback to empty
-            }
-        } catch (error) {
-            console.error('Error fetching lists:', error);
-            alert('Грешка при вчитување на листите.');
-        }
-    }
-
-
-    // Render user's shopping lists in navbar
-    function renderUserLists() {
-        const container = document.getElementById('navbarListsContainer');
-
-        if (userLists.length === 0) {
-            container.innerHTML = '<div class="no-lists">Немате креирано листи</div>';
-            return;
-        }
-
-        container.innerHTML = '';
-
-        userLists.forEach(list => {
-            const listItem = document.createElement('div');
-            listItem.className = 'list-item';
-            listItem.textContent = list.name;
-            listItem.dataset.listId = list.id;
-
-            if (selectedListId === list.id) {
-                listItem.classList.add('active');
-            }
-
-            listItem.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent event bubbling
-                window.location.href = `/lists/${list.id}/`; // Navigate to list detail
-            });
-
-            container.appendChild(listItem);
-        });
-    }
-
-    // Create new list from dropdown
-    function createNewListFromDropdown() {
-        const listName = prompt('Внесете име за новата листа:');
-        if (!listName) return;
-
-        fetch('/api/lists/create/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({name: listName})
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            if (priceSlider && maxPriceDisplay) {
+                // Set initial value if filter is active
+                if ("{{ selected_max_price }}" && "{{ selected_max_price }}" !== "1000") {
+                    priceSlider.value = "{{ selected_max_price }}";
+                    maxPriceDisplay.textContent = "{{ selected_max_price }}" + ' ден.';
                 }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    userLists.push({id: data.list_id, name: listName});
-                    renderUserLists();
-                    alert('Листата е успешно креирана!');
-                } else {
-                    alert('Грешка: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Настана грешка при креирање на листата.');
-            });
-    }
 
-
-    async function showListOptions(button) {
-        currentProductId = button.getAttribute('data-product-id');
-
-        // Check authentication
-        {% if not user.is_authenticated %}
-            window.location.href = "{% url 'login' %}?next={{ request.path }}";
-            return;
-        {% endif %}
-
-        // Fetch lists if not already loaded
-        if (userLists.length === 0) {
-            await fetchUserLists();
-        }
-
-        // Populate modal
-        const modal = document.getElementById('listModal');
-        const listsContainer = document.getElementById('listsContainer');
-        listsContainer.innerHTML = '';
-
-        if (userLists.length === 0) {
-            listsContainer.innerHTML = `
-                <p>Немате креирано листи.</p>
-                <div class="create-new-list" onclick="showNewListForm()">Креирај нова листа</div>
-            `;
-        } else {
-            userLists.forEach(list => {
-                const listOption = document.createElement('div');
-                listOption.className = 'list-option';
-                listOption.textContent = list.name;
-                listOption.onclick = () => addProductToList(currentProductId, list.id);
-                listsContainer.appendChild(listOption);
-            });
-        }
-
-        modal.style.display = 'flex';
-    }
-
-    async function showListOptionsModal(productId) {
-        const modal = document.getElementById('listModal');
-        const listsContainer = document.getElementById('listsContainer');
-
-        try {
-            const response = await fetch('/api/lists/');
-            const userLists = await response.json();
-
-            console.log("Fetched user lists:", userLists); // 🔍 ADD THIS LINE HERE
-
-            // Clear old list options
-            listsContainer.innerHTML = '';
-
-            // Add new list options
-            userLists.forEach(list => {
-                console.log("Rendering option →", list.name, list.id); // Optional: log each list's name & id
-
-                const listOption = document.createElement('div');
-                listOption.className = 'list-option';
-                listOption.innerHTML = list.name;
-                listOption.onclick = () => addProductToList(productId, list.id);
-                listsContainer.appendChild(listOption);
-            });
-
-            modal.style.display = 'block';
-        } catch (error) {
-            console.error('Error loading user lists:', error);
-        }
-    }
-
-    async function addProductToList(productId, listId) {
-        if (!productId || !listId) {
-            alert('Недостасува ID на продукт или листа!');
-            return;
-        }
-
-        console.log("Sending to server → Product ID:", productId, "List ID:", listId);
-
-        try {
-            const response = await fetch('/add-to-list/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify({
-                    product_id: productId,
-                    list_id: listId
-                })
-            });
-
-            const data = await response.json();
-
-            if (data.success) {
-                alert('Продуктот е успешно додаден во листата!');
-                closeModal();
-            } else {
-                alert('Грешка: ' + data.message);
+                // Update display when slider moves
+                priceSlider.addEventListener('input', function () {
+                    maxPriceDisplay.textContent = this.value + ' ден.';
+                });
             }
-        } catch (error) {
-            console.error('Error:', error);
-            alert('Настана грешка при додавање на продуктот.');
-        }
-    }
 
-    // Helper function to get CSRF token from cookies
-    function getCSRFToken() {
-        return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    }
+            // Connect the sorting dropdown
+            const sortSelect = document.getElementById('sort');
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function () {
+                    // Get the selected sort value
+                    const sortValue = this.value;
 
+                    // Get current URL parameters
+                    const urlParams = new URLSearchParams(window.location.search);
 
-    // Function to create new list
-    function createNewList() {
-        const listName = document.getElementById('newListName').value.trim();
-        if (!listName) return;
+                    // Update or add the sort parameter
+                    urlParams.set('sort', sortValue);
 
-        fetch('/api/lists/create/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({name: listName})
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    userLists.push({id: data.list_id, name: listName});
-                    showListOptionsModal(currentProductId);
-                    document.getElementById('newListForm').style.display = 'none';
-                    document.getElementById('newListName').value = '';
-                } else {
-                    alert('Грешка: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Настана грешка при креирање на листата.');
-            });
-    }
+                    // Reset to first page when changing sort
+                    urlParams.set('page', '1');
 
-    function showNewListForm() {
-        document.getElementById('newListForm').style.display = 'block';
-    }
-
-    function closeModal() {
-        document.getElementById('listModal').style.display = 'none';
-    }
-
-
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        // Close modal when clicking outside
-        document.getElementById('listModal').addEventListener('click', function (e) {
-            if (e.target === this) {
-                closeModal();
+                    // Reload the page with new parameters
+                    window.location.search = urlParams.toString();
+                });
             }
-        });
 
-        // Pre-fetch user lists if authenticated
-        {% if user.is_authenticated %}
-            fetchUserLists();
-        {% endif %}
-    });
-
-    function toggleMobileMenu() {
-        const menu = document.getElementById("mobile-menu");
-        const overlay = document.getElementById("overlay");
-
-        menu.classList.toggle("open");
-        overlay.classList.toggle("active");
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-        fetch('/api/lists/')
-            .then(response => response.json())
-            .then(data => {
-                const dropdown = document.getElementById('listSelector');
-                data.lists.forEach(list => {
-                    const option = document.createElement('option');
-                    option.value = list.id;
-                    option.text = list.name;
-                    dropdown.appendChild(option);
+            // Function to handle checkbox changes (immediate filter application)
+            document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    document.getElementById('filterForm').submit();
                 });
             });
-    });
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const addToListButtons = document.querySelectorAll('.add-to-list-btn');
+            // Ensure form submits properly
+            document.getElementById('filterForm').addEventListener('submit', function (e) {
+                // You can add any pre-submit logic here if needed
+            });
 
-        addToListButtons.forEach(button => {
-            button.addEventListener('click', async () => {
-                const productId = button.dataset.productId;
-                const selectedListId = document.getElementById('listSelector').value;
+            // Add to shopping list functionality
+            document.querySelectorAll('.add-to-list').forEach(button => {
+                button.addEventListener('click', function () {
+                    const productId = this.getAttribute('data-product-id');
 
-                if (!selectedListId) {
-                    alert("Ве молиме изберете листа.");
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/lists/add-product/', {
+                    // Send AJAX request to add to shopping list
+                    fetch('/add-to-list/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-CSRFToken': getCookie('csrftoken'),
+                            'X-CSRFToken': '{{ csrf_token }}'
                         },
                         body: JSON.stringify({
-                            product_id: productId,
-                            list_id: selectedListId
+                            product_id: productId
                         })
-                    });
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('Продуктот е додаден во вашата листа!');
+                            } else {
+                                alert('Грешка: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Настана грешка при додавање на продуктот.');
+                        });
+                });
+            });
+        });
+        // Global variables for list management
 
-                    const result = await response.json();
-                    if (result.success) {
-                        {#alert("Производот е додаден во листата!");#}
-                    } else {
-                        alert("Грешка: " + result.message);
-                    }
-                } catch (error) {
-                    console.error("Fetch error:", error);
-                    alert("Настана грешка. Обидете се повторно.");
+        let selectedListId = null;
+        let rememberChoice = localStorage.getItem('rememberListChoice') === 'true';
+
+        // Toggle lists dropdown
+        function toggleListsDropdown() {
+            const dropdown = document.getElementById('listsDropdown');
+            dropdown.classList.toggle('show');
+
+            // Load lists if not already loaded
+            if (dropdown.classList.contains('show') && userLists.length === 0) {
+                fetchUserLists();
+            }
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function (e) {
+            if (!e.target.closest('.lists-dropdown') && !e.target.classList.contains('lists-toggle')) {
+                const dropdown = document.getElementById('listsDropdown');
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Fetch user's shopping lists
+        let userLists = [];
+        let currentProductId = null;
+
+        // Fetch user's lists
+        async function fetchUserLists() {
+            try {
+                const response = await fetch('/api/lists/');
+                const data = await response.json();
+                console.log("Fetched data from /api/lists/:", data); // 🔍 Check structure
+
+                // Access the lists properly based on the received data structure
+                if (data.lists && Array.isArray(data.lists)) {
+                    userLists = data.lists;  // Now userLists gets the correct array
+                } else {
+                    console.error("Unexpected response format:", data);
+                    userLists = []; // Fallback to empty
                 }
+            } catch (error) {
+                console.error('Error fetching lists:', error);
+                alert('Грешка при вчитување на листите.');
+            }
+        }
+
+
+        // Render user's shopping lists in navbar
+        function renderUserLists() {
+            const container = document.getElementById('navbarListsContainer');
+
+            if (userLists.length === 0) {
+                container.innerHTML = '<div class="no-lists">Немате креирано листи</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            userLists.forEach(list => {
+                const listItem = document.createElement('div');
+                listItem.className = 'list-item';
+                listItem.textContent = list.name;
+                listItem.dataset.listId = list.id;
+
+                if (selectedListId === list.id) {
+                    listItem.classList.add('active');
+                }
+
+                listItem.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent event bubbling
+                    window.location.href = `/lists/${list.id}/`; // Navigate to list detail
+                });
+
+                container.appendChild(listItem);
+            });
+        }
+
+        // Create new list from dropdown
+        function createNewListFromDropdown() {
+            const listName = prompt('Внесете име за новата листа:');
+            if (!listName) return;
+
+            fetch('/api/lists/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({name: listName})
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        userLists.push({id: data.list_id, name: listName});
+                        renderUserLists();
+                        alert('Листата е успешно креирана!');
+                    } else {
+                        alert('Грешка: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Настана грешка при креирање на листата.');
+                });
+        }
+
+
+        async function showListOptions(button) {
+            currentProductId = button.getAttribute('data-product-id');
+
+            // Check authentication
+            {% if not user.is_authenticated %}
+                window.location.href = "{% url 'login' %}?next={{ request.path }}";
+                return;
+            {% endif %}
+
+            // Fetch lists if not already loaded
+            if (userLists.length === 0) {
+                await fetchUserLists();
+            }
+
+            // Populate modal
+            const modal = document.getElementById('listModal');
+            const listsContainer = document.getElementById('listsContainer');
+            listsContainer.innerHTML = '';
+
+            if (userLists.length === 0) {
+                listsContainer.innerHTML = `
+                <p>Немате креирано листи.</p>
+                <div class="create-new-list" onclick="showNewListForm()">Креирај нова листа</div>
+            `;
+            } else {
+                userLists.forEach(list => {
+                    const listOption = document.createElement('div');
+                    listOption.className = 'list-option';
+                    listOption.textContent = list.name;
+                    listOption.onclick = () => addProductToList(currentProductId, list.id);
+                    listsContainer.appendChild(listOption);
+                });
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        async function showListOptionsModal(productId) {
+            const modal = document.getElementById('listModal');
+            const listsContainer = document.getElementById('listsContainer');
+
+            try {
+                const response = await fetch('/api/lists/');
+                const userLists = await response.json();
+
+                console.log("Fetched user lists:", userLists); // 🔍 ADD THIS LINE HERE
+
+                // Clear old list options
+                listsContainer.innerHTML = '';
+
+                // Add new list options
+                userLists.forEach(list => {
+                    console.log("Rendering option →", list.name, list.id); // Optional: log each list's name & id
+
+                    const listOption = document.createElement('div');
+                    listOption.className = 'list-option';
+                    listOption.innerHTML = list.name;
+                    listOption.onclick = () => addProductToList(productId, list.id);
+                    listsContainer.appendChild(listOption);
+                });
+
+                modal.style.display = 'block';
+            } catch (error) {
+                console.error('Error loading user lists:', error);
+            }
+        }
+
+        async function addProductToList(productId, listId) {
+            if (!productId || !listId) {
+                alert('Недостасува ID на продукт или листа!');
+                return;
+            }
+
+            console.log("Sending to server → Product ID:", productId, "List ID:", listId);
+
+            try {
+                const response = await fetch('/add-to-list/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        list_id: listId
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Продуктот е успешно додаден во листата!');
+                    closeModal();
+                } else {
+                    alert('Грешка: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Настана грешка при додавање на продуктот.');
+            }
+        }
+
+        // Helper function to get CSRF token from cookies
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
+
+        // Function to create new list
+        function createNewList() {
+            const listName = document.getElementById('newListName').value.trim();
+            if (!listName) return;
+
+            fetch('/api/lists/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({name: listName})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        userLists.push({id: data.list_id, name: listName});
+                        showListOptionsModal(currentProductId);
+                        document.getElementById('newListForm').style.display = 'none';
+                        document.getElementById('newListName').value = '';
+                    } else {
+                        alert('Грешка: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Настана грешка при креирање на листата.');
+                });
+        }
+
+        function showNewListForm() {
+            document.getElementById('newListForm').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('listModal').style.display = 'none';
+        }
+
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Close modal when clicking outside
+            document.getElementById('listModal').addEventListener('click', function (e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            // Pre-fetch user lists if authenticated
+            {% if user.is_authenticated %}
+                fetchUserLists();
+            {% endif %}
+        });
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById("mobile-menu");
+            const overlay = document.getElementById("overlay");
+
+            menu.classList.toggle("open");
+            overlay.classList.toggle("active");
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/api/lists/')
+                .then(response => response.json())
+                .then(data => {
+                    const dropdown = document.getElementById('listSelector');
+                    data.lists.forEach(list => {
+                        const option = document.createElement('option');
+                        option.value = list.id;
+                        option.text = list.name;
+                        dropdown.appendChild(option);
+                    });
+                });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const addToListButtons = document.querySelectorAll('.add-to-list-btn');
+
+            addToListButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const productId = button.dataset.productId;
+                    const selectedListId = document.getElementById('listSelector').value;
+
+                    if (!selectedListId) {
+                        alert("Ве молиме изберете листа.");
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/api/lists/add-product/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken'),
+                            },
+                            body: JSON.stringify({
+                                product_id: productId,
+                                list_id: selectedListId
+                            })
+                        });
+
+                        const result = await response.json();
+                        if (result.success) {
+                            {#alert("Производот е додаден во листата!");#}
+                        } else {
+                            alert("Грешка: " + result.message);
+                        }
+                    } catch (error) {
+                        console.error("Fetch error:", error);
+                        alert("Настана грешка. Обидете се повторно.");
+                    }
+                });
+            });
+
+            // Helper for CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+        document.querySelectorAll('.add-to-list-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                button.classList.remove('pulse-on-click'); // reset animation if applied
+                void button.offsetWidth; // force reflow so animation can be reapplied
+                button.classList.add('pulse-on-click');
             });
         });
 
-        // Helper for CSRF token
+        document.addEventListener('DOMContentLoaded', function () {
+            // Desktop search elements
+            const searchInput = document.getElementById('searchInput');
+            const suggestionsDiv = document.getElementById('suggestions');
+            const searchForm = document.getElementById('searchForm');
+
+            // Mobile search elements
+            const mobileSearchInput = document.getElementById('mobileSearchInput');
+            const mobileSearchForm = document.getElementById('mobileSearchForm');
+
+            // Extended transliteration with typo correction
+            function transliterateLatinToCyrillic(text) {
+                const map = {
+                    'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
+                    'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
+                    'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
+                    'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
+                    'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
+                    'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
+                    's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
+                    'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
+                    'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
+                };
+
+                const typoPatterns = [
+                    {pattern: /sampon/gi, replace: 'shampon'},
+                    {pattern: /cresi/gi, replace: 'creshi'},
+                    {pattern: /stipki/gi, replace: 'shtipki'},
+                    {pattern: /sch/gi, replace: 'sh'},
+                    {pattern: /ck/gi, replace: 'k'},
+                    {pattern: /ph/gi, replace: 'f'},
+                    {pattern: /th/gi, replace: 't'},
+                    {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
+                    {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
+                    {pattern: /([a-z])\1/gi, replace: '$1'}
+                ];
+
+                let normalizedText = text.toLowerCase();
+                for (const {pattern, replace} of typoPatterns) {
+                    normalizedText = normalizedText.replace(pattern, replace);
+                }
+
+                let result = '';
+                let i = 0;
+                while (i < normalizedText.length) {
+                    if (map[normalizedText.substring(i, i + 3)]) {
+                        result += map[normalizedText.substring(i, i + 3)];
+                        i += 3;
+                    } else if (map[normalizedText.substring(i, i + 2)]) {
+                        result += map[normalizedText.substring(i, i + 2)];
+                        i += 2;
+                    } else if (map[normalizedText[i]]) {
+                        result += map[normalizedText[i]];
+                        i++;
+                    } else {
+                        result += normalizedText[i];
+                        i++;
+                    }
+                }
+                return result;
+            }
+
+            function setupSearch(input, form) {
+                input.addEventListener('input', function () {
+                    const query = this.value.trim();
+                    if (query.length < 2) {
+                        suggestionsDiv.style.display = 'none';
+                        return;
+                    }
+
+                    fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            suggestionsDiv.innerHTML = '';
+                            if (data.suggestions.length > 0) {
+                                data.suggestions.forEach(suggestion => {
+                                    const div = document.createElement('div');
+                                    div.textContent = suggestion;
+                                    div.style.padding = '5px 10px';
+                                    div.style.cursor = 'pointer';
+                                    div.addEventListener('click', function () {
+                                        input.value = transliterateLatinToCyrillic(suggestion);
+                                        suggestionsDiv.style.display = 'none';
+                                        form.submit();
+                                    });
+                                    suggestionsDiv.appendChild(div);
+                                });
+                                suggestionsDiv.style.display = 'block';
+                            } else {
+                                suggestionsDiv.style.display = 'none';
+                            }
+                        });
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        suggestionsDiv.style.display = 'none';
+                        input.value = transliterateLatinToCyrillic(input.value);
+                        form.submit();
+                    }
+                });
+            }
+
+            setupSearch(searchInput, searchForm);
+            setupSearch(mobileSearchInput, mobileSearchForm);
+
+            document.addEventListener('click', function (e) {
+                if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
+                    !mobileSearchInput.contains(e.target)) {
+                    suggestionsDiv.style.display = 'none';
+                }
+            });
+        });
+        const priceRange = document.getElementById('priceRange');
+        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+
+        priceRange.addEventListener('input', () => {
+            maxPriceDisplay.textContent = priceRange.value + ' ден.';
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if this is the first visit to the catalog page
+            if (!localStorage.getItem('catalogTourShown')) {
+                // Show the instruction modal after a short delay
+                setTimeout(showInstructionModal, 1000);
+
+                // Mark that the tour has been shown
+                localStorage.setItem('catalogTourShown', 'true');
+            }
+
+            // Close button handler
+            document.getElementById('closeInstruction')?.addEventListener('click', function () {
+                document.getElementById('instructionModal').style.display = 'none';
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if first visit
+            if (!localStorage.getItem('catalogTourShown')) {
+                setTimeout(showEnhancedTour, 1000);
+                localStorage.setItem('catalogTourShown', 'true');
+            }
+
+            // Close button
+            document.getElementById('closeInstruction')?.addEventListener('click', closeTour);
+            document.getElementById('gotItBtn')?.addEventListener('click', closeTour);
+
+            // Optional: Replay button
+            document.getElementById('showInstructionsAgain')?.addEventListener('click', showEnhancedTour);
+        });
+
+        function showEnhancedTour() {
+            const modal = document.getElementById('instructionModal');
+            const listArrow = document.getElementById('listArrow');
+            const navArrow = document.getElementById('navArrow');
+            const listSelector = document.getElementById('listSelector');
+            const navLists = document.querySelector('.user-actions .list-icon');
+            // In showEnhancedTour():
+            {#listArrow.style.left = '300px';  // Fixed test position#}
+            {#listArrow.style.top = '100px';#}
+            {#navArrow.style.left = '200px';#}
+            {#navArrow.style.top = '200px';#}
+
+            if (modal && listArrow && navArrow) {
+                // Position arrows
+                if (listSelector) {
+                    const listRect = listSelector.getBoundingClientRect();
+                    listArrow.style.left = `${listRect.left + listRect.width / 2 - 50}px`; // Adjust X position
+                    listArrow.style.top = `${listRect.top - 80}px`; // Adjust Y position
+                }
+
+                if (navLists) {
+                    const navRect = navLists.getBoundingClientRect();
+                    navArrow.style.left = `${navRect.left + navRect.width / 2 - 50}px`; // Adjust X position
+                    navArrow.style.top = `${navRect.bottom - 30}px`; // Adjust Y position
+                }
+
+                // Show modal and arrows
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    listArrow.style.opacity = '1';
+                    navArrow.style.opacity = '1';
+                }, 500);
+            }
+        }
+
+        function closeTour() {
+            const modal = document.getElementById('instructionModal');
+            if (modal) {
+                modal.style.animation = 'modalExit 0.3s forwards';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        document.getElementById('showInstructionsAgain')?.addEventListener('click', showInstructionModal);
+
+        // Add this script to your template
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
                 const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                         break;
                     }
@@ -2930,275 +3183,63 @@
             }
             return cookieValue;
         }
-    });
-    document.querySelectorAll('.add-to-list-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            button.classList.remove('pulse-on-click'); // reset animation if applied
-            void button.offsetWidth; // force reflow so animation can be reapplied
-            button.classList.add('pulse-on-click');
-        });
-    });
-    {#// Add this to your existing JavaScript#}
-    {#document.addEventListener('DOMContentLoaded', function () {#}
-    {#    // Handle navbar search form submission#}
-    {#    const navbarSearchForm = document.querySelector('.header-search form');#}
-    {#    if (navbarSearchForm) {#}
-    {#        navbarSearchForm.addEventListener('submit', function (e) {#}
-    {#            const searchInput = this.querySelector('input[name="search"]');#}
-    {#            if (searchInput.value.trim() === '') {#}
-    {#                e.preventDefault(); // Prevent empty searches#}
-    {#            }#}
-    {#        });#}
-    {#    }#}
 
-    // Handle mobile search form submission
-    {#    const mobileSearchForm = document.querySelector('.mobile-search-form');#}
-    {#    if (mobileSearchForm) {#}
-    {#        mobileSearchForm.addEventListener('submit', function (e) {#}
-    {#            const searchInput = this.querySelector('input[name="search"]');#}
-    {#            if (searchInput.value.trim() === '') {#}
-    {#                e.preventDefault(); // Prevent empty searches#}
-    {#            }#}
-    {#        });#}
-    {#    }#}
-    {#{}#}
-    {#);#}
+        function toggleFavorite(button, productId) {
+            fetch('/toggle-favorite/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')  // <-- Get CSRF from cookie
+                },
+                body: JSON.stringify({product_id: productId})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update heart icon
+                        const icon = button.querySelector('i');
+                        icon.classList.toggle('far');
+                        icon.classList.toggle('fas');
 
-    document.addEventListener('DOMContentLoaded', function () {
-        // Desktop search elements
-        const searchInput = document.getElementById('searchInput');
-        const suggestionsDiv = document.getElementById('suggestions');
-        const searchForm = document.getElementById('searchForm');
-
-        // Mobile search elements
-        const mobileSearchInput = document.getElementById('mobileSearchInput');
-        const mobileSearchForm = document.getElementById('mobileSearchForm');
-
-        // Extended transliteration with typo correction
-        function transliterateLatinToCyrillic(text) {
-            const map = {
-                'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
-                'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
-                'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
-                'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
-                'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
-                'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
-                's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
-                'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
-                'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
-            };
-
-            const typoPatterns = [
-                {pattern: /sampon/gi, replace: 'shampon'},
-                {pattern: /cresi/gi, replace: 'creshi'},
-                {pattern: /stipki/gi, replace: 'shtipki'},
-                {pattern: /sch/gi, replace: 'sh'},
-                {pattern: /ck/gi, replace: 'k'},
-                {pattern: /ph/gi, replace: 'f'},
-                {pattern: /th/gi, replace: 't'},
-                {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
-                {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
-                {pattern: /([a-z])\1/gi, replace: '$1'}
-            ];
-
-            let normalizedText = text.toLowerCase();
-            for (const {pattern, replace} of typoPatterns) {
-                normalizedText = normalizedText.replace(pattern, replace);
-            }
-
-            let result = '';
-            let i = 0;
-            while (i < normalizedText.length) {
-                if (map[normalizedText.substring(i, i + 3)]) {
-                    result += map[normalizedText.substring(i, i + 3)];
-                    i += 3;
-                } else if (map[normalizedText.substring(i, i + 2)]) {
-                    result += map[normalizedText.substring(i, i + 2)];
-                    i += 2;
-                } else if (map[normalizedText[i]]) {
-                    result += map[normalizedText[i]];
-                    i++;
-                } else {
-                    result += normalizedText[i];
-                    i++;
-                }
-            }
-            return result;
-        }
-
-        function setupSearch(input, form) {
-            input.addEventListener('input', function () {
-                const query = this.value.trim();
-                if (query.length < 2) {
-                    suggestionsDiv.style.display = 'none';
-                    return;
-                }
-
-                fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        suggestionsDiv.innerHTML = '';
-                        if (data.suggestions.length > 0) {
-                            data.suggestions.forEach(suggestion => {
-                                const div = document.createElement('div');
-                                div.textContent = suggestion;
-                                div.style.padding = '5px 10px';
-                                div.style.cursor = 'pointer';
-                                div.addEventListener('click', function () {
-                                    input.value = transliterateLatinToCyrillic(suggestion);
-                                    suggestionsDiv.style.display = 'none';
-                                    form.submit();
-                                });
-                                suggestionsDiv.appendChild(div);
-                            });
-                            suggestionsDiv.style.display = 'block';
-                        } else {
-                            suggestionsDiv.style.display = 'none';
+                        // Reload favorites list page to reflect changes
+                        if (window.location.pathname === '/favorites/') {
+                            window.location.reload();
                         }
-                    });
-            });
-
-            input.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    suggestionsDiv.style.display = 'none';
-                    input.value = transliterateLatinToCyrillic(input.value);
-                    form.submit();
-                }
-            });
+                    } else {
+                        console.error('Failed to toggle favorite:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error toggling favorite:', error);
+                });
         }
 
-        setupSearch(searchInput, searchForm);
-        setupSearch(mobileSearchInput, mobileSearchForm);
-
-        document.addEventListener('click', function (e) {
-            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
-                !mobileSearchInput.contains(e.target)) {
-                suggestionsDiv.style.display = 'none';
-            }
-        });
-    });
-    const priceRange = document.getElementById('priceRange');
-    const maxPriceDisplay = document.getElementById('maxPriceDisplay');
-
-    priceRange.addEventListener('input', () => {
-        maxPriceDisplay.textContent = priceRange.value + ' ден.';
-    });
-    document.addEventListener('DOMContentLoaded', function () {
-        // Check if this is the first visit to the catalog page
-        if (!localStorage.getItem('catalogTourShown')) {
-            // Show the instruction modal after a short delay
-            setTimeout(showInstructionModal, 1000);
-
-            // Mark that the tour has been shown
-            localStorage.setItem('catalogTourShown', 'true');
-        }
-
-        // Close button handler
-        document.getElementById('closeInstruction')?.addEventListener('click', function () {
-            document.getElementById('instructionModal').style.display = 'none';
-        });
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        // Check if first visit
-        if (!localStorage.getItem('catalogTourShown')) {
-            setTimeout(showEnhancedTour, 1000);
-            localStorage.setItem('catalogTourShown', 'true');
-        }
-
-        // Close button
-        document.getElementById('closeInstruction')?.addEventListener('click', closeTour);
-        document.getElementById('gotItBtn')?.addEventListener('click', closeTour);
-
-        // Optional: Replay button
-        document.getElementById('showInstructionsAgain')?.addEventListener('click', showEnhancedTour);
-    });
-
-    function showEnhancedTour() {
-        const modal = document.getElementById('instructionModal');
-        const listArrow = document.getElementById('listArrow');
-        const navArrow = document.getElementById('navArrow');
-        const listSelector = document.getElementById('listSelector');
-        const navLists = document.querySelector('.user-actions .list-icon');
-        // In showEnhancedTour():
-        {#listArrow.style.left = '300px';  // Fixed test position#}
-        {#listArrow.style.top = '100px';#}
-        {#navArrow.style.left = '200px';#}
-        {#navArrow.style.top = '200px';#}
-
-        if (modal && listArrow && navArrow) {
-            // Position arrows
-            if (listSelector) {
-                const listRect = listSelector.getBoundingClientRect();
-                listArrow.style.left = `${listRect.left + listRect.width / 2 - 50}px`; // Adjust X position
-                listArrow.style.top = `${listRect.top - 80}px`; // Adjust Y position
-            }
-
-            if (navLists) {
-                const navRect = navLists.getBoundingClientRect();
-                navArrow.style.left = `${navRect.left + navRect.width / 2 - 50}px`; // Adjust X position
-                navArrow.style.top = `${navRect.bottom - 30}px`; // Adjust Y position
-            }
-
-            // Show modal and arrows
-            modal.style.display = 'flex';
-            setTimeout(() => {
-                listArrow.style.opacity = '1';
-                navArrow.style.opacity = '1';
-            }, 500);
-        }
-    }
-
-    function closeTour() {
-        const modal = document.getElementById('instructionModal');
-        if (modal) {
-            modal.style.animation = 'modalExit 0.3s forwards';
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
-        }
-    }
-
-    // Add to your existing CSS:
-    {#@keyframes#}
-    {#modalExit#}
-    {#{#}
-    {#    to#}
-    {#    {#}
-    {#        transform: scale(0.9);#}
-    {#        opacity: 0;#}
-    {#    }#}
-
-
-    document.getElementById('showInstructionsAgain')?.addEventListener('click', showInstructionModal);
-
-</script>
-<!-- Instruction Modal - Enhanced -->
-<div id="instructionModal" class="instruction-modal">
-    <div class="modal-content">
-        <div class="modal-header" style="border-radius: 7px;">
-            <h3>Како да ги користите листите?</h3>
-            <button id="closeInstruction" class="modal-close-btn">&times;</button>
+    </script>
+    <!-- Instruction Modal - Enhanced -->
+    <div id="instructionModal" class="instruction-modal">
+        <div class="modal-content">
+            <div class="modal-header" style="border-radius: 7px;">
+                <h3>Како да ги користите вашите листи?</h3>
+                <button id="closeInstruction" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="instruction-step">
+                    <div class="step-number">1</div>
+                    <p>Одберете ја листата од паѓачкото мени за да почнете.</p>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">2</div>
+                    <p>Кликнете на копчето <strong>"Додај"</strong> за да го вметнете производот во избраната листа.</p>
+                </div>
+                <div class="instruction-step">
+                    <div class="step-number">3</div>
+                    <p>Вашите листи можете да ги најдете и управувате преку менито <strong>"Листи"</strong></p>
+                </div>
+            </div>
+            <button id="gotItBtn" class="modal-action-btn">Разбрав!</button>
         </div>
-        <div class="modal-body">
-            {#            <p>Како да користите листи:</p>#}
-            <div class="instruction-step">
-                <div class="step-number">1</div>
-                <p>Изберете листа од паѓачкото мени!</p>
-            </div>
-            <div class="instruction-step">
-                <div class="step-number">2</div>
-                <p>Кликнете на <strong>"Додај"</strong> за да го додадете производот во листа.</p>
-            </div>
-            <div class="instruction-step">
-                <div class="step-number">3</div>
-                <p>Пристапете ги вашите листи од менито <strong>"Мои листи"</strong><span
-                        class="hint-text">(горе десно)</span></p>
-            </div>
-        </div>
-        <button id="gotItBtn" class="modal-action-btn">Разбрав!</button>
     </div>
+
 
     <!-- Arrow pointing to list selector -->
     <div id="listArrow" class="arrow-pointer pulse-arrow"
@@ -3221,10 +3262,11 @@
     </div>
 
 
-</div>
-<button id="showInstructionsAgain"
-        style="position: fixed; bottom: 20px; right: 20px; background: #2e652e; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px;">
-    ?
-</button>
-</body>
+    </div>
+    <button id="showInstructionsAgain"
+            style="position: fixed; bottom: 20px; right: 20px; background: #2e652e; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px;">
+        ?
+    </button>
+    </body>
+{% endblock %}
 </html>

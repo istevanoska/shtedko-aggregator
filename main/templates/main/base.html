@@ -1,6 +1,8 @@
+{% extends 'main/header.html' %}
 {% load category_filters %}
 {% load custom_filters %}
 {% load static %}
+{% block content %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -21,135 +23,6 @@
             min-height: 100vh;
             background-color: #f5f5f5;
         }
-
-        /* Header */
-        .main-header {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        .logo img {
-            height: 60px;
-        }
-
-        .header-search {
-            flex-grow: 1;
-            margin: 0 20px;
-            position: relative;
-        }
-
-        .header-search input {
-            width: 97%;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            font-size: 16px;
-            background-color: #f5f5f5;
-        }
-
-        .header-search button {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        .user-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-actions a {
-            color: #333;
-            text-decoration: none;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .user-actions a:hover {
-            color: #2e652e;
-        }
-
-        .logout-btn {
-            background-color: #2e652e;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .logout-btn:hover {
-            background-color: #1f3f1f;
-        }
-
-        /* Navigation */
-        .main-nav {
-            padding: 15px 30px;
-            background-color: #2e652e;
-        }
-
-        .main-nav ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .main-nav li {
-            margin-right: 20px;
-        }
-
-        .main-nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 5px 0;
-            position: relative;
-        }
-
-        .main-nav a:hover {
-            color: #fdd835;
-        }
-
-        .main-nav a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: #fdd835;
-            transition: width 0.3s ease;
-        }
-
-        .main-nav a:hover::after {
-            width: 100%;
-        }
-
         /* Main Content */
         .main-content {
             display: flex;
@@ -263,21 +136,6 @@
             z-index: 10;
         }
 
-        .banner-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.5);
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .banner-dot.active {
-            background-color: white;
-            transform: scale(1.2);
-        }
-
         /* Slide transition */
         .banner {
             position: absolute;
@@ -347,38 +205,12 @@
         }
 
         /* Categories */
-        .categories-section {
-            background-color: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
 
         .section-title {
             font-size: 1.5rem;
             font-weight: 600;
             margin-bottom: 20px;
             color: #2e652e;
-        }
-
-        .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 15px;
-        }
-
-        .category-card {
-            text-align: center;
-            padding: 15px 10px;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            transition: all 0.3s ease;
-        }
-
-        .category-card:hover {
-            background-color: #e9f7fe;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .category-card img {
@@ -546,142 +378,6 @@
             font-size: 0.9rem;
         }
 
-        /* Mobile Menu */
-        #mobile-header {
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #2e652e, #1f3f1f);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            z-index: 1001;
-            position: relative;
-        }
-
-        #mobile-logo img {
-            height: 50px;
-        }
-
-        .menu-toggle {
-            font-size: 28px;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .menu-toggle:hover {
-            transform: scale(1.1);
-        }
-
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 75%;
-            height: 100vh;
-            background: linear-gradient(135deg, #f0f7f0, #e0e8e0);
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
-            transition: right 0.3s ease;
-            padding: 20px;
-            z-index: 1002;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mobile-menu.open {
-            right: 0;
-        }
-
-        .mobile-menu-header {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-        }
-
-        .close-btn {
-            cursor: pointer;
-            font-size: 28px;
-            color: #2e652e;
-            transition: color 0.3s ease;
-        }
-
-        .close-btn:hover {
-            color: #1f3f1f;
-        }
-
-        .mobile-search-form {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            gap: 10px;
-            background: white;
-            border-radius: 25px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .mobile-search-form input {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 20px;
-            font-size: 14px;
-            outline: none;
-            background: #f5f5f5;
-        }
-
-        .mobile-search-form button {
-            background-color: #2e652e;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 50%;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
-        .mobile-search-form button:hover {
-            background-color: #1f3f1f;
-            transform: scale(1.1);
-        }
-
-        .mobile-nav {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .mobile-nav a {
-            color: #2e652e;
-            text-decoration: none;
-            font-size: 18px;
-            padding: 10px 15px;
-            border-radius: 8px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-
-        .mobile-nav a:hover {
-            background-color: #2e652e;
-            color: white;
-            transform: translateX(5px);
-        }
-
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        #overlay.active {
-            display: block;
-        }
-
         /* Message Styling */
         .message-container {
             position: fixed;
@@ -710,14 +406,14 @@
             border-left-color: #dc3545;
         }
 
-        .close-btn {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 20px;
-        }
+        {#.close-btn {#}
+        {#    position: absolute;#}
+        {#    right: 15px;#}
+        {#    top: 50%;#}
+        {#    transform: translateY(-50%);#}
+        {#    cursor: pointer;#}
+        {#    font-size: 20px;#}
+        {#}#}
 
         /* Modal */
         .modal {
@@ -775,25 +471,6 @@
             width: 100%;
             height: 150px;
             object-fit: cover;
-        }
-
-        .modal-product-info {
-            padding: 15px;
-        }
-
-        .modal-product-name {
-            font-weight: 500;
-            margin-bottom: 8px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .modal-product-price {
-            display: flex;
-            gap: 10px;
-            align-items: center;
         }
 
         /* Improved Popular Categories */
@@ -880,27 +557,6 @@
             text-decoration: none;
         }
 
-        .auth-btn {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .auth-btn.logout {
-            background-color: #2e652e;
-            color: white;
-            border: none;
-        }
-
-        .auth-btn:not(.logout) {
-            color: #333;
-            background-color: #f5f5f5;
-        }
-
         /* Responsiveness */
         @media (max-width: 1024px) {
             .categories-grid {
@@ -913,14 +569,6 @@
         }
 
         @media (max-width: 768px) {
-            .main-header {
-                display: none;
-            }
-
-            #mobile-header {
-                display: flex;
-            }
-
             .main-content {
                 flex-direction: column;
                 padding: 10px;
@@ -995,16 +643,6 @@
             .categories-section {
                 padding: 15px;
                 border-radius: 15px;
-            }
-
-            .categories-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .category-card {
-                padding: 20px 10px;
-                border-radius: 10px;
             }
 
             .category-card img {
@@ -1112,84 +750,6 @@
         {% endfor %}
     {% endif %}
 </div>
-
-<!-- Header -->
-<header class="main-header">
-    <div class="header-top">
-        <div class="logo">
-            <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"/></a>
-        </div>
-        <div class="header-search">
-            <form method="GET" action="{% url 'product_list' %}" id="searchForm">
-                <input type="text" name="search" id="searchInput" placeholder="Пребарај производи..."
-                       value="{{ request.GET.search }}">
-                <button type="submit"><i class="fas fa-search"></i></button>
-            </form>
-            <div id="suggestions"
-                 style="position: absolute; background: white; border: 1px solid #ddd; border-radius: 5px; width: 98%; max-height: 200px; overflow-y: auto; display: none; z-index: 2"></div>
-        </div>
-        <div class="user-actions">
-            {% if user.is_authenticated %}
-                <form method="post" action="{% url 'logout' %}" class="auth-form">
-                    {% csrf_token %}
-                    <button type="submit" class="auth-btn logout">
-                        <i class="fas fa-sign-out-alt"></i> Одјави се
-                    </button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}" class="auth-btn">
-                    <i class="fas fa-user"></i> Најави се
-                </a>
-                <a href="{% url 'register' %}" class="auth-btn">
-                    <i class="fas fa-user-plus"></i> Регистрирај се
-                </a>
-            {% endif %}
-        </div>
-    </div>
-    <nav class="main-nav">
-        <ul>
-            {#            <li><a href="{% url 'home' %}">Дома</a></li>#}
-            <li><a href="{% url 'product_list' %}">Каталог</a></li>
-            <li style="z-index: 0"><a href="{% url 'stats' %}">Статистика</a></li>
-        </ul>
-    </nav>
-</header>
-
-<!-- Mobile Menu -->
-<div id="mobile-header">
-    <div id="mobile-logo">
-        <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого">
-    </div>
-    <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
-</div>
-
-<!-- Mobile Menu -->
-<div id="mobile-menu" class="mobile-menu">
-    <div class="mobile-menu-header">
-        <span class="close-btn" onclick="toggleMobileMenu()">×</span>
-    </div>
-
-    <form method="GET" action="{% url 'product_list' %}" class="mobile-search-form" id="mobileSearchForm">
-        <input type="text" name="search" id="mobileSearchInput" placeholder="Пребарај производ..."
-               value="{{ request.GET.search }}">
-        <button type="submit"><i class="fas fa-search"></i></button>
-    </form>
-
-    <nav class="mobile-nav">
-        <a href="{% url 'home' %}">Дома</a>
-        <a href="{% url 'product_list' %}">Каталог</a>
-        <a href="{% url 'stats' %}">Статистика</a>
-        <a href="{% url 'view_lists' %}">Листи</a>
-
-        {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}">Одјави се</a>
-        {% else %}
-            <a href="{% url 'login' %}">Најави се</a>
-            <a href="{% url 'register' %}">Регистрирај се</a>
-        {% endif %}
-    </nav>
-</div>
-<div id="overlay" onclick="toggleMobileMenu()"></div>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -1637,4 +1197,5 @@
 
 </script>
 </body>
+{% endblock %}
 </html>

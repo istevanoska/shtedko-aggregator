@@ -34,7 +34,7 @@ HUGGINGFACE_TOKEN="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"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 # Tuka ja dodavame kreiranata aplikacija main.apps.MainConfig da znae django deka postoi. sega mora da se ran migrate comandata

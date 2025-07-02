@@ -1,6 +1,10 @@
+{% extends 'main/header.html' %}
+
 {% load static %}
 {% load category_filters %}
 {% load custom_filters %}
+
+{% block content %}
 
 <!DOCTYPE html>
 <html lang="mk">
@@ -700,80 +704,6 @@
     {% endif %}
 </div>
 
-<!-- Header -->
-<header class="main-header">
-    <div class="header-top">
-        <div class="logo">
-            <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"/></a>
-        </div>
-        <div class="header-search">
-            <form method="GET" action="{% url 'product_list' %}" id="searchForm">
-                <input type="text" name="search" id="searchInput" placeholder="Пребарај производи..."
-                       value="{{ request.GET.search }}">
-                <button type="submit"><i class="fas fa-search"></i></button>
-            </form>
-            <div id="suggestions"
-                 style="position: absolute; background: white; border: 1px solid #ddd; border-radius: 5px; width: 98%; max-height: 200px; overflow-y: auto; display: none; z-index: 2;"></div>
-        </div>
-        <div class="user-actions">
-            {% if user.is_authenticated %}
-                <form method="post" action="{% url 'logout' %}" class="auth-form">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-btn" style="color: white">
-                        <i class="fas fa-sign-out-alt"></i> Одјави се
-                    </button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}" class="auth-btn">
-                    <i class="fas fa-user"></i> Најави се
-                </a>
-                <a href="{% url 'register' %}" class="auth-btn">
-                    <i class="fas fa-user-plus"></i> Регистрирај се
-                </a>
-            {% endif %}
-        </div>
-    </div>
-    <nav class="main-nav">
-        <ul>
-            {#                <li><a href="{% url 'home' %}">Дома</a></li>#}
-            <li><a href="{% url 'product_list' %}">Каталог</a></li>
-            <li><a href="{% url 'stats' %}">Статистика</a></li>
-            <li><a href="{% url 'view_lists' %}">Листи</a></li>
-        </ul>
-    </nav>
-</header>
-
-<!-- Mobile Menu -->
-<div id="mobile-header">
-    <div id="mobile-logo">
-        <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого">
-    </div>
-    <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
-</div>
-<div id="mobile-menu" class="mobile-menu">
-    <div class="mobile-menu-header">
-        <span class="close-btn" onclick="toggleMobileMenu()">×</span>
-    </div>
-     <form method="GET" action="{% url 'product_list' %}" class="mobile-search-form" id="mobileSearchForm">
-        <input type="text" name="search" id="mobileSearchInput" placeholder="Пребарај производ..."
-               value="{{ request.GET.search }}">
-        <button type="submit"><i class="fas fa-search"></i></button>
-    </form>
-    <nav class="mobile-nav">
-        <a href="{% url 'home' %}">Дома</a>
-        <a href="{% url 'product_list' %}">Каталог</a>
-        <a href="{% url 'stats' %}">Статистика</a>
-        <a href="{% url 'view_lists' %}">Листи</a>
-        {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}">Одјави се</a>
-        {% else %}
-            <a href="{% url 'login' %}">Најави се</a>
-            <a href="{% url 'register' %}">Регистрирај се</a>
-        {% endif %}
-    </nav>
-</div>
-<div id="overlay" onclick="toggleMobileMenu()"></div>
-
 <!-- Main Content -->
 <div class="main-content">
     <main class="content-area">
@@ -903,131 +833,11 @@
             overlay.classList.toggle('active');
         }
 
-        const menuToggle = document.querySelector('.menu-toggle');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const overlay = document.getElementById('overlay');
 
-        if (menuToggle && mobileMenu && overlay) {
-            menuToggle.addEventListener('click', toggleMobileMenu);
-            overlay.addEventListener('click', toggleMobileMenu);
-            document.querySelector('.close-btn').addEventListener('click', toggleMobileMenu);
-        }
 
-        // Search suggestions and transliteration
-        document.addEventListener('DOMContentLoaded', function () {
-            // Desktop search elements
-            const searchInput = document.getElementById('searchInput');
-            const suggestionsDiv = document.getElementById('suggestions');
-            const searchForm = document.getElementById('searchForm');
 
-            // Mobile search elements
-            const mobileSearchInput = document.getElementById('mobileSearchInput');
-            const mobileSearchForm = document.getElementById('mobileSearchForm');
 
-            // Extended transliteration with typo correction
-            function transliterateLatinToCyrillic(text) {
-                const map = {
-                    'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
-                    'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
-                    'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
-                    'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
-                    'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
-                    'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
-                    's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
-                    'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
-                    'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
-                };
-
-                const typoPatterns = [
-                    {pattern: /sampon/gi, replace: 'shampon'},
-                    {pattern: /cresi/gi, replace: 'creshi'},
-                    {pattern: /stipki/gi, replace: 'shtipki'},
-                    {pattern: /sch/gi, replace: 'sh'},
-                    {pattern: /ck/gi, replace: 'k'},
-                    {pattern: /ph/gi, replace: 'f'},
-                    {pattern: /th/gi, replace: 't'},
-                    {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
-                    {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
-                    {pattern: /([a-z])\1/gi, replace: '$1'}
-                ];
-
-                let normalizedText = text.toLowerCase();
-                for (const {pattern, replace} of typoPatterns) {
-                    normalizedText = normalizedText.replace(pattern, replace);
-                }
-
-                let result = '';
-                let i = 0;
-                while (i < normalizedText.length) {
-                    if (map[normalizedText.substring(i, i + 3)]) {
-                        result += map[normalizedText.substring(i, i + 3)];
-                        i += 3;
-                    } else if (map[normalizedText.substring(i, i + 2)]) {
-                        result += map[normalizedText.substring(i, i + 2)];
-                        i += 2;
-                    } else if (map[normalizedText[i]]) {
-                        result += map[normalizedText[i]];
-                        i++;
-                    } else {
-                        result += normalizedText[i];
-                        i++;
-                    }
-                }
-                return result;
-            }
-
-            function setupSearch(input, form) {
-                input.addEventListener('input', function () {
-                    const query = this.value.trim();
-                    if (query.length < 2) {
-                        suggestionsDiv.style.display = 'none';
-                        return;
-                    }
-
-                    fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            suggestionsDiv.innerHTML = '';
-                            if (data.suggestions.length > 0) {
-                                data.suggestions.forEach(suggestion => {
-                                    const div = document.createElement('div');
-                                    div.textContent = suggestion;
-                                    div.style.padding = '5px 10px';
-                                    div.style.cursor = 'pointer';
-                                    div.addEventListener('click', function () {
-                                        input.value = transliterateLatinToCyrillic(suggestion);
-                                        suggestionsDiv.style.display = 'none';
-                                        form.submit();
-                                    });
-                                    suggestionsDiv.appendChild(div);
-                                });
-                                suggestionsDiv.style.display = 'block';
-                            } else {
-                                suggestionsDiv.style.display = 'none';
-                            }
-                        });
-                });
-
-                input.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        suggestionsDiv.style.display = 'none';
-                        input.value = transliterateLatinToCyrillic(input.value);
-                        form.submit();
-                    }
-                });
-            }
-
-            setupSearch(searchInput, searchForm);
-            setupSearch(mobileSearchInput, mobileSearchForm);
-
-            document.addEventListener('click', function (e) {
-                if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
-                    !mobileSearchInput.contains(e.target)) {
-                    suggestionsDiv.style.display = 'none';
-                }
-            });
-        });
 </script>
 </body>
+{% endblock %}
 </html>

@@ -7,7 +7,7 @@ from django.contrib.auth import login
 from .forms import RegisterForm
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from .models import ShoppingList, ShoppingListItem, Products2
+from .models import ShoppingList, ShoppingListItem, Products2, Favorite
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from .utils.similarity import get_similar_products
@@ -112,16 +112,13 @@ def home(response):
 #     return render(response, "main/base.html")
 def product_list(request):
     products = Products2.objects.all()
-    query = request.GET.get("q")
-    products = Products2.objects.all()
-
-    if query:
-        products = products.filter(name__icontains=query)
-
     search_query = request.GET.get('search')
+
+    # If there's a search query, find matching products
     if search_query:
         products = products.filter(name__icontains=search_query)
 
+    # Apply filters (unchanged from your original code)
     selected_categories = request.GET.getlist('category')
     if selected_categories:
         products = products.filter(category__in=selected_categories)
@@ -140,7 +137,6 @@ def product_list(request):
             Q(popust=False, price__lte=int(max_price))
         )
 
-    # Store filter
     selected_stores = request.GET.getlist('store')
     if selected_stores:
         products = products.filter(store__in=selected_stores)
@@ -167,9 +163,9 @@ def product_list(request):
     elif sort == 'name_desc':
         products = products.order_by('-name')
     elif sort == 'popular':
-        products = products.order_by('-popularity')  # Assuming you have a popularity field
+        products = products.order_by('-popularity')
     elif sort == 'newest':
-        products = products.order_by('-created_at')  # Assuming you have a created_at field
+        products = products.order_by('-created_at')
 
     show_discounted = request.GET.get('discounted')
     if show_discounted:
@@ -180,6 +176,30 @@ def product_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    # Get similar products if there's a search query and results
+    similar_products = None
+    if search_query and page_obj:
+        # Get the first product from search results as reference
+        reference_product = page_obj[0]
+        similar_products = get_similar_products(
+            product_name=reference_product.name,
+            product_category=reference_product.category,
+            top_n=8
+        )
+
+        # Convert to Product objects
+        similar_product_ids = [p['id'] for p in similar_products]
+        similar_products = Products2.objects.filter(id__in=similar_product_ids)
+
+        # Maintain order from similarity results
+        id_to_product = {p.id: p for p in similar_products}
+        similar_products = [id_to_product[pid] for pid in similar_product_ids if pid in id_to_product]
+
+    # Favorite products logic
+    fav_ids = []
+    if request.user.is_authenticated:
+        fav_ids = list(request.user.favorites.all().values_list('product_id', flat=True))
+
     context = {
         'page_obj': page_obj,
         'categories': Products2.objects.values_list('category', flat=True).distinct(),
@@ -188,37 +208,31 @@ def product_list(request):
         'selected_stores': selected_stores,
         'selected_sort': sort,
         'search_query': search_query,
+        'fav_ids': fav_ids,
+        'similar_products': similar_products,
     }
     return render(request, 'main/product_list.html', context)
 
-
-def product_catalog(request):
-    products = Products2.objects.all()
-
-    search_query = request.GET.get('search', '')
-    if search_query:
-        products = products.filter(
-            Q(name__icontains=search_query) |
-            Q(description__icontains=search_query) |
-            Q(category__icontains=search_query)
-        )
-
-    context = {
-        'products': products,
-    }
-    return render(request, 'main/product_list.html', context)
-
+from django.contrib.auth import authenticate, login
 
 def register(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('home')  # Redirect to your homepage
+            # Save the form, but don't commit to DB yet
+            user = form.save(commit=False)
+            raw_password = form.cleaned_data.get('password1')
+            user.save()
+
+            # Authenticate with raw credentials
+            authenticated_user = authenticate(username=user.username, password=raw_password)
+            if authenticated_user is not None:
+                login(request, authenticated_user)
+                return redirect('home')
     else:
         form = RegisterForm()
     return render(request, 'main/register.html', {'form': form})
+
 
 
 def custom_logout(request):
@@ -755,3 +769,43 @@ def search_suggestions(request):
 
     return JsonResponse({'suggestions': list(suggestions)})
 
+
+def header(request):
+    return render(request, "main/header.html")
+
+
+@login_required
+def toggle_favorite(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            product_id = data.get('product_id')
+
+            product = Products2.objects.get(id=product_id)
+            favorite, created = Favorite.objects.get_or_create(
+                user=request.user,
+                product=product
+            )
+
+            if not created:
+                favorite.delete()
+                return JsonResponse({'success': True, 'is_favorite': False})
+
+            return JsonResponse({'success': True, 'is_favorite': True})
+
+        except Products2.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Product not found'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request'})
+
+@login_required
+def get_favorites(request):
+    favorites = Favorite.objects.filter(user=request.user).values_list('product_id', flat=True)
+    return JsonResponse({'favorites': list(favorites)})
+
+@login_required
+def favorites_list(request):
+    favorites = Favorite.objects.filter(user=request.user).select_related('product')
+    return render(request, 'main/favorites.html', {'favorites': favorites})

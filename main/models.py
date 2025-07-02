@@ -1,3 +1,6 @@
+from datetime import timezone
+
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -70,4 +73,14 @@ class Category(models.Model):
         return self.name_mk  # or self.name depending on context
 
 
+from django.utils import timezone  # Correct import for timezone.now
+
+User = get_user_model()
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    product = models.ForeignKey('main.Products2', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'product')
 
