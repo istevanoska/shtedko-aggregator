@@ -117,7 +117,7 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': '3306',
         'USER': 'root',
-        'PASSWORD': 'P@ssw0rdilina123',
+        'PASSWORD': '',
         'OPTIONS': {
             'charset': 'utf8mb4',
             'use_unicode': True,
