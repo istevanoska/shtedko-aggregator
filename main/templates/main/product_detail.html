@@ -1,1142 +1,806 @@
+{% extends 'main/header.html' %}
 {% load category_filters %}
 {% load static %}
 {% load custom_filters %}
+{% block content %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ product.name }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        /* General reset and base styling */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            height: 100%;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Main container */
-        .main-container {
-            display: grid;
-            grid-template-columns: 250px 1fr 350px;
-            gap: 20px;
-            max-width: 1400px;
-            margin: 20px auto;
-            padding: 0 20px;
-        }
-
-        /* Left column - Product image and actions */
-        .left-column {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            height: fit-content;
-        }
-
-        .product-image-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .product-image-container img {
-            max-width: 100%;
-            max-height: 250px;
-            object-fit: contain;
-        }
-
-        .product-actions {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .view-product-btn, .add-to-list-btn {
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: 600;
-            text-align: center;
-            text-decoration: none;
-            transition: all 0.3s;
-        }
-
-        .view-product-btn {
-            background: #3498db;
-            color: white;
-        }
-
-        .view-product-btn:hover {
-            background: #2980b9;
-        }
-
-        .add-to-list-btn {
-            background: #2ecc71;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        .add-to-list-btn:hover {
-            background: #27ae60;
-        }
-
-        /* Middle column - Product info and similar products */
-        .middle-column {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-info {
-            margin-bottom: 30px;
-        }
-
-        .product-info h2 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #333;
-        }
-
-        .info-item {
-            margin-bottom: 10px;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: #555;
-        }
-
-        .info-value {
-            color: #333;
-        }
-
-        .similar-products {
-            margin-top: 30px;
-        }
-
-        .similar-products h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .similar-product-card {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-        }
-
-        .similar-product-card:hover {
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .similar-product-card.cheaper {
-            border: 2px solid #e74c3c;
-            background-color: #fdecea;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{ product.name }}</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            /* General reset and base styling */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
             }
-            70% {
-                box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+
+            html, body {
+                height: 100%;
+                font-family: Arial, sans-serif;
+                background-color: #f5f5f5;
+                position: relative;
+                overflow-x: hidden;
             }
-            100% {
-                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
-            }
-        }
 
-        .similar-product-image {
-            flex: 0 0 80px;
-            margin-right: 15px;
-        }
-
-        .similar-product-image img {
-            max-width: 80px;
-            max-height: 80px;
-            object-fit: contain;
-        }
-
-        .similar-product-info {
-            flex: 1;
-        }
-
-        .similar-product-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .similar-product-price {
-            font-weight: bold;
-        }
-
-        .similar-product-price.cheaper {
-            color: #e74c3c;
-        }
-
-        .similar-product-store {
-            font-size: 13px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .similar-product-actions {
-            flex: 0 0 100px;
-            text-align: right;
-        }
-
-        .view-similar-btn {
-            padding: 6px 12px;
-            background: #3498db;
-            color: white;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 13px;
-            transition: all 0.3s;
-        }
-
-        .view-similar-btn:hover {
-            background: #2980b9;
-        }
-
-        /* Right column - Price chart */
-        .right-column {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            height: fit-content;
-        }
-
-        .price-chart-container h3 {
-            font-size: 18px;
-            margin-bottom: 15px;
-            color: #333;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-
-        .no-data-message {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-style: italic;
-        }
-
-        /* Navbar styles (keep your existing navbar styles) */
-        /* ===== DESKTOP NAVBAR ===== */
-        .main-header {
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            border-bottom: 1px solid #e5e5e5;
-        }
-
-        .logo img {
-            height: 60px;
-        }
-
-        .header-search {
-            flex-grow: 1;
-            margin: 0 20px;
-            position: relative;
-        }
-
-        .header-search input {
-            width: 100%;
-            padding: 12px 20px;
-            border: 1px solid #ddd;
-            border-radius: 30px;
-            font-size: 16px;
-            background-color: #f5f5f5;
-        }
-
-        .header-search button {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
-            cursor: pointer;
-            font-size: 18px;
-        }
-
-        .user-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-actions a {
-            color: #333;
-            text-decoration: none;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .user-actions a:hover {
-            color: #2e652e;
-        }
-
-        .logout-btn {
-            background-color: #2e652e;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .logout-btn:hover {
-            background-color: #1f3f1f;
-        }
-
-        /* Navigation */
-        .main-nav {
-            padding: 15px 30px;
-            background-color: #2e652e;
-        }
-
-        .main-nav ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .main-nav li {
-            margin-right: 20px;
-        }
-
-        .main-nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 5px 0;
-            position: relative;
-        }
-
-        .main-nav a:hover {
-            color: #fdd835;
-        }
-
-        .main-nav a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background-color: #fdd835;
-            transition: width 0.3s ease;
-        }
-
-        .main-nav a:hover::after {
-            width: 100%;
-        }
-
-        /* ===== MOBILE HEADER ===== */
-        #mobile-header {
-            display: none;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: linear-gradient(135deg, #2e652e, #1f3f1f);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            z-index: 1001;
-            position: relative;
-        }
-
-        #mobile-logo img {
-            height: 40px;
-        }
-
-        .menu-toggle {
-            font-size: 28px;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .menu-toggle:hover {
-            transform: scale(1.1);
-        }
-
-        /* ===== MOBILE SLIDE MENU ===== */
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 75%;
-            height: 100vh;
-            background: linear-gradient(135deg, #f0f7f0, #e0e8e0);
-            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
-            transition: right 0.3s ease;
-            padding: 20px;
-            z-index: 1002;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mobile-menu.open {
-            right: 0;
-        }
-
-        .mobile-menu-header {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 20px;
-        }
-
-        .close-btn {
-            cursor: pointer;
-            font-size: 28px;
-            color: #2e652e;
-            transition: color 0.3s ease;
-        }
-
-        .close-btn:hover {
-            color: #1f3f1f;
-        }
-
-        .mobile-search-form {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            gap: 10px;
-            background: white;
-            border-radius: 25px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .mobile-search-form input {
-            flex: 1;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 20px;
-            font-size: 14px;
-            outline: none;
-            background: #f5f5f5;
-        }
-
-        .mobile-search-form button {
-            background-color: #2e652e;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 50%;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
-
-        .mobile-search-form button:hover {
-            background-color: #1f3f1f;
-            transform: scale(1.1);
-        }
-
-        .mobile-menu nav a,
-        .mobile-menu nav button {
-            display: block;
-            margin: 15px 0;
-            font-size: 18px;
-            text-decoration: none;
-            color: #2e652e;
-            background: none;
-            border: none;
-            text-align: left;
-        }
-
-        .mobile-menu nav a:hover {
-            background-color: #2e652e;
-            color: white;
-            transform: translateX(5px);
-        }
-
-        /* ===== OVERLAY FOR MOBILE ===== */
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-
-        #overlay.active {
-            display: block;
-        }
-
-        /* ===== RESPONSIVENESS ===== */
-        @media (max-width: 1024px) {
+            /* Main container */
             .main-container {
-                grid-template-columns: 1fr;
+                display: grid;
+                grid-template-columns: 250px 1fr 350px;
+                gap: 20px;
+                max-width: 1400px;
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+
+            /* Left column - Product image and actions */
+            .left-column {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                height: fit-content;
+            }
+
+            .product-image-container {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
+            .product-image-container img {
+                max-width: 100%;
+                max-height: 250px;
+                object-fit: contain;
+            }
+
+            .product-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .view-product-btn, .add-to-list-btn {
+                padding: 10px;
+                border-radius: 4px;
+                font-weight: 600;
+                text-align: center;
+                text-decoration: none;
+                transition: all 0.3s;
+            }
+
+            .view-product-btn {
+                background: #3498db;
+                color: white;
+            }
+
+            .view-product-btn:hover {
+                background: #2980b9;
+            }
+
+            .add-to-list-btn {
+                background: #2ecc71;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
+
+            .add-to-list-btn:hover {
+                background: #27ae60;
+            }
+
+            /* Middle column - Product info and similar products */
+            .middle-column {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .product-info {
+                margin-bottom: 30px;
+            }
+
+            .product-info h2 {
+                font-size: 20px;
+                margin-bottom: 15px;
+                color: #333;
+            }
+
+            .info-item {
+                margin-bottom: 10px;
+            }
+
+            .info-label {
+                font-weight: 600;
+                color: #555;
+            }
+
+            .info-value {
+                color: #333;
+            }
+
+            .similar-products {
+                margin-top: 30px;
+            }
+
+            .similar-products h3 {
+                font-size: 18px;
+                margin-bottom: 15px;
+                color: #333;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+            }
+
+            .similar-product-card {
+                display: flex;
+                align-items: center;
+                padding: 15px;
+                border: 1px solid #eee;
+                border-radius: 6px;
+                margin-bottom: 15px;
+                transition: all 0.3s;
+            }
+
+            .similar-product-card:hover {
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+            .similar-product-card.cheaper {
+                border: 2px solid #e74c3c;
+                background-color: #fdecea;
+                animation: pulse 2s infinite;
+            }
+
+            @keyframes pulse {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4);
+                }
+                70% {
+                    box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+                }
+                100% {
+                    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+                }
+            }
+
+            .similar-product-image {
+                flex: 0 0 80px;
+                margin-right: 15px;
+            }
+
+            .similar-product-image img {
+                max-width: 80px;
+                max-height: 80px;
+                object-fit: contain;
+            }
+
+            .similar-product-info {
+                flex: 1;
+            }
+
+            .similar-product-name {
+                font-weight: 600;
+                margin-bottom: 5px;
+            }
+
+            .similar-product-price {
+                font-weight: bold;
+            }
+
+            .similar-product-price.cheaper {
+                color: #e74c3c;
+            }
+
+            .similar-product-store {
+                font-size: 13px;
+                color: #666;
+                margin-top: 5px;
+            }
+
+            .similar-product-actions {
+                flex: 0 0 100px;
+                text-align: right;
+            }
+
+            .view-similar-btn {
+                padding: 6px 12px;
+                background: #3498db;
+                color: white;
+                border-radius: 4px;
+                text-decoration: none;
+                font-size: 13px;
+                transition: all 0.3s;
+            }
+
+            .view-similar-btn:hover {
+                background: #2980b9;
+            }
+
+            /* Right column - Price chart */
+            .right-column {
+                background: white;
+                border-radius: 8px;
+                padding: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                height: fit-content;
+            }
+
+            .price-chart-container h3 {
+                font-size: 18px;
+                margin-bottom: 15px;
+                color: #333;
+                border-bottom: 1px solid #eee;
+                padding-bottom: 10px;
+            }
+
+            .chart-container {
+                position: relative;
+                height: 300px;
+                width: 100%;
+            }
+
+            .no-data-message {
+                text-align: center;
+                padding: 20px;
+                color: #666;
+                font-style: italic;
+            }
+
+            /* Lists dropdown styles */
+            .lists-dropdown {
+                position: relative;
+                display: inline-block;
+            }
+
+            .lists-toggle {
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 1rem;
+                color: black;
+                padding: 5px 10px;
+                border-radius: 5px;
+            }
+
+            .lists-toggle:hover {
+                background-color: #f0f0f0;
+            }
+
+            .dropdown-content {
+                display: none;
+                position: absolute;
+                background-color: white;
+                min-width: 160px;
+                box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+                z-index: 1;
+                border-radius: 5px;
+            }
+
+            .dropdown-content a {
+                color: black;
+                padding: 12px 16px;
+                text-decoration: none;
+                display: block;
+            }
+
+            .dropdown-content a:hover {
+                background-color: #f1f1f1;
+            }
+
+            .show {
+                display: block;
+            }
+
+            .lists-toggle:hover .selected-list-badge {
+                background: #1f3f1f;
+                transform: scale(1.05);
+            }
+
+            /* Modal styles */
+            .modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.6);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 999;
+            }
+
+            .modal-content {
+                background: white;
+                padding: 20px 30px;
+                border-radius: 10px;
+                text-align: center;
+                max-width: 400px;
+                width: 90%;
+                position: relative;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            }
+
+            .modal-content h3 {
+                padding: 10px;
+            }
+
+            .modal-content button {
+                background-color: #28a745;
+                color: white;
+                padding: 8px 16px;
+                margin: 6px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 14px;
+            }
+
+            .modal-content button:hover {
+                background-color: #218838;
+            }
+
+            .close-modal {
+                position: absolute;
+                top: 10px;
+                right: 15px;
+                font-size: 22px;
+                cursor: pointer;
+            }
+
+            a {
+                text-decoration: none;
+                color: black;
+            }
+
+            /* Price history section */
+            .section-header {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+
+            .section-header h3 {
+                margin: 0;
+                font-size: 18px;
+                color: #333;
+            }
+
+            .section-header i {
+                color: #2e652e;
+                font-size: 20px;
+            }
+
+            .chart-summary {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                margin-top: 15px;
+                background: #f8f9fa;
+                padding: 12px;
+                border-radius: 8px;
+            }
+
+            .summary-item {
+                text-align: center;
+            }
+
+            .summary-label {
+                display: block;
+                font-size: 12px;
+                color: #666;
+                margin-bottom: 5px;
+            }
+
+            .summary-value {
+                font-weight: 600;
+                color: #2e652e;
+            }
+
+            /* Date range selector */
+            .date-range-form {
+                margin-top: 15px;
+            }
+
+            .form-row {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .form-group {
+                flex: 1;
+            }
+
+            .form-group label {
+                display: block;
+                margin-bottom: 5px;
+                font-size: 13px;
+                color: #555;
+            }
+
+            .form-group label i {
+                margin-right: 5px;
+            }
+
+            .form-input {
+                width: 100%;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+
+            .update-chart-btn {
+                width: 100%;
+                padding: 10px;
+                background-color: #2e652e;
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-weight: 500;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .update-chart-btn:hover {
+                background-color: #1f3f1f;
+            }
+
+            .update-chart-btn i {
+                margin-right: 8px;
+            }
+
+            /* Promo banner */
+            .promo-banner {
+                margin-top: 20px;
+                position: relative;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .promo-banner img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+
+            .banner-overlay {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.6);
+                color: white;
                 padding: 15px;
             }
 
-            .left-column, .middle-column, .right-column {
+            .banner-overlay h4 {
+                margin: 0 0 5px 0;
+                font-size: 16px;
+            }
+
+            .banner-overlay p {
+                margin: 0;
+                font-size: 13px;
+                opacity: 0.9;
+            }
+
+            /* Chart tooltip styling */
+            .chartjs-tooltip {
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 4px;
+                color: white;
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+
+            /* Message container for alerts */
+            .message-container {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+                max-width: 400px;
+            }
+
+            .alert {
+                padding: 15px;
+                margin-bottom: 10px;
+                border-radius: 4px;
+                position: relative;
+                background-color: #f8f9fa;
+                border-left: 4px solid #6c757d;
+            }
+
+            .alert-close-btn {
+                position: absolute;
+                right: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                cursor: pointer;
+                font-size: 20px;
+            }
+
+            .similar-product-card {
+                padding: 15px;
+                margin-bottom: 15px;
+                border-radius: 8px;
+                transition: all 0.3s ease;
+                background: white;
+                border: 1px solid #e0e0e0;
+            }
+
+            .similar-product-card.cheaper {
+                border: 2px solid #e74c3c;
+                background-color: #fff5f5;
+                box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
+                position: relative;
+            }
+
+            .similar-product-card.cheaper::before {
+                content: "ПОНИСКА ЦЕНА";
+                position: absolute;
+                top: -10px;
+                left: 15px;
+                background: #e74c3c;
+                color: white;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                font-weight: bold;
+            }
+
+            /* Improved similar product image container */
+            .similar-product-image {
+                flex: 0 0 100px;
+                height: 100px;
+                margin-right: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #f9f9f9;
+                border-radius: 6px;
+                overflow: hidden;
+                border: 1px solid #eee;
+            }
+
+            .similar-product-image img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: contain;
+                width: auto;
+                height: auto;
+            }
+
+            /* Enhanced price highlighting */
+            .similar-product-price.cheaper {
+                color: #e74c3c;
+                font-weight: bold;
+                font-size: 18px;
+            }
+
+            /* Improved list selection badge */
+            .selected-list-badge {
+                font-size: 12px;
+                background: #2e652e;
+                color: white;
+                padding: 4px 8px;
+                border-radius: 12px;
+                margin-left: 8px;
+                display: inline-flex;
+                align-items: center;
+                line-height: 1;
+                transition: all 0.2s;
+            }
+
+            .lists-toggle:hover .selected-list-badge {
+                background: #1f3f1f;
+                transform: scale(1.05);
+            }
+
+            /* Make sure images in similar products are visible */
+            .similar-product-image img {
+                display: block;
+                width: auto;
+                height: auto;
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+            :root {
+                --fa-style-family-classic: "Font Awesome 6 Free";
+                --fa-font-solid: normal 900 1em / 1 "Font Awesome 6 Free";
+            }
+
+            .mobile-search-form button {
+                margin-left: -7px;
+            }
+
+            /* Prevent horizontal scrolling */
+            body {
+                overflow-x: hidden;
                 width: 100%;
             }
-        }
 
-        @media (max-width: 768px) {
-            .main-header {
-                display: none;
+            .mobile-menu{
+                width: 86%;
             }
 
-            #mobile-header {
-                display: flex;
+            /* ===== RESPONSIVENESS ===== */
+            @media (max-width: 1200px) {
+                .main-container {
+                    grid-template-columns: 250px 1fr;
+                }
+
+                .right-column {
+                    grid-column: span 2;
+                }
+
+                .chart-container {
+                    height: 400px;
+                }
             }
-        }
 
-        /* Lists dropdown styles */
-        .lists-dropdown {
-            position: relative;
-            display: inline-block;
-        }
+            @media (max-width: 992px) {
+                .main-container {
+                    grid-template-columns: 1fr;
+                    padding: 15px;
+                    gap: 15px;
+                }
 
-        .lists-toggle {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            color: black;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
+                .left-column, .middle-column, .right-column {
+                    width: 100%;
+                }
 
-        .lists-toggle:hover {
-            background-color: #f0f0f0;
-        }
+                .right-column {
+                    grid-column: span 1;
+                }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: white;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-            z-index: 1;
-            border-radius: 5px;
-        }
+                .product-image-container img {
+                    max-height: 200px;
+                }
 
-        .dropdown-content a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
+                .similar-product-card {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
 
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
+                .similar-product-image {
+                    margin-bottom: 10px;
+                    margin-right: 0;
+                }
 
-        .show {
-            display: block;
-        }
+                .similar-product-actions {
+                    margin-top: 10px;
+                    width: 100%;
+                    text-align: left;
+                }
 
-        /* Mobile lists dropdown styles */
-        .lists-dropdown-mobile {
-            position: relative;
-            display: inline-block;
-        }
+                .view-similar-btn {
+                    display: block;
+                    width: 100%;
+                    text-align: center;
+                }
+            }
 
-        .lists-toggle-mobile {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            color: white;
-            padding: 5px;
-        }
+            @media (max-width: 768px) {
+                .promo-banner {
+                    display: none;
+                }
 
-        .dropdown-content-mobile {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: white;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-            z-index: 1003;
-            border-radius: 5px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
+                .chart-summary {
+                    grid-template-columns: 1fr;
+                }
 
-        .dropdown-content-mobile a {
-            color: black;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-        }
+                .form-row {
+                    flex-direction: column;
+                }
 
-        .dropdown-content-mobile a:hover {
-            background-color: #f1f1f1;
-        }
+                .similar-product-image {
+                    width: 100%;
+                    height: auto;
+                    flex: none;
+                }
+            }
 
-        .dropdown-content-mobile.show {
-            display: block;
-        }
+            @media (max-width: 576px) {
+                .main-container {
+                    padding: 10px;
+                }
 
-        .selected-list-badge {
-            font-size: 12px;
-            background: #2e652e;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            margin-left: 8px;
-            display: inline-flex;
-            align-items: center;
-            line-height: 1;
-            transition: all 0.2s;
-        }
+                .product-info h2 {
+                    font-size: 18px;
+                }
 
-        .lists-toggle:hover .selected-list-badge {
-            background: #1f3f1f;
-            transform: scale(1.05);
-        }
+                .similar-products h3 {
+                    font-size: 16px;
+                }
 
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 999;
-        }
+                .similar-product-card {
+                    padding: 10px;
+                }
 
-        .modal-content {
-            background: white;
-            padding: 20px 30px;
-            border-radius: 10px;
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-            position: relative;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
+                .price-chart-container h3 {
+                    font-size: 16px;
+                }
 
-        .modal-content h3 {
-        {#margin-bottom: 15px;#} padding: 10px;
-        }
+                .chart-container {
+                    height: 300px;
+                }
+            }
+            .header-search input{
+                width: 102%;
+            }
+        </style>
+    </head>
+    <body>
 
-        .modal-content button {
-            background-color: #28a745;
-            color: white;
-            padding: 8px 16px;
-            margin: 6px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .modal-content button:hover {
-            background-color: #218838;
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 22px;
-            cursor: pointer;
-        }
-
-        a {
-            text-decoration: none;
-            color: black;
-        }
-
-        /* Price history section */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .section-header h3 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .section-header i {
-            color: #2e652e;
-            font-size: 20px;
-        }
-
-        .chart-summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 15px;
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-        }
-
-        .summary-item {
-            text-align: center;
-        }
-
-        .summary-label {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .summary-value {
-            font-weight: 600;
-            color: #2e652e;
-        }
-
-        /* Date range selector */
-        .date-range-form {
-            margin-top: 15px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .form-group {
-            flex: 1;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 13px;
-            color: #555;
-        }
-
-        .form-group label i {
-            margin-right: 5px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .update-chart-btn {
-            width: 100%;
-            padding: 10px;
-            background-color: #2e652e;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .update-chart-btn:hover {
-            background-color: #1f3f1f;
-        }
-
-        .update-chart-btn i {
-            margin-right: 8px;
-        }
-
-        /* Promo banner */
-        .promo-banner {
-            margin-top: 20px;
-            position: relative;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .promo-banner img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .banner-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 15px;
-        }
-
-        .banner-overlay h4 {
-            margin: 0 0 5px 0;
-            font-size: 16px;
-        }
-
-        .banner-overlay p {
-            margin: 0;
-            font-size: 13px;
-            opacity: 0.9;
-        }
-
-        /* Chart tooltip styling */
-        .chartjs-tooltip {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 4px;
-            color: white;
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-
-        /* Message container for alerts */
-        .message-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            max-width: 400px;
-        }
-
-        .alert {
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            position: relative;
-            background-color: #f8f9fa;
-            border-left: 4px solid #6c757d;
-        }
-
-        .alert-close-btn {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            font-size: 20px;
-        }
-
-
-        .similar-product-card {
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            background: white;
-            border: 1px solid #e0e0e0;
-        }
-
-        .similar-product-card.cheaper {
-            border: 2px solid #e74c3c;
-            background-color: #fff5f5;
-            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.15);
-            position: relative;
-        }
-
-        .similar-product-card.cheaper::before {
-            content: "ПОНИСКА ЦЕНА";
-            position: absolute;
-            top: -10px;
-            left: 15px;
-            background: #e74c3c;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-        }
-
-        /* Improved similar product image container */
-        .similar-product-image {
-            flex: 0 0 100px;
-            height: 100px;
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f9f9f9;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 1px solid #eee;
-        }
-
-        .similar-product-image img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            width: auto;
-            height: auto;
-        }
-
-        /* Enhanced price highlighting */
-        .similar-product-price.cheaper {
-            color: #e74c3c;
-            font-weight: bold;
-            font-size: 18px;
-        }
-
-        /* Improved list selection badge */
-        .selected-list-badge {
-            font-size: 12px;
-            background: #2e652e;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            margin-left: 8px;
-            display: inline-flex;
-            align-items: center;
-            line-height: 1;
-            transition: all 0.2s;
-        }
-
-        .lists-toggle:hover .selected-list-badge {
-            background: #1f3f1f;
-            transform: scale(1.05);
-        }
-
-        /* Make sure images in similar products are visible */
-        .similar-product-image img {
-            display: block;
-            width: auto;
-            height: auto;
-            max-width: 100%;
-            max-height: 100%;
-        }
-
-        :root {
-            --fa-style-family-classic: "Font Awesome 6 Free";
-            --fa-font-solid: normal 900 1em / 1 "Font Awesome 6 Free";
-        }
-
-    </style>
-</head>
-<body>
-
-<!-- Message container for alerts -->
-<div class="message-container">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-                <span class="alert-close-btn" onclick="this.parentElement.remove()">×</span>
-            </div>
-        {% endfor %}
-    {% endif %}
-</div>
-
-<!-- Header -->
-<header class="main-header">
-    <div class="header-top">
-        <div class="logo">
-            <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"/></a>
-        </div>
-
-        <div class="header-search">
-            <form method="GET" action="{% url 'product_list' %}" id="searchForm">
-                <input type="text" name="search" id="searchInput" placeholder="Пребарај производи..."
-                       value="{{ request.GET.search }}">
-                <button type="submit"><i class="fas fa-search"></i></button>
-            </form>
-            <div id="suggestions"
-                 style="position: absolute; background: white; border: 1px solid #ddd; border-radius: 5px; width: 98%; max-height: 200px; overflow-y: auto; display: none; z-index:2;"></div>
-        </div>
-        <div class="user-actions">
-            {% if user.is_authenticated %}
-                <div class="lists-dropdown">
-                    <button class="lists-toggle" onclick="toggleListsDropdown()">
-                        <i class="fas fa-list"></i> Листа
-                        <span id="selected-list-name" class="selected-list-badge">
-                            {% if user_lists %}(Избери листа){% else %}(Нема листи){% endif %}
-                        </span>
-                    </button>
-                    <div id="listsDropdown" class="dropdown-content">
-                        {% for list in user_lists %}
-                            <a href="#" onclick="selectList('{{ list.id }}', '{{ list.name }}')">{{ list.name }}</a>
-                        {% empty %}
-                            <a href="{% url 'create_list' %}">Креирај нова листа</a>
-                        {% endfor %}
-                    </div>
+    <!-- Message container for alerts -->
+    <div class="message-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                    <span class="alert-close-btn" onclick="this.parentElement.remove()">×</span>
                 </div>
-
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Одјави се
-                    </button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}"
-                   style=" padding: 8px 16px; border-radius: 20px; background-color: #f5f5f5; margin-right: -10px"><b><i
-                        class="fas fa-user"></i> Најави се</b></a>
-                <a href="{% url 'register' %}"
-                   style=" padding: 8px 16px; border-radius: 20px; background-color: #f5f5f5"><b><i
-                        class="fas fa-user-plus"></i> Регистрирај се </b></a>
-            {% endif %}
-        </div>
-    </div>
-
-    <nav class="main-nav">
-        <ul style="font-weight: 600; font-size: 17px">
-            <li><a href="{% url 'product_list' %}">Каталог</a></li>
-            <li><a href="{% url 'stats' %}">Статистика</a></li>
-            {#            <li><a href="#">Попусти</a></li>#}
-            {#            <li><a href="#">Продавници</a></li>#}
-        </ul>
-    </nav>
-</header>
-
-<!-- Mobile Header -->
-<div id="mobile-header">
-    <div id="mobile-logo">
-        <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого" style="height: 40px;">
-    </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <!-- Lists dropdown for mobile -->
-        <div class="lists-dropdown-mobile">
-            <button class="lists-toggle-mobile" onclick="toggleMobileListsDropdown()">
-                <img src="{% static 'images/lists.png' %}" style="width: 20px; margin-top: 7px">
-            </button>
-            <div id="mobileListsDropdown" class="dropdown-content-mobile">
-                {% for list in user_lists %}
-                    <a href="#" onclick="selectList('{{ list.id }}', '{{ list.name }}')">{{ list.name }}</a>
-                {% empty %}
-                    <a href="{% url 'create_list' %}">Креирај нова листа</a>
-                {% endfor %}
-            </div>
-        </div>
-        <!-- Hamburger menu -->
-        <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
-    </div>
-</div>
-
-<!-- Mobile Menu -->
-<div id="mobile-menu" class="mobile-menu">
-    <div class="mobile-menu-header">
-        <span class="close-btn" onclick="toggleMobileMenu()">✕</span>
-    </div>
-   <form method="GET" action="{% url 'product_list' %}" class="mobile-search-form" id="mobileSearchForm">
-        <input type="text" name="search" id="mobileSearchInput" style="padding: 7px" placeholder="Пребарај производ..."
-               value="{{ request.GET.search }}">
-        <button type="submit"><i class="fas fa-search"></i></button>
-    </form>
-    <nav>
-        <a href="{% url 'home' %}">Дома</a>
-        <a href="{% url 'product_list' %}">Каталог</a>
-        <a href="{% url 'stats' %}">Статистика</a>
-        {% if user.is_authenticated %}
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button type="submit" style="color:#2e652e"><b>Одјави се</b></button>
-            </form>
-        {% else %}
-            <a href="{% url 'login' %}" style="color:#2e652e"><b>Најави се</b></a>
-            <a href="{% url 'register' %}" style="color:#2e652e"><b>Регистрирај се</b></a>
+            {% endfor %}
         {% endif %}
-    </nav>
-</div>
-
-<!-- MOBILE DARK OVERLAY -->
-<div id="overlay" onclick="toggleMobileMenu()"></div>
-
-<!-- Main content -->
-<div class="main-container">
-    <!-- Left column - Add banner below product image -->
-    <div class="left-column">
-        <div class="product-image-container">
-            {% if product.image_url %}
-                <img src="{{ product.image_url }}" alt="{{ product.name }}">
-            {% else %}
-                <div class="no-image-placeholder">
-                    <span>Нема слика</span>
-                </div>
-            {% endif %}
-        </div>
-
-        <div class="product-actions">
-            <a href="{{ product.product_url }}" target="_blank" class="view-product-btn">
-                <i class="fas fa-external-link-alt"></i> Види производ
-            </a>
-            <button class="add-to-list-btn" onclick="addToList({{ product.id }})">
-                <i class="fas fa-plus"></i> Додади во листа
-            </button>
-        </div>
-
-        <!-- New promotional banner -->
-        <div class="promo-banner">
-            <img src="{% static 'images/vertical_banner.png' %}" alt="Промоција">
-            <div class="banner-overlay">
-                <h4>Специјална понуда!</h4>
-                <p>Дознајте ги нашите најнови промоции</p>
-            </div>
-        </div>
     </div>
-    <!-- Middle column - Product info and similar products -->
-    <div class="middle-column">
-        <div class="product-info">
-            <h2>{{ product.name }}</h2>
 
-            <div class="info-item">
-                <span class="info-label">Категорија:</span>
-                <span class="info-value">{{ product.category | translate_category }}</span>
+    <!-- Main content -->
+    <div class="main-container">
+        <!-- Left column - Add banner below product image -->
+        <div class="left-column">
+            <div class="product-image-container">
+                {% if product.image_url %}
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}">
+                {% else %}
+                    <div class="no-image-placeholder">
+                        <span>Нема слика</span>
+                    </div>
+                {% endif %}
             </div>
 
-            <div class="info-item">
-                <span class="info-label">Продавница:</span>
-                <span class="info-value">
+            <div class="product-actions">
+                <a href="{{ product.product_url }}" target="_blank" class="view-product-btn">
+                    <i class="fas fa-external-link-alt"></i> Види производ
+                </a>
+                <button class="add-to-list-btn" onclick="addToList({{ product.id }})">
+                    <i class="fas fa-plus"></i> Додади во листа
+                </button>
+            </div>
+
+            <!-- New promotional banner -->
+            <div class="promo-banner">
+                <img src="{% static 'images/vertical_banner.png' %}" alt="Промоција">
+                <div class="banner-overlay">
+                    <h4>Специјална понуда!</h4>
+                    <p>Дознајте ги нашите најнови промоции</p>
+                </div>
+            </div>
+        </div>
+        <!-- Middle column - Product info and similar products -->
+        <div class="middle-column">
+            <div class="product-info">
+                <h2>{{ product.name }}</h2>
+
+                <div class="info-item">
+                    <span class="info-label">Категорија:</span>
+                    <span class="info-value">{{ product.category | translate_category }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Продавница:</span>
+                    <span class="info-value">
                     {% if product.store == "Vero" %}
                         <img src="{% static 'images/vero_logo1.png' %}" alt="Vero"
                              style="height: 25px; vertical-align: middle;">
@@ -1147,463 +811,415 @@
                         <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore"
                              style="height: 25px; vertical-align: middle;">
                     {% endif %}
-                    {#                    {{ product.store }}#}
                 </span>
-            </div>
+                </div>
 
-            <div class="info-item">
-                <span class="info-label">Цена:</span>
-                <span class="info-value" style="font-weight: bold; font-size: 18px; color: #2e652e;">
+                <div class="info-item">
+                    <span class="info-label">Цена:</span>
+                    <span class="info-value" style="font-weight: bold; font-size: 18px; color: #2e652e;">
                     {{ product.price }} ден
                 </span>
+                </div>
             </div>
-        </div>
 
-        <div class="similar-products">
-            <h3><i class="fas fa-random"></i> Слични производи</h3>
+            <div class="similar-products">
+                <h3><i class="fas fa-random"></i> Слични производи</h3>
 
-            {% for similar in similar_products|slice:":5" %}
-                <div class="similar-product-card {% if similar.price < product.price %}cheaper{% endif %}">
-                    <div class="similar-product-image">
-                        {% if similar.image %}
-                            <img src="{{ similar.image }}" alt="{{ similar.name }}"
-                                 onerror="this.onerror=null;this.src='{% static 'images/no-image.png' %}'">
-                        {% else %}
-                            <img src="{% static 'images/no-image.png' %}" alt="Нема слика">
-                        {% endif %}
-                    </div>
-
-                    <div class="similar-product-info">
-                        <div class="similar-product-name">
-                            <a href="{% url 'product_detail' similar.id %}">{{ similar.name }}</a>
+                {% for similar in similar_products|slice:":5" %}
+                    <div class="similar-product-card {% if similar.price < product.price %}cheaper{% endif %}">
+                        <div class="similar-product-image">
+                            {% if similar.image %}
+                                <img src="{{ similar.image }}" alt="{{ similar.name }}"
+                                     onerror="this.onerror=null;this.src='{% static 'images/no-image.png' %}'">
+                            {% else %}
+                                <img src="{% static 'images/no-image.png' %}" alt="Нема слика">
+                            {% endif %}
                         </div>
-                        <div class="similar-product-price {% if similar.price < product.price %}cheaper{% endif %}">
-                            {{ similar.price }} ден
-                            {% if similar.price < product.price %}
-                                <span style="color: #e74c3c; font-size: 13px;">
+
+                        <div class="similar-product-info">
+                            <div class="similar-product-name">
+                                <a href="{% url 'product_detail' similar.id %}">{{ similar.name }}</a>
+                            </div>
+                            <div class="similar-product-price {% if similar.price < product.price %}cheaper{% endif %}">
+                                {{ similar.price }} ден
+                                {% if similar.price < product.price %}
+                                    <span style="color: #e74c3c; font-size: 13px;">
                                     (Заштеда: {{ product.price|subtract:similar.price }} ден)
                                 </span>
-                            {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="similar-product-store">
+                                {% if similar.store == "Vero" %}
+                                    <img src="{% static 'images/vero_logo1.png' %}" alt="Vero"
+                                         style="height: 20px; vertical-align: middle;">
+                                {% elif similar.store == "Reptil" %}
+                                    <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil"
+                                         style="height: 20px; vertical-align: middle;">
+                                {% elif similar.store == "Ramstore" %}
+                                    <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore"
+                                         style="height: 20px; vertical-align: middle;">
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="similar-product-store">
-                            {% if similar.store == "Vero" %}
-                                <img src="{% static 'images/vero_logo1.png' %}" alt="Vero"
-                                     style="height: 20px; vertical-align: middle;">
-                            {% elif similar.store == "Reptil" %}
-                                <img src="{% static 'images/reptil_logo.jpg' %}" alt="Reptil"
-                                     style="height: 20px; vertical-align: middle;">
-                            {% elif similar.store == "Ramstore" %}
-                                <img src="{% static 'images/ramstore_logo.png' %}" alt="Ramstore"
-                                     style="height: 20px; vertical-align: middle;">
-                            {% endif %}
-                            {#                            {{ similar.store }}#}
+
+                        <div class="similar-product-actions">
+                            <a href="{% url 'product_detail' similar.id %}" class="view-similar-btn">
+                                <i class="fas fa-info-circle"></i> Детали
+                            </a>
                         </div>
                     </div>
-
-                    <div class="similar-product-actions">
-                        <a href="{% url 'product_detail' similar.id %}" class="view-similar-btn">
-                            <i class="fas fa-info-circle"></i> Детали
-                        </a>
+                {% empty %}
+                    <div style="padding: 20px; text-align: center; color: #666;">
+                        Нема слични производи во моментов.
                     </div>
-                </div>
-            {% empty %}
-                <div style="padding: 20px; text-align: center; color: #666;">
-                    Нема слични производи во моментов.
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Right column - Price chart -->
-    <div class="right-column">
-        <div class="price-history-container">
-            <div class="section-header">
-                <i class="fas fa-chart-line"></i>
-                <h3>Историја на цени</h3>
+                {% endfor %}
             </div>
+        </div>
 
-            <div class="chart-container">
-                {% if price_history %}
-                    <canvas id="priceChart"></canvas>
-                    <div class="chart-summary">
-                        <div class="summary-item">
-                            <span class="summary-label">Тековна цена:</span>
-                            <span class="summary-value">{{ product.price|floatformat:2 }} ден</span>
+        <!-- Right column - Price chart -->
+        <div class="right-column">
+            <div class="price-history-container">
+                <div class="section-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Историја на цени</h3>
+                </div>
+
+                <div class="chart-container">
+                    {% if price_history %}
+                        <canvas id="priceChart"></canvas>
+                        <div class="chart-summary">
+                            <div class="summary-item">
+                                <span class="summary-label">Тековна цена:</span>
+                                <span class="summary-value">{{ product.price|floatformat:2 }} ден</span>
+                            </div>
                         </div>
-                        {#                    <div class="summary-item">#}
-                        {#                        <span class="summary-label">Најниска:</span>#}
-                        {#                        <span class="summary-value">{{ min_price|floatformat:2 }} ден</span>#}
-                        {#                    </div>#}
-                        {#                    <div class="summary-item">#}
-                        {#                        <span class="summary-label">Највисока:</span>#}
-                        {#                        <span class="summary-value">{{ max_price|floatformat:2 }} ден</span>#}
-                        {#                    </div>#}
-                    </div>
-                {% else %}
-                    <div class="no-data-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>Нема достапни историски податоци за цените.</p>
+                    {% else %}
+                        <div class="no-data-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p>Нема достапни историски податоци за цените.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if price_history %}
+                    <div class="date-range-selector">
+                        <form method="get" class="date-range-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="start-date"><i class="far fa-calendar-alt"></i> Од:</label>
+                                    <input type="date" id="start-date" name="start_date" class="form-input"
+                                           value="{{ start_date|default:'' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="end-date"><i class="far fa-calendar-alt"></i> До:</label>
+                                    <input type="date" id="end-date" name="end_date" class="form-input"
+                                           value="{{ end_date|default:'' }}">
+                                </div>
+                            </div>
+                            <input type="hidden" name="product_id" value="{{ product.id }}">
+                            <button type="submit" class="update-chart-btn">
+                                <i class="fas fa-sync-alt"></i> Ажурирај графикон
+                            </button>
+                        </form>
                     </div>
                 {% endif %}
             </div>
-
-            {% if price_history %}
-                <div class="date-range-selector">
-                    <form method="get" class="date-range-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="start-date"><i class="far fa-calendar-alt"></i> Од:</label>
-                                <input type="date" id="start-date" name="start_date" class="form-input"
-                                       value="{{ start_date|default:'' }}">
-                            </div>
-                            <div class="form-group">
-                                <label for="end-date"><i class="far fa-calendar-alt"></i> До:</label>
-                                <input type="date" id="end-date" name="end_date" class="form-input"
-                                       value="{{ end_date|default:'' }}">
-                            </div>
-                        </div>
-                        <input type="hidden" name="product_id" value="{{ product.id }}">
-                        <button type="submit" class="update-chart-btn">
-                            <i class="fas fa-sync-alt"></i> Ажурирај графикон
-                        </button>
-                    </form>
-                </div>
-            {% endif %}
         </div>
-    </div>
-    <!-- List Selection Modal -->
-    <div id="listModal" style="display: none;" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">×</span>
-            <h3>Избери листа</h3>
-            <ul id="listOptions" style="list-style: none; padding: 0;">
-                {% for list in user_lists %}
-                    <li style="margin: 10px 0;">
-                        <button onclick="addToList({{ list.id }})"
-                                style="width: 100%; text-align: left; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
-                            {{ list.name }}
-                        </button>
-                    </li>
-                {% empty %}
-                    <li style="margin: 20px 0; text-align: center;">
-                        Немаш листи. <a href="{% url 'create_list' %}" style="color: #2e652e;">Креирај тука</a>
-                    </li>
-                {% endfor %}
-            </ul>
+        <!-- List Selection Modal -->
+        <div id="listModal" style="display: none;" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModal()">×</span>
+                <h3>Избери листа</h3>
+                <ul id="listOptions" style="list-style: none; padding: 0;">
+                    {% for list in user_lists %}
+                        <li style="margin: 10px 0;">
+                            <button onclick="addToList({{ list.id }})"
+                                    style="width: 100%; text-align: left; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: white; cursor: pointer;">
+                                {{ list.name }}
+                            </button>
+                        </li>
+                    {% empty %}
+                        <li style="margin: 20px 0; text-align: center;">
+                            Немаш листи. <a href="{% url 'create_list' %}" style="color: #2e652e;">Креирај тука</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
-    </div>
 
-    <script>
-        let selectedProductId = null;
-        let selectedListId = localStorage.getItem('selectedListId');
-        let selectedListName = localStorage.getItem('selectedListName');
-
-        function showListOptions(button) {
-            selectedProductId = button.dataset.productId;
-            document.getElementById('listModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('listModal').style.display = 'none';
-            selectedProductId = null;
-        }
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById("mobile-menu");
-            const overlay = document.getElementById("overlay");
-
-            menu.classList.toggle("open");
-            overlay.classList.toggle("active");
-        }
-
-        function toggleListsDropdown() {
-            document.getElementById("listsDropdown").classList.toggle("show");
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            if (selectedListId && selectedListName) {
-                document.getElementById("selected-list-name").textContent = selectedListName;
+        <script>
+            function toggleListsDropdown() {
+                document.getElementById("listsDropdown").classList.toggle("show");
             }
 
-            // Initialize price chart if data exists
-            {% if price_history %}
-                initializePriceChart();
-            {% endif %}
-        });
+            document.addEventListener('DOMContentLoaded', function () {
+                if (selectedListId && selectedListName) {
+                    document.getElementById("selected-list-name").textContent = selectedListName;
+                }
 
-        function initializePriceChart() {
-            const ctx = document.getElementById('priceChart').getContext('2d');
+                // Initialize price chart if data exists
+                {% if price_history %}
+                    initializePriceChart();
+                {% endif %}
+            });
 
-            // Prepare data from Django template
-            const labels = [
-                {% for entry in chart_data %}
-                    "{{ entry.date|date:'d.m.Y' }}"{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ];
+            function initializePriceChart() {
+                const ctx = document.getElementById('priceChart').getContext('2d');
 
-            const prices = [
-                {% for entry in chart_data %}
-                    {{ entry.price }}{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ];
+                // Prepare data from Django template
+                const labels = [
+                    {% for entry in chart_data %}
+                        "{{ entry.date|date:'d.m.Y' }}"{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ];
 
-            const minPrice = Math.min(...prices);
-            const maxPrice = Math.max(...prices);
-            const range = maxPrice - minPrice;
-            const suggestedMin = Math.max(0, minPrice - range * 0.1);
-            const suggestedMax = maxPrice + range * 0.1;
+                const prices = [
+                    {% for entry in chart_data %}
+                        {{ entry.price }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ];
 
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Цена (ден) за {{ product.name }}',
-                        data: prices,
-                        borderColor: '#2ecc71',
-                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.1,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            suggestedMin: suggestedMin,
-                            suggestedMax: suggestedMax,
-                            ticks: {
-                                callback: function (value) {
-                                    return value + ' ден';
+                const minPrice = Math.min(...prices);
+                const maxPrice = Math.max(...prices);
+                const range = maxPrice - minPrice;
+                const suggestedMin = Math.max(0, minPrice - range * 0.1);
+                const suggestedMax = maxPrice + range * 0.1;
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Цена (ден) за {{ product.name }}',
+                            data: prices,
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                suggestedMin: suggestedMin,
+                                suggestedMax: suggestedMax,
+                                ticks: {
+                                    callback: function (value) {
+                                        return value + ' ден';
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
                                 }
                             },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
+                            x: {
+                                grid: {
+                                    display: false
+                                }
                             }
                         },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return 'Цена: ' + context.parsed.y + ' ден';
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        return 'Цена: ' + context.parsed.y + ' ден';
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
-            try {
-                new Chart(document.getElementById('priceChart').getContext('2d'), {
-                    type: 'line',
-                    data: {labels: ['Test'], datasets: [{label: 'Test', data: [1]}]}
                 });
-                console.log("Test chart created successfully");
-            } catch (e) {
-                console.error("Chart.js error:", e);
+                try {
+                    new Chart(document.getElementById('priceChart').getContext('2d'), {
+                        type: 'line',
+                        data: {labels: ['Test'], datasets: [{label: 'Test', data: [1]}]}
+                    });
+                    console.log("Test chart created successfully");
+                } catch (e) {
+                    console.error("Chart.js error:", e);
+                }
             }
 
-
-        }
-
-        window.onclick = function (event) {
-            if (!event.target.matches('.lists-toggle')) {
-                const dropdowns = document.getElementsByClassName("dropdown-content");
-                for (let i = 0; i < dropdowns.length; i++) {
-                    const openDropdown = dropdowns[i];
-                    if (openDropdown.classList.contains('show')) {
-                        openDropdown.classList.remove('show');
+            window.onclick = function (event) {
+                if (!event.target.matches('.lists-toggle')) {
+                    const dropdowns = document.getElementsByClassName("dropdown-content");
+                    for (let i = 0; i < dropdowns.length; i++) {
+                        const openDropdown = dropdowns[i];
+                        if (openDropdown.classList.contains('show')) {
+                            openDropdown.classList.remove('show');
+                        }
                     }
                 }
             }
-        }
 
-        function addToList(productId) {
-            if (!{{ request.user.is_authenticated|yesno:"true,false" }}) {
-                alert("Мора да бите најавени за да додавате производи во листа!");
-                return;
-            }
-
-            if (!selectedListId) {
-                alert("Ве молиме изберете листа од менито 'Листи'!");
-                return;
-            }
-
-            fetch("{% url 'add_to_list' %}", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    list_id: selectedListId,
-                    product_id: productId
-                })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`Производот е успешно додаден во листата "${selectedListName}"!`);
-                    } else {
-                        alert("Грешка: " + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("Настана грешка при додавањето на производот.");
-                });
-        }
-
-        function toggleMobileListsDropdown() {
-            document.getElementById("mobileListsDropdown").classList.toggle("show");
-        }
-
-        document.addEventListener('click', function (event) {
-            if (!event.target.closest('.lists-dropdown-mobile') && !event.target.classList.contains('lists-toggle-mobile')) {
-                const dropdown = document.getElementById("mobileListsDropdown");
-                if (dropdown.classList.contains('show')) {
-                    dropdown.classList.remove('show');
-                }
-            }
-        });
-
-        function selectList(listId, listName) {
-            selectedListId = listId;
-            selectedListName = listName;
-
-            localStorage.setItem('selectedListId', listId);
-            localStorage.setItem('selectedListName', listName);
-
-            document.getElementById("selected-list-name").textContent = listName;
-
-            document.getElementById("listsDropdown").classList.remove('show');
-            document.getElementById("mobileListsDropdown").classList.remove('show');
-        }
-
-      document.addEventListener('DOMContentLoaded', function () {
-        // Desktop search elements
-        const searchInput = document.getElementById('searchInput');
-        const suggestionsDiv = document.getElementById('suggestions');
-        const searchForm = document.getElementById('searchForm');
-
-        // Mobile search elements
-        const mobileSearchInput = document.getElementById('mobileSearchInput');
-        const mobileSearchForm = document.getElementById('mobileSearchForm');
-
-        // Extended transliteration with typo correction
-        function transliterateLatinToCyrillic(text) {
-            const map = {
-                'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
-                'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
-                'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
-                'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
-                'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
-                'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
-                's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
-                'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
-                'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
-            };
-
-            const typoPatterns = [
-                {pattern: /sampon/gi, replace: 'shampon'},
-                {pattern: /cresi/gi, replace: 'creshi'},
-                {pattern: /stipki/gi, replace: 'shtipki'},
-                {pattern: /sch/gi, replace: 'sh'},
-                {pattern: /ck/gi, replace: 'k'},
-                {pattern: /ph/gi, replace: 'f'},
-                {pattern: /th/gi, replace: 't'},
-                {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
-                {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
-                {pattern: /([a-z])\1/gi, replace: '$1'}
-            ];
-
-            let normalizedText = text.toLowerCase();
-            for (const {pattern, replace} of typoPatterns) {
-                normalizedText = normalizedText.replace(pattern, replace);
-            }
-
-            let result = '';
-            let i = 0;
-            while (i < normalizedText.length) {
-                if (map[normalizedText.substring(i, i + 3)]) {
-                    result += map[normalizedText.substring(i, i + 3)];
-                    i += 3;
-                } else if (map[normalizedText.substring(i, i + 2)]) {
-                    result += map[normalizedText.substring(i, i + 2)];
-                    i += 2;
-                } else if (map[normalizedText[i]]) {
-                    result += map[normalizedText[i]];
-                    i++;
-                } else {
-                    result += normalizedText[i];
-                    i++;
-                }
-            }
-            return result;
-        }
-
-        function setupSearch(input, form) {
-            input.addEventListener('input', function () {
-                const query = this.value.trim();
-                if (query.length < 2) {
-                    suggestionsDiv.style.display = 'none';
+            function addToList(productId) {
+                if (!{{ request.user.is_authenticated|yesno:"true,false" }}) {
+                    alert("Мора да бите најавени за да додавате производи во листа!");
                     return;
                 }
 
-                fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
+                if (!selectedListId) {
+                    alert("Ве молиме изберете листа од менито 'Листи'!");
+                    return;
+                }
+
+                fetch("{% url 'add_to_list' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        list_id: selectedListId,
+                        product_id: productId
+                    })
+                })
                     .then(response => response.json())
                     .then(data => {
-                        suggestionsDiv.innerHTML = '';
-                        if (data.suggestions.length > 0) {
-                            data.suggestions.forEach(suggestion => {
-                                const div = document.createElement('div');
-                                div.textContent = suggestion;
-                                div.style.padding = '5px 10px';
-                                div.style.cursor = 'pointer';
-                                div.addEventListener('click', function () {
-                                    input.value = transliterateLatinToCyrillic(suggestion);
-                                    suggestionsDiv.style.display = 'none';
-                                    form.submit();
-                                });
-                                suggestionsDiv.appendChild(div);
-                            });
-                            suggestionsDiv.style.display = 'block';
+                        if (data.success) {
+                            alert(`Производот е успешно додаден во листата "${selectedListName}"!`);
                         } else {
+                            alert("Грешка: " + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("Настана грешка при додавањето на производот.");
+                    });
+            }
+
+            function selectList(listId, listName) {
+                selectedListId = listId;
+                selectedListName = listName;
+
+                localStorage.setItem('selectedListId', listId);
+                localStorage.setItem('selectedListName', listName);
+
+                document.getElementById("selected-list-name").textContent = listName;
+
+                document.getElementById("listsDropdown").classList.remove('show');
+                document.getElementById("mobileListsDropdown").classList.remove('show');
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Desktop search elements
+                const searchInput = document.getElementById('searchInput');
+                const suggestionsDiv = document.getElementById('suggestions');
+                const searchForm = document.getElementById('searchForm');
+
+                // Mobile search elements
+                const mobileSearchInput = document.getElementById('mobileSearchInput');
+                const mobileSearchForm = document.getElementById('mobileSearchForm');
+
+                // Extended transliteration with typo correction
+                function transliterateLatinToCyrillic(text) {
+                    const map = {
+                        'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
+                        'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
+                        'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
+                        'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
+                        'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
+                        'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
+                        's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
+                        'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
+                        'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
+                    };
+
+                    const typoPatterns = [
+                        {pattern: /sampon/gi, replace: 'shampon'},
+                        {pattern: /cresi/gi, replace: 'creshi'},
+                        {pattern: /stipki/gi, replace: 'shtipki'},
+                        {pattern: /sch/gi, replace: 'sh'},
+                        {pattern: /ck/gi, replace: 'k'},
+                        {pattern: /ph/gi, replace: 'f'},
+                        {pattern: /th/gi, replace: 't'},
+                        {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
+                        {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
+                        {pattern: /([a-z])\1/gi, replace: '$1'}
+                    ];
+
+                    let normalizedText = text.toLowerCase();
+                    for (const {pattern, replace} of typoPatterns) {
+                        normalizedText = normalizedText.replace(pattern, replace);
+                    }
+
+                    let result = '';
+                    let i = 0;
+                    while (i < normalizedText.length) {
+                        if (map[normalizedText.substring(i, i + 3)]) {
+                            result += map[normalizedText.substring(i, i + 3)];
+                            i += 3;
+                        } else if (map[normalizedText.substring(i, i + 2)]) {
+                            result += map[normalizedText.substring(i, i + 2)];
+                            i += 2;
+                        } else if (map[normalizedText[i]]) {
+                            result += map[normalizedText[i]];
+                            i++;
+                        } else {
+                            result += normalizedText[i];
+                            i++;
+                        }
+                    }
+                    return result;
+                }
+
+                function setupSearch(input, form) {
+                    input.addEventListener('input', function () {
+                        const query = this.value.trim();
+                        if (query.length < 2) {
                             suggestionsDiv.style.display = 'none';
+                            return;
+                        }
+
+                        fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                suggestionsDiv.innerHTML = '';
+                                if (data.suggestions.length > 0) {
+                                    data.suggestions.forEach(suggestion => {
+                                        const div = document.createElement('div');
+                                        div.textContent = suggestion;
+                                        div.style.padding = '5px 10px';
+                                        div.style.cursor = 'pointer';
+                                        div.addEventListener('click', function () {
+                                            input.value = transliterateLatinToCyrillic(suggestion);
+                                            suggestionsDiv.style.display = 'none';
+                                            form.submit();
+                                        });
+                                        suggestionsDiv.appendChild(div);
+                                    });
+                                    suggestionsDiv.style.display = 'block';
+                                } else {
+                                    suggestionsDiv.style.display = 'none';
+                                }
+                            });
+                    });
+
+                    input.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            suggestionsDiv.style.display = 'none';
+                            input.value = transliterateLatinToCyrillic(input.value);
+                            form.submit();
                         }
                     });
-            });
-
-            input.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    suggestionsDiv.style.display = 'none';
-                    input.value = transliterateLatinToCyrillic(input.value);
-                    form.submit();
                 }
+
+                setupSearch(searchInput, searchForm);
+                setupSearch(mobileSearchInput, mobileSearchForm);
+
+                document.addEventListener('click', function (e) {
+                    if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
+                        !mobileSearchInput.contains(e.target)) {
+                        suggestionsDiv.style.display = 'none';
+                    }
+                });
             });
-        }
-
-        setupSearch(searchInput, searchForm);
-        setupSearch(mobileSearchInput, mobileSearchForm);
-
-        document.addEventListener('click', function (e) {
-            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
-                !mobileSearchInput.contains(e.target)) {
-                suggestionsDiv.style.display = 'none';
-            }
-        });
-    });
-
-    </script>
-
-</body>
+        </script>
+    </body>
+{% endblock %}
 </html>

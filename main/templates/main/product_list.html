@@ -1,4 +1,4 @@
-{% extends 'main\header.html' %}
+{% extends 'main/header.html' %}
 {% load static %}
 {% load category_filters %}
 {% block content %}
@@ -1725,16 +1725,16 @@
                                {% if 'Ramstore' in selected_stores %}checked{% endif %}>
                         <label for="store-ramstore">Ramstore</label>
                     </div>
-                    <div class="filter-option">
-                        <input type="checkbox" id="store-zito" name="store" value="Zito"
-                               {% if 'Zito' in selected_stores %}checked{% endif %}>
-                        <label for="store-zito">Zito</label>
-                    </div>
-                    <div class="filter-option">
-                        <input type="checkbox" id="store-kam" name="store" value="Kam"
-                               {% if 'Kam' in selected_stores %}checked{% endif %}>
-                        <label for="store-kam">Kam</label>
-                    </div>
+                    {#                    <div class="filter-option">#}
+                    {#                        <input type="checkbox" id="store-zito" name="store" value="Zito"#}
+                    {#                               {% if 'Zito' in selected_stores %}checked{% endif %}>#}
+                    {#                        <label for="store-zito">Zito</label>#}
+                    {#                    </div>#}
+                    {#                    <div class="filter-option">#}
+                    {#                        <input type="checkbox" id="store-kam" name="store" value="Kam"#}
+                    {#                               {% if 'Kam' in selected_stores %}checked{% endif %}>#}
+                    {#                        <label for="store-kam">Kam</label>#}
+                    {#                    </div>#}
                 </div>
                 <input type="hidden" name="sort" id="sortValue" value="{{ selected_sort }}">
 
@@ -1763,7 +1763,7 @@
                     <label style="margin-top: 7px; color: rgba(31,70,31,0.9)"
                            for="sort">Сортирај по:</label>
                     <select id="sort" onchange="updateSort()">
-                        <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Најпопуларни
+                        <option value="-" >    -- Избери --
                         </option>
                         <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Цена
                             (најниска)
@@ -1851,7 +1851,8 @@
                                                 style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer; "
                                                 data-product-id="{{ product.id }}"><b>Додај</b>
                                         </button>
-                                        <button onclick="toggleFavorite(this, {{ product.id }})" class="favorite-btn">
+                                        <button onclick="toggleFavorite(this, {{ product.id }})" class="favorite-btn"
+                                                data-product-id="{{ product.id }}">
                                             <i class="far fa-heart"></i>
                                         </button>
                                     </div>
@@ -1904,7 +1905,7 @@
                                             <img src="{{ product.image_url }}" alt="{{ product.name }}"
                                                  style="max-width: 100%; max-height: 100%;">
                                         {% else %}
-                                            [No Image]
+                                            <img src="{% static 'images/no-image.png' %}" alt="no-image">
                                         {% endif %}
                                     </div>
                                     <div class="product-info">
@@ -2093,8 +2094,12 @@
 
 
 
+
+
                             {% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo;</a>
                     <a href="?page=
+
+
 
 
 
@@ -2358,8 +2363,12 @@
 
 
 
+
+
                             {{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&rsaquo;</a>
                     <a href="?page=
+
+
 
 
 
@@ -2893,20 +2902,6 @@
             overlay.classList.toggle("active");
         }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            fetch('/api/lists/')
-                .then(response => response.json())
-                .then(data => {
-                    const dropdown = document.getElementById('listSelector');
-                    data.lists.forEach(list => {
-                        const option = document.createElement('option');
-                        option.value = list.id;
-                        option.text = list.name;
-                        dropdown.appendChild(option);
-                    });
-                });
-        });
-
         document.addEventListener('DOMContentLoaded', function () {
             const addToListButtons = document.querySelectorAll('.add-to-list-btn');
 
@@ -3185,34 +3180,77 @@
         }
 
         function toggleFavorite(button, productId) {
+            const icon = button.querySelector('i');
+
             fetch('/toggle-favorite/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')  // <-- Get CSRF from cookie
+                    'X-CSRFToken': getCookie('csrftoken')
                 },
                 body: JSON.stringify({product_id: productId})
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Update heart icon
-                        const icon = button.querySelector('i');
+                        // Toggle the heart icon
                         icon.classList.toggle('far');
                         icon.classList.toggle('fas');
 
-                        // Reload favorites list page to reflect changes
+                        // Update color immediately
+                        if (icon.classList.contains('fas')) {
+                            icon.style.color = '#e74c3c';
+                            button.classList.add('pulse');
+                            setTimeout(() => button.classList.remove('pulse'), 600);
+                        } else {
+                            icon.style.color = '#ccc';
+                        }
+
+                        // Reload favorites list page if needed
                         if (window.location.pathname === '/favorites/') {
                             window.location.reload();
                         }
                     } else {
                         console.error('Failed to toggle favorite:', data.message);
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        }
                     }
                 })
                 .catch(error => {
                     console.error('Error toggling favorite:', error);
                 });
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if user is authenticated
+            {% if user.is_authenticated %}
+                // Get all favorite buttons
+                const favoriteButtons = document.querySelectorAll('.favorite-btn');
+
+                // Get list of favorited product IDs from the server
+                fetch('/get-favorites/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // For each product, check if it's favorited
+                            favoriteButtons.forEach(button => {
+                                const productId = button.getAttribute('data-product-id');
+                                if (data.favorites.includes(parseInt(productId))) {
+                                    // If favorited, set the heart to filled state
+                                    const icon = button.querySelector('i');
+                                    icon.classList.remove('far');
+                                    icon.classList.add('fas');
+                                    icon.style.color = '#e74c3c';
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching favorites:', error);
+                    });
+            {% endif %}
+        });
 
     </script>
     <!-- Instruction Modal - Enhanced -->
@@ -3241,25 +3279,25 @@
     </div>
 
 
-    <!-- Arrow pointing to list selector -->
-    <div id="listArrow" class="arrow-pointer pulse-arrow"
-         style="width: 60px; height: 60px; position: absolute;">
-        <svg viewBox="0 0 24 24" style="width: 100%; height: 100%;" preserveAspectRatio="xMidYMid meet"
-             xmlns="http://www.w3.org/2000/svg">
-            <path d="m14.707 12.707-4 4a1 1 0 0 1-1.414-1.414L12.586 12 9.293 8.707a1 1 0 1 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414z"
-                  style="fill:rgba(31,63,31,0.93)"/>
-        </svg>
-    </div>
+    {#    <!-- Arrow pointing to list selector -->#}
+    {#    <div id="listArrow" class="arrow-pointer pulse-arrow"#}
+    {#         style="width: 60px; height: 60px; position: absolute;">#}
+    {#        <svg viewBox="0 0 24 24" style="width: 100%; height: 100%;" preserveAspectRatio="xMidYMid meet"#}
+    {#             xmlns="http://www.w3.org/2000/svg">#}
+    {#            <path d="m14.707 12.707-4 4a1 1 0 0 1-1.414-1.414L12.586 12 9.293 8.707a1 1 0 1 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414z"#}
+    {#                  style="fill:rgba(31,63,31,0.93)"/>#}
+    {#        </svg>#}
+    {#    </div>#}
 
 
-    <div id="navArrow" class="arrow-pointer pulse-arrow"
-         style="position: absolute; width: 50px; height: 50px;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet"
-             style="width: 100%; height: 100%;">
-            <path d="M16 15a1 1 0 0 1-.707-.293L12 11.414l-3.293 3.293a1 1 0 1 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4A1 1 0 0 1 16 15z"
-                  style="fill:rgba(31,63,31,0.93)"/>
-        </svg>
-    </div>
+    {#    <div id="navArrow" class="arrow-pointer pulse-arrow"#}
+    {#         style="position: absolute; width: 50px; height: 50px;">#}
+    {#        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet"#}
+    {#             style="width: 100%; height: 100%;">#}
+    {#            <path d="M16 15a1 1 0 0 1-.707-.293L12 11.414l-3.293 3.293a1 1 0 1 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4A1 1 0 0 1 16 15z"#}
+    {#                  style="fill:rgba(31,63,31,0.93)"/>#}
+    {#        </svg>#}
+    {#    </div>#}
 
 
     </div>

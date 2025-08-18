@@ -115,6 +115,20 @@
             background-color: #e0e0e0;
         }
 
+        /* User greeting styles */
+        .user-greeting {
+            font-weight: 600;
+            color: #2e652e;
+            margin-right: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 150px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         /* List Selector Styles */
         .list-selector-container {
             position: relative;
@@ -166,6 +180,7 @@
             list-style: none;
             margin: 0;
             padding: 0;
+        {#justify-content: space-between;#}
         }
 
         .main-nav li {
@@ -292,6 +307,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s ease, transform 0.3s ease;
+            margin-left: -9px;
         }
 
         .mobile-search-form button:hover {
@@ -318,6 +334,26 @@
             background-color: #fdd835;
             color: #2e652e;
             transform: translateX(5px);
+        }
+
+        /* User info in mobile menu */
+        .mobile-user-info {
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .mobile-user-info .username {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .mobile-user-info .email {
+            font-size: 14px;
+            opacity: 0.8;
         }
 
         /* Mobile List Selector */
@@ -470,6 +506,12 @@
                 padding-bottom: 60px;
             }
         }
+
+        @media (max-width: 1024px) {
+            .header-search input {
+                width: 96%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -494,10 +536,11 @@
                 <form method="post" action="{% url 'logout' %}" class="auth-form">
                     {% csrf_token %}
                     <div class="list-selector-container" style="display: flex; align-items: center; gap: 8px;">
-                        <a href="{% url 'favorites_list' %}" title="Омилени" style="color: #2e652e;">
+                        <a href="{% url 'favorites_list' %}" title="Омилени"
+                           style="color: #2e652e; margin-left: 20px; margin-right: 20px">
                             <i class="fas fa-heart" style="font-size: 18px;"></i>
                         </a>
-                        <select id="listSelector" class="list-selector">
+                        <select id="listSelector" class="list-selector" style="margin-right: 20px">
                             <option value="">-- Избери листа --</option>
                         </select>
                     </div>
@@ -517,18 +560,25 @@
         </div>
     </div>
     <nav class="main-nav">
-        <ul>
-            <li><a href="{% url 'product_list' %}">Каталог</a></li>
-            <li style="z-index: 0"><a href="{% url 'stats' %}">Статистика</a></li>
-            <li><a href="{% url 'view_lists' %}">Листи</a></li>
-        </ul>
+        <div id="flex" style="display: flex; justify-content: space-between">
+            <ul>
+                <li><a href="{% url 'product_list' %}">Каталог</a></li>
+                <li style="z-index: 0"><a href="{% url 'stats' %}">Статистика</a></li>
+                <li><a href="{% url 'view_lists' %}">Листи</a></li>
+            </ul>
+            <div style="display: flex">
+                <span class="user-greeting" title="{{ user.username }}" style="color: white">
+                            <i class="fas fa-user-circle"></i> {{ user.username|truncatechars:15 }}
+                </span>
+            </div>
+        </div>
     </nav>
 </header>
 
 <!-- Mobile Menu -->
 <div id="mobile-header">
     <div id="mobile-logo">
-        <img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого">
+        <a href="{% url 'home' %}"><img src="{% static 'images/shtedko_official1.png' %}" alt="Штедко лого"></a>
     </div>
     <div class="menu-toggle" onclick="toggleMobileMenu()">☰</div>
 </div>
@@ -539,19 +589,20 @@
         <span class="close-btn" onclick="toggleMobileMenu()">×</span>
     </div>
 
+    {% if user.is_authenticated %}
+        <div class="mobile-user-info">
+            <div class="username">
+                <i class="fas fa-user-circle"></i> {{ user.username }}
+            </div>
+            <div class="email">{{ user.email }}</div>
+        </div>
+    {% endif %}
+
     <form method="GET" action="{% url 'product_list' %}" class="mobile-search-form" id="mobileSearchForm">
         <input type="text" name="search" id="mobileSearchInput" placeholder="Пребарај производ..."
                value="{{ request.GET.search }}">
         <button type="submit"><i class="fas fa-search"></i></button>
     </form>
-
-    {% if user.is_authenticated %}
-        <div class="mobile-list-selector-container">
-            <select id="mobileListSelector" class="mobile-list-selector">
-                <option value="">-- Избери листа --</option>
-            </select>
-        </div>
-    {% endif %}
 
     <nav class="mobile-nav">
         <a href="{% url 'home' %}">Дома</a>
@@ -560,10 +611,10 @@
         <a href="{% url 'view_lists' %}">Листи</a>
 
         {% if user.is_authenticated %}
-            <a href="{% url 'logout' %}">Одјави се</a>
+            <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Одјави се</a>
         {% else %}
-            <a href="{% url 'login' %}">Најави се</a>
-            <a href="{% url 'register' %}">Регистрирај се</a>
+            <a href="{% url 'login' %}"><i class="fas fa-sign-in-alt"></i> Најави се</a>
+            <a href="{% url 'register' %}"><i class="fas fa-user-plus"></i> Регистрирај се</a>
         {% endif %}
     </nav>
 </div>
@@ -572,42 +623,27 @@
 <!-- Mobile Bottom Navigation -->
 <nav class="mobile-bottom-nav">
     <div class="mobile-bottom-nav-container">
-        <a href="{% url 'home' %}" class="mobile-bottom-nav-btn {% if request.path == '/' %}active{% endif %}">
-            <i class="fas fa-home"></i>
-            <span>Дома</span>
-        </a>
-
         <a href="{% url 'favorites_list' %}" class="mobile-bottom-nav-btn">
             <i class="fas fa-heart"></i>
             <span>Омилени</span>
         </a>
 
+        <div class="mobile-bottom-nav-selector">
+            <select id="mobileBottomListSelector" class="mobile-bottom-list-selector">
+                <option value="">-- Избери листа --</option>
+            </select>
+        </div>
 
-        {% if user.is_authenticated %}
-            <div class="mobile-bottom-nav-selector">
-                <select id="mobileBottomListSelector" class="mobile-bottom-list-selector">
-                    <option value="">Листи</option>
-                </select>
-            </div>
-        {% else %}
-            <a href="{% url 'view_lists' %}"
-               class="mobile-bottom-nav-btn {% if 'lists' in request.path %}active{% endif %}">
-                <i class="fas fa-list"></i>
-                <span>Листи</span>
-            </a>
-        {% endif %}
-
-        {#        <a href="{% url 'product_list' %}" class="mobile-bottom-nav-btn {% if 'product' in request.path %}active{% endif %}">#}
-        {#            <i class="fas fa-search"></i>#}
-        {#            <span>Пребарувај</span>#}
-        {#        </a>#}
+        <a href="{% url 'view_lists' %}" class="mobile-bottom-nav-btn">
+            <i class="fas fa-list"></i>
+            <span>Листи</span>
+        </a>
     </div>
 </nav>
 
 {% block content %}
 
 {% endblock %}
-
 
 <script>
     function toggleMobileMenu() {
@@ -676,7 +712,28 @@
             return result;
         }
 
-        function setupSearch(input, form) {
+        function setupSearch(input, form, isMobile = false) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const originalQuery = input.value.trim();
+                const cyrillicQuery = transliterateLatinToCyrillic(originalQuery);
+
+                const originalInput = document.createElement('input');
+                originalInput.type = 'hidden';
+                originalInput.name = 'original_search';
+                originalInput.value = originalQuery;
+                form.appendChild(originalInput);
+
+                const cyrillicInput = document.createElement('input');
+                cyrillicInput.type = 'hidden';
+                cyrillicInput.name = 'cyrillic_search';
+                cyrillicInput.value = cyrillicQuery;
+                form.appendChild(cyrillicInput);
+
+                form.submit();
+            });
+
             input.addEventListener('input', function () {
                 const query = this.value.trim();
                 if (query.length < 2) {
@@ -695,9 +752,9 @@
                                 div.style.padding = '5px 10px';
                                 div.style.cursor = 'pointer';
                                 div.addEventListener('click', function () {
-                                    input.value = transliterateLatinToCyrillic(suggestion);
+                                    input.value = suggestion;
                                     suggestionsDiv.style.display = 'none';
-                                    form.submit();
+                                    form.dispatchEvent(new Event('submit'));
                                 });
                                 suggestionsDiv.appendChild(div);
                             });
@@ -712,18 +769,28 @@
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     suggestionsDiv.style.display = 'none';
-                    input.value = transliterateLatinToCyrillic(input.value);
-                    form.submit();
+                    form.dispatchEvent(new Event('submit'));
                 }
             });
+
+            if (isMobile) {
+                const searchButton = form.querySelector('button[type="submit"]');
+                if (searchButton) {
+                    searchButton.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        form.dispatchEvent(new Event('submit'));
+                    });
+                }
+            }
         }
 
         setupSearch(searchInput, searchForm);
-        setupSearch(mobileSearchInput, mobileSearchForm);
+        setupSearch(mobileSearchInput, mobileSearchForm, true);
 
         document.addEventListener('click', function (e) {
-            if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
-                !mobileSearchInput.contains(e.target)) {
+            if (!searchInput.contains(e.target) &&
+                !mobileSearchInput.contains(e.target) &&
+                !suggestionsDiv.contains(e.target)) {
                 suggestionsDiv.style.display = 'none';
             }
         });
@@ -733,11 +800,8 @@
         fetch('/api/lists/')
             .then(response => response.json())
             .then(data => {
-                // Desktop list selector
                 const dropdown = document.getElementById('listSelector');
-                // Mobile list selector
                 const mobileDropdown = document.getElementById('mobileListSelector');
-                // Mobile bottom list selector
                 const mobileBottomDropdown = document.getElementById('mobileBottomListSelector');
 
                 data.lists.forEach(list => {
@@ -755,7 +819,33 @@
                         mobileBottomDropdown.appendChild(mobileBottomOption);
                     }
                 });
+
+                const savedListId = localStorage.getItem('selectedListId');
+                if (savedListId) {
+                    if (dropdown) dropdown.value = savedListId;
+                    if (mobileDropdown) mobileDropdown.value = savedListId;
+                    if (mobileBottomDropdown) mobileBottomDropdown.value = savedListId;
+                }
             });
+
+        const listSelectors = [
+            document.getElementById('listSelector'),
+            document.getElementById('mobileListSelector'),
+            document.getElementById('mobileBottomListSelector')
+        ].filter(el => el !== null);
+
+        listSelectors.forEach(selector => {
+            selector.addEventListener('change', function () {
+                const selectedValue = this.value;
+                localStorage.setItem('selectedListId', selectedValue);
+
+                listSelectors.forEach(s => {
+                    if (s !== this) {
+                        s.value = selectedValue;
+                    }
+                });
+            });
+        });
     });
 
     document.addEventListener('DOMContentLoaded', function () {
@@ -787,9 +877,7 @@
                     });
 
                     const result = await response.json();
-                    if (result.success) {
-                        {#alert("Производот е додаден во листата!");#}
-                    } else {
+                    if (!result.success) {
                         alert("Грешка: " + result.message);
                     }
                 } catch (error) {
@@ -799,7 +887,6 @@
             });
         });
 
-        // Helper for CSRF token
         function getCookie(name) {
             let cookieValue = null;
             if (document.cookie && document.cookie !== '') {
@@ -818,30 +905,16 @@
 
     document.querySelectorAll('.add-to-list-btn').forEach(button => {
         button.addEventListener('click', function () {
-            button.classList.remove('pulse-on-click'); // reset animation if applied
-            void button.offsetWidth; // force reflow so animation can be reapplied
+            button.classList.remove('pulse-on-click');
+            void button.offsetWidth;
             button.classList.add('pulse-on-click');
         });
     });
 
-    // Sync list selectors
     document.addEventListener('DOMContentLoaded', function () {
-        const listSelectors = [
-            document.getElementById('listSelector'),
-            document.getElementById('mobileListSelector'),
-            document.getElementById('mobileBottomListSelector')
-        ].filter(el => el !== null);
-
-        listSelectors.forEach(selector => {
-            selector.addEventListener('change', function () {
-                const selectedValue = this.value;
-                listSelectors.forEach(s => {
-                    if (s !== this) {
-                        s.value = selectedValue;
-                    }
-                });
-            });
-        });
+        if (typeof initializePriceChart === 'function') {
+            initializePriceChart();
+        }
     });
 </script>
 </body>

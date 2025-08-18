@@ -4,6 +4,9 @@ from django.core.paginator import Paginator
 from django.db.models import Case, When, DecimalField
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
+import transliterate  # pip install transliterate
+
+
 from .forms import RegisterForm
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
@@ -110,15 +113,31 @@ def home(response):
 
 # def base(response):
 #     return render(response, "main/base.html")
+from django.db.models import Q
+from django.utils import timezone
+from django.db.models import Case, When, DecimalField
+from django.core.paginator import Paginator
+
+
 def product_list(request):
     products = Products2.objects.all()
-    search_query = request.GET.get('search')
+    search_query = request.GET.get('search', '').strip()
+    original_query = request.GET.get('original_search', '').strip()
+    cyrillic_query = request.GET.get('cyrillic_search', '').strip()
 
-    # If there's a search query, find matching products
-    if search_query:
-        products = products.filter(name__icontains=search_query)
+    # For backward compatibility with old search URLs
+    if not original_query and search_query:
+        original_query = search_query
+        cyrillic_query = transliterate_latin_to_cyrillic(search_query)
 
-    # Apply filters (unchanged from your original code)
+    # If there's a search query, find matching products in both Latin and Cyrillic
+    if original_query:
+        products = products.filter(
+            Q(name__icontains=original_query) |
+            Q(name__icontains=cyrillic_query)
+        )
+
+    # Rest of your existing filters remain unchanged
     selected_categories = request.GET.getlist('category')
     if selected_categories:
         products = products.filter(category__in=selected_categories)
@@ -178,7 +197,7 @@ def product_list(request):
 
     # Get similar products if there's a search query and results
     similar_products = None
-    if search_query and page_obj:
+    if original_query and page_obj:
         # Get the first product from search results as reference
         reference_product = page_obj[0]
         similar_products = get_similar_products(
@@ -207,11 +226,31 @@ def product_list(request):
         'selected_max_price': max_price,
         'selected_stores': selected_stores,
         'selected_sort': sort,
-        'search_query': search_query,
+        'search_query': original_query or search_query,  # Show the original query in the UI
         'fav_ids': fav_ids,
         'similar_products': similar_products,
     }
     return render(request, 'main/product_list.html', context)
+
+
+# Helper function for transliteration
+def transliterate_latin_to_cyrillic(text):
+    mapping = {
+        'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
+        'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
+        'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
+        'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
+        'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
+        'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
+        's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
+        'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
+        'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
+    }
+
+    text = text.lower()
+    for lat, cyr in mapping.items():
+        text = text.replace(lat, cyr)
+    return text
 
 from django.contrib.auth import authenticate, login
 
@@ -238,7 +277,6 @@ def register(request):
 def custom_logout(request):
     logout(request)
 
-    # Replicate the home view logic for stores_with_products
     categories = Products2.objects.exclude(
         Q(category__isnull=True) | Q(category__exact='')
     ).values_list('category', flat=True).distinct()
@@ -256,7 +294,7 @@ def custom_logout(request):
         store_filtered = Products2.objects.filter(store__iexact=cleaned)
         popust_filtered = store_filtered.filter(popust=True)
         products = popust_filtered.order_by('-price')[:3]
-        if products.exists():  # Only add if there are products
+        if products.exists():
             stores_with_products.append({
                 'name': cleaned,
                 'products': list(products),
@@ -280,12 +318,28 @@ def view_lists(request):
 @login_required
 def create_list(request):
     if request.method == 'POST':
-        list_name = request.POST.get('list_name')
-        if list_name:
-            ShoppingList.objects.create(user=request.user, name=list_name)
-            return redirect('view_lists')
-    return redirect('view_lists')
+        list_name = request.POST.get('list_name', '').strip()
 
+        # Transliterate Cyrillic to Latin if needed
+        try:
+            if any(ord(char) > 127 for char in list_name):  # Check for non-ASCII
+                list_name = transliterate.translit(list_name, reversed=True)
+        except:
+            pass  # Fall through to original name
+
+        try:
+            ShoppingList.objects.create(user=request.user, name=list_name)
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            })
+
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request method'
+    })
 
 
 @login_required
@@ -466,64 +520,67 @@ def stats_view(request):
     matched_name = None
     similar_products = []
     exact_match = False
+    current_price = None
+    min_price = None
+    max_price = None
+    avg_price = None
 
-    if store and query:
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT DISTINCT name 
-                FROM product_history2 
-                WHERE store LIKE %s AND name = %s
-                LIMIT 1
-            """, ['%' + store + '%', query])
-            exact_match_result = cursor.fetchone()
+    if store and (query or selected_product):
+        # First check for exact match if we have a query (not selected product)
+        if query and not selected_product:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT DISTINCT name 
+                    FROM product_history2 
+                    WHERE store LIKE %s AND name = %s
+                    LIMIT 1
+                """, ['%' + store + '%', query])
+                exact_match_result = cursor.fetchone()
 
-            if exact_match_result:
-                matched_name = exact_match_result[0]
-                exact_match = True
-            else:
+                if exact_match_result:
+                    matched_name = exact_match_result[0]
+                    exact_match = True
+
+        # If no exact match or we have selected_product, find similar products
+        if not exact_match:
+            with connection.cursor() as cursor:
                 cursor.execute("""
                     SELECT DISTINCT name FROM product_history2 
                     WHERE store LIKE %s
                 """, ['%' + store + '%'])
                 all_store_products = [row[0] for row in cursor.fetchall()]
 
+                search_term = selected_product if selected_product else query
                 similar_products = []
 
-                string_matches = get_close_matches(
-                    query,
-                    all_store_products,
-                    n=10,
-                    cutoff=0.3
-                )
+                if search_term:
+                    from difflib import get_close_matches
+                    string_matches = get_close_matches(
+                        search_term,
+                        all_store_products,
+                        n=10,
+                        cutoff=0.3
+                    )
 
-                query_lower = query.lower()
-                contains_matches = [
-                                       p for p in all_store_products
-                                       if query_lower in p.lower()
-                                   ][:10]
-
-                all_matches = list(set(string_matches + contains_matches))
-
-                if len(all_matches) < 5:
-                    all_matches.extend([
+                    query_lower = search_term.lower()
+                    contains_matches = [
                                            p for p in all_store_products
-                                           if p not in all_matches
-                                       ][:10 - len(all_matches)])
+                                           if query_lower in p.lower()
+                                       ][:10]
 
-                similar_products = [(p, 1.0) for p in all_matches[:10]]
+                    all_matches = list(set(string_matches + contains_matches))
+                    similar_products = [(p, 100) for p in all_matches[:10]]  # Using 100% for all for simplicity
 
-        if selected_product:
-            matched_name = selected_product
-
-        if matched_name:
+        # If we have a selected product or exact match, get price history
+        product_to_search = selected_product if selected_product else matched_name
+        if product_to_search:
             base_sql = """
                 SELECT scraped_date, price 
                 FROM product_history2 
                 WHERE name = %s AND store LIKE %s
             """
-            params = [matched_name, '%' + store + '%']
+            params = [product_to_search, '%' + store + '%']
 
-            # Add date range conditions if provided
             if start_date_obj and end_date_obj:
                 base_sql += " AND scraped_date BETWEEN %s AND %s"
                 params.extend([start_date_obj, end_date_obj])
@@ -544,17 +601,34 @@ def stats_view(request):
                     'price': float(row[1])
                 } for row in result]
 
-    return render(request, 'main/stats.html', {
+                if result:
+                    prices = [float(row[1]) for row in result]
+                    current_price = prices[-1]
+                    min_price = min(prices)
+                    max_price = max(prices)
+                    avg_price = sum(prices) / len(prices)
+
+    context = {
         'chart_data': chart_data,
-        'matched_name': matched_name,
+        'matched_name': matched_name or selected_product,
         'query': query,
         'store': store,
         'similar_products': similar_products,
         'exact_match': exact_match,
         'start_date': start_date,
         'end_date': end_date,
-    })
+        'current_price': current_price,
+        'min_price': min_price,
+        'max_price': max_price,
+        'avg_price': avg_price,
+    }
 
+    # Debug output - remove in production
+    print("Context being sent to template:")
+    for key, value in context.items():
+        print(f"{key}: {value}")
+
+    return render(request, 'main/stats.html', context)
 def get_driving_distance(user_lat, user_lon, store_lat, store_lon, api_key):
     url = "https://maps.googleapis.com/maps/api/distancematrix/json"
     params = {
@@ -774,38 +848,79 @@ def header(request):
     return render(request, "main/header.html")
 
 
-@login_required
+@require_POST
 def toggle_favorite(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            product_id = data.get('product_id')
+    # Handle unauthenticated users
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'message': 'Authentication required',
+            'login_required': True,
+            'login_url': f'/login/?next={request.META.get("HTTP_REFERER", "/")}'
+        }, status=401)
 
-            product = Products2.objects.get(id=product_id)
-            favorite, created = Favorite.objects.get_or_create(
+    try:
+        data = json.loads(request.body)
+        product_id = data.get('product_id')
+
+        if not product_id:
+            return JsonResponse({'success': False, 'message': 'Product ID is required'}, status=400)
+
+        product = Products2.objects.get(id=product_id)
+
+        # Check if favorite exists
+        favorite_exists = Favorite.objects.filter(
+            user=request.user,
+            product=product
+        ).exists()
+
+        if favorite_exists:
+            # Delete if exists
+            Favorite.objects.filter(
+                user=request.user,
+                product=product
+            ).delete()
+            return JsonResponse({
+                'success': True,
+                'action': 'removed',
+                'is_favorite': False,
+                'product_id': product_id
+            })
+        else:
+            # Create if doesn't exist
+            Favorite.objects.create(
                 user=request.user,
                 product=product
             )
+            return JsonResponse({
+                'success': True,
+                'action': 'added',
+                'is_favorite': True,
+                'product_id': product_id
+            })
 
-            if not created:
-                favorite.delete()
-                return JsonResponse({'success': True, 'is_favorite': False})
-
-            return JsonResponse({'success': True, 'is_favorite': True})
-
-        except Products2.DoesNotExist:
-            return JsonResponse({'success': False, 'message': 'Product not found'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': str(e)})
-
-    return JsonResponse({'success': False, 'message': 'Invalid request'})
-
-@login_required
-def get_favorites(request):
-    favorites = Favorite.objects.filter(user=request.user).values_list('product_id', flat=True)
-    return JsonResponse({'favorites': list(favorites)})
-
+    except Products2.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': 'Product not found'
+        }, status=404)
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': str(e)
+        }, status=500)
 @login_required
 def favorites_list(request):
     favorites = Favorite.objects.filter(user=request.user).select_related('product')
     return render(request, 'main/favorites.html', {'favorites': favorites})
+
+@login_required
+def get_favorites(request):
+    if request.user.is_authenticated:
+        favorites = Favorite.objects.filter(user=request.user).values_list('product_id', flat=True)
+        return JsonResponse({
+            'success': True,
+            'favorites': list(favorites)
+        })
+    return JsonResponse({'success': False, 'message': 'User not authenticated'})
+

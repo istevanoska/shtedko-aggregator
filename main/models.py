@@ -21,6 +21,23 @@ class Item(models.Model):
     def __str__(self):
         return self.text
 
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    name_mk = models.CharField(max_length=100) # Macedonian name
+
+    def __str__(self):
+        return self.name_mk  # or self.name depending on context
+
+class Subcategory(models.Model):
+    name = models.CharField(max_length=100)       # English
+    name_mk = models.CharField(max_length=100)    # Macedonian
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name_mk
+
 #sega odime so komanda python manage.py makemigrations
 class Products2(models.Model):
     name = models.CharField(max_length=255)
@@ -37,6 +54,7 @@ class Products2(models.Model):
     popust = models.BooleanField(default=False)
     popust_date = models.DateField(null=True, blank=True)
     embedding = models.BinaryField()
+    subcategory = models.ForeignKey(Subcategory, on_delete=models.SET_NULL, null=True, blank=True)
 
 
     class Meta:
@@ -63,14 +81,6 @@ class ShoppingListItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
-
-
-class Category(models.Model):
-    name = models.CharField(max_length=100)  # English name
-    name_mk = models.CharField(max_length=100)  # Macedonian name
-
-    def __str__(self):
-        return self.name_mk  # or self.name depending on context
 
 
 from django.utils import timezone  # Correct import for timezone.now

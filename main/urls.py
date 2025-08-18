@@ -6,7 +6,6 @@ from django.contrib.auth import views as auth_views
 
 from .views import custom_logout, remove_from_list, get_store_products, stats_view
 
-
 # from .views import test_db_connection
 # prethodnoto znaci deka od momentalniot folder (main) go vnesuvame views.py
 urlpatterns = [
@@ -41,7 +40,8 @@ urlpatterns = [
     path('header/', views.header, name='header'),
     path('toggle-favorite/', views.toggle_favorite, name='toggle_favorite'),
     path('favorites/', views.favorites_list, name='favorites_list'),
-
+    # path('profile/', views.profile, name='profile'),
+    path('get-favorites/', views.get_favorites, name='get_favorites'),
 
 ]
 # prethodnoto znaci deka koga odime na pocetna strana nema nisto "" i ne nosi na funkcijata
