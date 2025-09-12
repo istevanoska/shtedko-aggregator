@@ -110,6 +110,7 @@ WSGI_APPLICATION = 'DjangoProject3.wsgi.application'
 #        'NAME': BASE_DIR / 'db.sqlite3',
 #    }
 # }
+ORS_API_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjljN2M5ZDlmNWFiMDQwOWJhYjc5NmI0OTI0YmM2M2JkIiwiaCI6Im11cm11cjY0In0="
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',

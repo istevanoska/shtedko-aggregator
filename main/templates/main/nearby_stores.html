@@ -473,8 +473,10 @@
 
     function initMap() {
         try {
-            const userLat = parseFloat(document.getElementById('latitude').value) || {{ nearest_stores.0.latitude|default:41.9981 }};
-            const userLng = parseFloat(document.getElementById('longitude').value) || {{ nearest_stores.0.longitude|default:21.4254 }};
+            const userLat = parseFloat(document.getElementById('latitude').value)
+            || ({{ nearest_stores.0.latitude|default:"41.9981" }});
+        const userLng = parseFloat(document.getElementById('longitude').value)
+            || ({{ nearest_stores.0.longitude|default:"21.4254" }});
 
             map = L.map('map', {
                 center: [userLat, userLng],

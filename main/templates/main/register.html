@@ -6,97 +6,105 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Регистрација</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
+    /* Global Reset */
+    * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        background-image: url('{% static "images/baner1.jpg" %}');
-        background-size: cover;
-        background-position: center;
+        background: url('{% static "images/baner1.jpg" %}') no-repeat center center/cover;
         position: relative;
     }
 
+    /* Dark transparent overlay for contrast */
     body::before {
         content: '';
         position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: inherit;
-        filter: blur(8px);
+        inset: 0;
+        background: rgba(0,0,0,0.5);
         z-index: -1;
     }
 
     .auth-container {
         width: 100%;
-        max-width: 400px;
-        background-color: rgba(255, 255, 255, 0.9);
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        margin: 20px;
-        box-sizing: border-box;
+        max-width: 420px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 35px 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        animation: fadeIn 0.6s ease-in-out;
     }
 
     .auth-container h2 {
         text-align: center;
         margin-bottom: 25px;
-        color: #333;
         font-size: 28px;
+        color: #222;
     }
 
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 18px;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-        color: #555;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #444;
+        font-size: 15px;
     }
 
     .form-group input {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 16px;
-        box-sizing: border-box;
-        transition: border-color 0.3s;
+        padding: 12px 14px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 15px;
+        transition: all 0.3s ease;
     }
+
     .form-group input:focus {
         border-color: #28a745;
+        box-shadow: 0 0 0 3px rgba(40,167,69,0.2);
         outline: none;
     }
 
     button[type="submit"] {
         width: 100%;
-        padding: 12px;
-        background-color: #28a745;
+        padding: 13px;
+        background: linear-gradient(135deg, #28a745, #218838);
         color: white;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 16px;
+        font-weight: 600;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: transform 0.2s ease, opacity 0.2s ease;
     }
 
     button[type="submit"]:hover {
-        background-color: #218838;
+        transform: translateY(-2px);
+        opacity: 0.9;
     }
 
     .login-link {
         text-align: center;
-        margin-top: 20px;
+        margin-top: 18px;
+        font-size: 14px;
     }
 
     .login-link a {
         color: #007bff;
+        font-weight: 600;
         text-decoration: none;
-        transition: color 0.3s;
+        transition: color 0.3s ease;
     }
 
     .login-link a:hover {
@@ -108,6 +116,7 @@
         color: #dc3545;
         margin-bottom: 15px;
         padding-left: 20px;
+        font-size: 14px;
     }
 
     .errorlist li {
@@ -115,12 +124,17 @@
         margin-bottom: 5px;
     }
 
-    /* Help text styling */
-    .auth-container small.helptext {
+    small.helptext {
         font-size: 12px;
         color: #666;
+        margin-top: 4px;
         display: block;
-        margin-top: 5px;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(20px);}
+        to {opacity: 1; transform: translateY(0);}
     }
 </style>
 </head>
@@ -154,7 +168,7 @@
         <button type="submit">Регистрирај се</button>
 
         <div class="login-link">
-            <a href="{% url 'login' %}">Веќе имате профил? Најави се</a>
+            <a href="{% url 'login' %}">Веќе имате профил? Најавете се</a>
         </div>
     </form>
 </div>

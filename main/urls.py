@@ -42,6 +42,7 @@ urlpatterns = [
     path('favorites/', views.favorites_list, name='favorites_list'),
     # path('profile/', views.profile, name='profile'),
     path('get-favorites/', views.get_favorites, name='get_favorites'),
+    path('api/product-history/', views.product_history_api, name='product_history_api'),
 
 ]
 # prethodnoto znaci deka koga odime na pocetna strana nema nisto "" i ne nosi na funkcijata

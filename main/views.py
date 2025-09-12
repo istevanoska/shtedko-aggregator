@@ -629,26 +629,53 @@ def stats_view(request):
         print(f"{key}: {value}")
 
     return render(request, 'main/stats.html', context)
-def get_driving_distance(user_lat, user_lon, store_lat, store_lon, api_key):
-    url = "https://maps.googleapis.com/maps/api/distancematrix/json"
-    params = {
-        "origins": f"{user_lat},{user_lon}",
-        "destinations": f"{store_lat},{store_lon}",
-        "key": api_key,
-        "units": "metric"
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
 
-    if data['status'] == 'OK':
-        element = data['rows'][0]['elements'][0]
-        if element['status'] == 'OK':
-            distance_km = element['distance']['value'] / 1000
-            duration = element['duration']['text']
-            return distance_km, duration
-    return None, None
+# def get_driving_distance(user_lat, user_lon, store_lat, store_lon, api_key):
+#     url = "https://maps.googleapis.com/maps/api/distancematrix/json"
+#     params = {
+#         "origins": f"{user_lat},{user_lon}",
+#         "destinations": f"{store_lat},{store_lon}",
+#         "key": api_key,
+#         "units": "metric"
+#     }
+#     response = requests.get(url, params=params)
+#     data = response.json()
+#     print("Distance Matrix API response:", data)  # <-- add this
+#
+#     if data['status'] == 'OK':
+#         element = data['rows'][0]['elements'][0]
+#         if element['status'] == 'OK':
+#             distance_km = element['distance']['value'] / 1000
+#             duration = element['duration']['text']
+#             return distance_km, duration
+#     return None, None
+
+import openrouteservice
+
+def get_driving_distance(user_lat, user_lon, store_lat, store_lon, api_key):
+    client = openrouteservice.Client(key=api_key)
+    coords = ((user_lon, user_lat), (store_lon, store_lat))  # ORS expects (lon, lat)
+
+    try:
+        route = client.directions(coords, profile='driving-car', format='geojson')
+        distance_m = route['features'][0]['properties']['segments'][0]['distance']  # meters
+        duration_s = route['features'][0]['properties']['segments'][0]['duration']  # seconds
+
+        distance_km = distance_m / 1000
+        duration_min = round(duration_s / 60)
+        duration = f"{duration_min} min"
+
+        return distance_km, duration
+    except Exception as e:
+        print("ORS error:", e)
+        return None, None
+
+
+
 
 from django.conf import settings
+
+from django.shortcuts import render
 
 def nearby_stores_view(request):
     user_lat = request.GET.get('latitude')
@@ -675,72 +702,39 @@ def nearby_stores_view(request):
         {"name": "Reptil Market Kisela Voda", "lat": 41.9510, "lon": 21.4460, "chain": "reptil"},
         {"name": "Reptil Market Aerodrom", "lat": 41.9780, "lon": 21.4680, "chain": "reptil"},
         {"name": "Reptil Market Karposh", "lat": 41.9980, "lon": 21.3930, "chain": "reptil"},
-        {"name": "Reptil Market Partizanska", "lat": 41.9980, "lon": 21.4090, "chain": "reptil"},
-        {"name": "Reptil Market Porta Vlae", "lat": 41.9990, "lon": 21.3860, "chain": "reptil"},
-        {"name": "Reptil Market Radishani", "lat": 42.0500, "lon": 21.4500, "chain": "reptil"},
-        {"name": "Reptil Market Karposh 3", "lat": 41.9990, "lon": 21.4080, "chain": "reptil"},
-        {"name": "Reptil Market Butel", "lat": 42.0400, "lon": 21.4500, "chain": "reptil"},
-        {"name": "Reptil Market Center (50ta Divizija)", "lat": 41.9980, "lon": 21.4320, "chain": "reptil"},
-        {"name": "Reptil Market Nerezi", "lat": 41.9960, "lon": 21.3900, "chain": "reptil"},
-        {"name": "Reptil Market Madzari", "lat": 41.9900, "lon": 21.4700, "chain": "reptil"},
-        {"name": "Reptil Market Lisiche", "lat": 41.9752, "lon": 21.4728, "chain": "reptil"},
-        {"name": "Reptil Market Green Market", "lat": 41.9950, "lon": 21.4360, "chain": "reptil"},
-        {"name": "Reptil Market Center (Aminta III)", "lat": 41.9980, "lon": 21.4300, "chain": "reptil"},
-        {"name": "Reptil Market Kozle", "lat": 41.9960, "lon": 21.3900, "chain": "reptil"},
-        {"name": "Reptil Market Vlae", "lat": 41.9990, "lon": 21.3860, "chain": "reptil"},
-        {"name": "Reptil Market Avtokomanda", "lat": 42.0000, "lon": 21.4700, "chain": "reptil"},
-        {"name": "Reptil Market Bardovci", "lat": 42.0200, "lon": 21.3900, "chain": "reptil"},
-        {"name": "Reptil Market Novo Lisiche", "lat": 41.9801, "lon": 21.4752, "chain": "reptil"},
-        {"name": "Reptil Market Taftalidze", "lat": 41.9972, "lon": 21.4085, "chain": "reptil"},
         {"name": "Ramstore Vardar", "lat": 41.9981, "lon": 21.4325, "chain": "ramstore"},
         {"name": "Ramstore City Mall", "lat": 42.0045, "lon": 21.3919, "chain": "ramstore"},
-        {"name": "Ramstore Taftalidze", "lat": 42.0030, "lon": 21.3925, "chain": "ramstore"},
-        {"name": "Ramstore Karposh", "lat": 42.0040, "lon": 21.3940, "chain": "ramstore"},
-        {"name": "Ramstore Cevahir", "lat": 41.9880, "lon": 21.4700, "chain": "ramstore"},
-        {"name": "Ramstore Park", "lat": 41.9975, "lon": 21.4260, "chain": "ramstore"},
-        {"name": "Ramstore Gorno Lisiche", "lat": 41.9600, "lon": 21.4700, "chain": "ramstore"},
-        {"name": "Ramstore Kapitol", "lat": 41.9830, "lon": 21.4690, "chain": "ramstore"},
-        {"name": "Ramstore Kapishtec", "lat": 41.9900, "lon": 21.4300, "chain": "ramstore"},
-        {"name": "Ramstore Debar Maalo", "lat": 41.9970, "lon": 21.4300, "chain": "ramstore"},
-        {"name": "Ramstore Vodno", "lat": 41.9900, "lon": 21.4300, "chain": "ramstore"},
-        {"name": "Ramstore Aerodrom", "lat": 41.9800, "lon": 21.4700, "chain": "ramstore"},
-        {"name": "Ramstore Star Aerodrom", "lat": 41.9800, "lon": 21.4700, "chain": "ramstore"},
-        {"name": "Ramstore Michurin", "lat": 41.9800, "lon": 21.4700, "chain": "ramstore"},
-        {"name": "Ramstore Sever", "lat": 42.0100, "lon": 21.4400, "chain": "ramstore"},
-        {"name": "Ramstore Cair", "lat": 42.0100, "lon": 21.4400, "chain": "ramstore"},
         {"name": "Vero Aerodrom", "lat": 41.9980, "lon": 21.4680, "chain": "vero"},
         {"name": "Vero Taftalidze", "lat": 41.9972, "lon": 21.4085, "chain": "vero"},
         {"name": "Vero GTC", "lat": 41.9981, "lon": 21.4325, "chain": "vero"},
         {"name": "Vero Čair", "lat": 42.0000, "lon": 21.4330, "chain": "vero"},
-        {"name": "Vero Vero Centar", "lat": 41.9980, "lon": 21.4250, "chain": "vero"},
-        {"name": "Vero Kisela Voda", "lat": 41.9510, "lon": 21.4460, "chain": "vero"},
-        {"name": "Vero Karposh", "lat": 41.9980, "lon": 21.3930, "chain": "vero"},
-        {"name": "Vero Diamond Mall", "lat": 41.9985, "lon": 21.4230, "chain": "vero"},
     ]
 
     filtered_stores = [s for s in stores if s["chain"] == store_chain]
-
     print("Filtered stores:", filtered_stores)
 
     results = []
     for store in filtered_stores:
-        distance_km, duration = get_driving_distance(user_lat, user_lon, store["lat"], store["lon"], settings.GOOGLE_MAPS_API_KEY)
+        distance_km, duration = get_driving_distance(
+            user_lat,
+            user_lon,
+            store["lat"],
+            store["lon"],
+            settings.ORS_API_KEY  # Pass your ORS key here
+        )
         if distance_km is not None:
-            gas_used = (distance_km * 2 * fuel_consumption) / 100
+            gas_used = (distance_km * 2 * fuel_consumption) / 100  # round trip
             results.append({
                 "store": store["name"],
-                "distance_km": distance_km,
+                "distance_km": round(distance_km, 2),
                 "duration": duration,
                 "gas_used": round(gas_used, 2),
-                "lat": store["lat"],
-                "lon": store["lon"],
+                "latitude": store["lat"],
+                "longitude": store["lon"],
             })
 
-    nearest_stores = sorted(results, key=lambda x: x['distance_km'])
-    nearest_stores_top5 = nearest_stores[:5]
-
-    least_gas_stores = sorted(results, key=lambda x: x['gas_used'])
-    least_gas_stores_top5 = least_gas_stores[:5]
+    nearest_stores_top5 = sorted(results, key=lambda x: x['distance_km'])[:5]
+    least_gas_stores_top5 = sorted(results, key=lambda x: x['gas_used'])[:5]
 
     context = {
         "results": results,
@@ -751,7 +745,9 @@ def nearby_stores_view(request):
         "fuel_consumption": fuel_consumption,
         "store_chain": store_chain.title(),
     }
+
     return render(request, "main/nearby_stores.html", context)
+
 
 from django.shortcuts import render
 from django.http import JsonResponse
@@ -924,3 +920,48 @@ def get_favorites(request):
         })
     return JsonResponse({'success': False, 'message': 'User not authenticated'})
 
+from django.http import JsonResponse
+from django.db import connection
+from datetime import datetime
+
+def product_history_api(request):
+    store = request.GET.get('store', '').strip()
+    product = request.GET.get('product', '').strip()
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    if not store or not product:
+        return JsonResponse({'error': 'Missing store or product'}, status=400)
+
+    try:
+        start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date() if start_date and start_date != 'None' else None
+        end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date() if end_date and end_date != 'None' else None
+    except (ValueError, TypeError):
+        start_date_obj = None
+        end_date_obj = None
+
+    base_sql = """
+        SELECT scraped_date, price 
+        FROM product_history2 
+        WHERE name = %s AND store LIKE %s
+    """
+    params = [product, f"%{store}%"]
+
+    if start_date_obj and end_date_obj:
+        base_sql += " AND scraped_date BETWEEN %s AND %s"
+        params.extend([start_date_obj, end_date_obj])
+    elif start_date_obj:
+        base_sql += " AND scraped_date >= %s"
+        params.append(start_date_obj)
+    elif end_date_obj:
+        base_sql += " AND scraped_date <= %s"
+        params.append(end_date_obj)
+
+    base_sql += " ORDER BY scraped_date ASC"
+
+    with connection.cursor() as cursor:
+        cursor.execute(base_sql, params)
+        rows = cursor.fetchall()
+        data = [{'date': row[0].isoformat(), 'price': float(row[1])} for row in rows]
+
+    return JsonResponse({'data': data})

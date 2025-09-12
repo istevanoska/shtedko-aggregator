@@ -94,3 +94,13 @@ class Favorite(models.Model):
     class Meta:
         unique_together = ('user', 'product')
 
+class ProductHistory(models.Model):
+    product = models.ForeignKey(Products2, on_delete=models.CASCADE)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField()
+
+    class Meta:
+        db_table = "product_history2"
+
+    def __str__(self):
+        return f"{self.product.name} - {self.price} ({self.date})"

@@ -38,7 +38,7 @@
                         <div class="list-icon">
                             <i class="fas fa-list-ul"></i>
                         </div>
-                        <h3 class="list-title">{{ list.name }}</h3>
+                        <h3 class="list-title" style="width: 150px">{{ list.name }}</h3>
                         <div class="list-meta">
                                 <span class="meta-item">
                                     <i class="fas fa-shopping-basket"></i> {{ list.items.count }} продукти
@@ -299,6 +299,7 @@
 
     .form-group {
         margin-bottom: 15px;
+        width: 93%;
     }
 
     .form-input {
@@ -491,7 +492,7 @@
         }
 
         .lists-grid {
-            grid-template-columns: 1fr;
+        grid-template-columns: repeat(3, 1fr); /* Exactly 3 columns */
             gap: 15px;
         }
 

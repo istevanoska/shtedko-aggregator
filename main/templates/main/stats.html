@@ -1,774 +1,495 @@
 {% extends 'main/header.html' %}
+{% load category_filters %}
+{% load custom_filters %}
 {% load static %}
-
 {% block content %}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <title>Статистика</title>
+    <title>Ценовна историја - Штедко</title>
     <style>
         :root {
             --primary-color: #2e652e;
             --primary-dark: #1f3f1f;
+            --secondary-color: white;
             --light-bg: #f5f5f5;
             --white: #ffffff;
             --text-dark: #333333;
             --text-light: #666666;
             --border-color: #e0e0e0;
+            --error-color: #e74c3c;
+            --orange-light: rgba(253,216,53,0.85);
+            --orange-dark: #F2C9A1;
+            --orange-solid: rgba(246,215,27,0.85);
         }
 
-        /* Base Styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             background-color: var(--light-bg);
             color: var(--text-dark);
             line-height: 1.6;
         }
 
-        /* Stats Page Container */
-        .stats-wrapper {
+        .main-content {
+            display: flex;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 15px;
+            gap: 20px;
+        }
+
+        .content-area {
+            flex-grow: 1;
+            background-color: var(--white);
+            border-radius: 8px;
             padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* Main Container */
-        .stats-container {
-            background-color: var(--white);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-
-        /* Header Section */
-        .stats-header {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-                url('{% static "images/baner2.jpg" %}') center center / cover no-repeat;
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-        }
-
-        .stats-main-title {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .stats-subtitle {
-            font-size: 16px;
-            opacity: 0.9;
-            margin-top: 8px;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Navigation */
-        .back-button {
-            margin: 20px;
-        }
-
-        .back-button a {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background-color: var(--white);
-            color: var(--primary-color);
-            border-radius: 30px;
-            text-decoration: none;
+        .section-title {
+            font-size: 1.5rem;
             font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(46, 101, 46, 0.2);
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            position: relative;
+            padding-bottom: 10px;
         }
 
-        .back-button a:hover {
-            background-color: #f0f7f0;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--orange-solid));
+            border-radius: 3px;
         }
 
-        /* Form Styles */
-        .stats-form {
-            padding: 0 20px 20px;
-        }
-
-        .form-row {
+        .price-history-container {
             display: flex;
             gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-panel {
+            flex: 1 1 250px;
+            max-width: 300px;
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-panel {
+            flex: 2 1 500px;
+            min-width: 300px;
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
             margin-bottom: 20px;
         }
 
         .form-group {
-            flex: 1;
-            min-width: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
             color: var(--primary-color);
-            font-size: 14px;
         }
 
-        .form-input {
-            width: 75%;
-            padding: 12px 15px;
+        .form-group select, 
+        .form-group input {
+            padding: 10px 12px;
+            border-radius: 4px;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 15px;
-            background-color: var(--white);
-            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
 
-        .form-input:focus {
-            border-color: var(--primary-color);
+        .form-group select:focus, 
+        .form-group input:focus {
             outline: none;
-            box-shadow: 0 0 0 3px rgba(46, 101, 46, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(46, 101, 46, 0.2);
         }
 
-        .form-actions {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .action-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 30px;
+        .search-btn {
+            padding: 12px;
             background-color: var(--primary-color);
             color: var(--white);
             border: none;
-            border-radius: 30px;
-            font-weight: 600;
+            border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
             transition: all 0.3s ease;
-            font-size: 16px;
+            margin-top: 10px;
         }
 
-        .action-button:hover {
+        .search-btn:hover {
             background-color: var(--primary-dark);
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        /* Results Section */
-        .results-container {
-            display: flex;
-            gap: 30px;
-            padding: 20px;
+        .similar-products {
+            margin-top: 20px;
         }
 
-        /* Products List */
-        .products-list {
-            flex: 1;
-            min-width: 300px;
-            max-height: 500px;
-            overflow-y: auto;
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-        }
-
-        .products-list h3 {
-            color: var(--primary-color);
-            font-size: 18px;
-            font-weight: 600;
+        .similar-products h3 {
+            font-size: 1.1rem;
             margin-bottom: 15px;
-            padding-bottom: 10px;
+            color: var(--primary-color);
             border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        .products-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
 
         .product-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 12px;
-            margin-bottom: 12px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
+            padding: 10px 12px;
+            cursor: pointer;
+            background: var(--white);
+            margin-bottom: 8px;
+            border-radius: 5px;
             border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
         }
 
         .product-item:hover {
-            background-color: #f8f8f8;
+            background: #e8f4e8;
             border-color: var(--primary-color);
+            transform: translateX(5px);
         }
 
-        .product-item img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
+        .product-item.active {
+            background: var(--primary-color) !important;
+            color: var(--white) !important;
+            border-color: var(--primary-dark);
         }
 
-        .product-info {
-            flex: 1;
-        }
-
-        .product-info a {
-            color: var(--primary-color);
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .product-info a:hover {
-            text-decoration: underline;
-        }
-
-        .product-meta {
-            font-size: 12px;
-            color: var(--text-light);
-            margin-top: 3px;
-        }
-
-        /* Chart Container */
         .chart-container {
-            flex: 2;
-            min-width: 300px;
-            background-color: var(--white);
+            background: var(--white);
+            padding: 15px;
             border-radius: 8px;
-            padding: 20px;
             border: 1px solid var(--border-color);
-        }
-
-        .chart-container h3 {
-            color: var(--primary-color);
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 400px;
-            width: 100%;
-        }
-
-        /* Empty State */
-        .no-results {
-            text-align: center;
-            padding: 40px;
-            color: #666;
-        }
-
-        .no-results i {
-            font-size: 40px;
-            margin-bottom: 15px;
-            color: var(--text-light);
-        }
-
-        /* Stats Summary */
-        .stats-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 20px;
-        }
-
-        .summary-card {
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-        }
-
-        .summary-card h4 {
-            color: var(--primary-color);
-            margin: 0 0 10px;
-            font-size: 16px;
-        }
-
-        .summary-card .value {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .summary-card .label {
-            font-size: 12px;
-            color: var(--text-light);
-        }
-
-        /* Promo Banner */
-        .promo-banner {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin: 20px;
+            min-height: 300px;
             display: flex;
+            flex-direction: column;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
 
-        .promo-banner .banner-content {
-            flex: 1;
-        }
-
-        .promo-banner h2 {
+        .chart-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
             margin: 0;
-            font-size: 20px;
         }
 
-        .promo-banner p {
-            margin: 5px 0 0;
-            opacity: 0.9;
-            font-size: 14px;
+        .chart-actions {
+            display: flex;
+            gap: 10px;
         }
 
-        /* Responsive Adjustments */
-        @media (max-width: 1200px) {
-            .results-container {
-                flex-direction: column;
-            }
+        .chart-btn {
+            padding: 6px 12px;
+            background-color: var(--orange-solid);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
 
-            .products-list {
-                max-height: 300px;
-            }
+        .chart-btn:hover {
+            background-color: var(--orange-light);
+        }
+
+        #priceChart {
+            flex-grow: 1;
+            width: 100% !important;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(46, 101, 46, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         @media (max-width: 768px) {
-            .stats-main-title {
-                font-size: 24px;
-            }
-
-            .stats-subtitle {
-                font-size: 14px;
-            }
-
-            .form-row {
+            .price-history-container {
                 flex-direction: column;
-                gap: 15px;
             }
-
-            .results-container {
-                padding: 15px;
-                gap: 20px;
+            
+            .search-panel {
+                max-width: 88%;
             }
-
-            .chart-wrapper {
-                height: 350px;
-            }
-
-            .promo-banner {
-                flex-direction: column;
-                text-align: center;
+            
+            .chart-panel {
+                min-width: 88%;
             }
         }
 
-        @media (max-width: 480px) {
-            .stats-wrapper {
-                padding: 10px;
-            }
-
-            .stats-header {
-                padding: 30px 15px;
-            }
-
-            .back-button {
-                margin: 15px;
-            }
-
-            .stats-form {
-                padding: 0 15px 15px;
-            }
-
-            .action-button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .product-item {
-                padding: 10px;
-            }
-
-            .chart-wrapper {
-                height: 300px;
-            }
-
-            .stats-summary {
-                grid-template-columns: 1fr;
-            }
+        .message-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
         }
 
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .alert {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            position: relative;
+            background-color: #f8f9fa;
+            border-left: 4px solid #6c757d;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform: translateX(100%);
+            opacity: 0;
         }
 
-        .stats-container {
-            animation: fadeIn 0.4s ease-out;
+        .alert.show {
+            transform: translateX(0);
+            opacity: 1;
         }
     </style>
 </head>
 <body>
 
-<div class="stats-wrapper">
-    <div class="stats-container">
-        <!-- Header Section -->
-        <div class="stats-header">
-            <h1 class="stats-main-title">Ценовна историја</h1>
-            <p class="stats-subtitle">Анализирајте ги промените на цените низ времето</p>
+<div class="message-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+                <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<div class="main-content">
+<main class="content-area">
+<h2 class="section-title">Ценовна историја</h2>
+
+<div class="price-history-container">
+<div class="search-panel">
+    <form method="get" id="searchForm" class="search-form">
+        <div class="form-group">
+            <label for="store">Продавница:</label>
+            <select name="store" id="store" required>
+                <option value="">-- Избери продавница --</option>
+                <option value="Vero" {% if store == 'Vero' %}selected{% endif %}>Vero</option>
+                <option value="Ramstore" {% if store == 'Ramstore' %}selected{% endif %}>Ramstore</option>
+                <option value="Reptil" {% if store == 'Reptil' %}selected{% endif %}>Reptil</option>
+                <option value="Zito" {% if store == 'Zito' %}selected{% endif %}>Zito</option>
+            </select>
         </div>
 
-        <div class="back-button">
-            <a href="{% url 'home' %}">
-                <i class="fas fa-arrow-left"></i> Назад кон почетна
-            </a>
+        <div class="form-group">
+            <label for="query">Производ:</label>
+            <input type="text" name="query" id="query" value="{{ query }}" required placeholder="Внеси име на производ">
         </div>
 
-        <!-- Search Form -->
-        <form method="get" class="stats-form" id="statsSearchForm">
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="store-select"><i class="fas fa-store"></i> Продавница:</label>
-                    <select name="store" id="store-select" required class="form-input" style="width: 79%">
-                        <option value="">Избери продавница...</option>
-                        <option value="Vero" {% if store == "Vero" %}selected{% endif %}>Vero</option>
-                        <option value="Ramstore" {% if store == "Ramstore" %}selected{% endif %}>Ramstore</option>
-                        <option value="Reptil" {% if store == "Reptil" %}selected{% endif %}>Reptil</option>
-                        <option value="Zito" {% if store == "Zito" %}selected{% endif %}>Zito</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="product-input"><i class="fas fa-search"></i> Продукт:</label>
-                    <input type="text" id="product-input" name="query" placeholder="напр. ВОДА" required
-                           value="{{ query|default:'' }}" class="form-input" autocomplete="off">
-                    <div id="stats-suggestions" style="position: absolute; background: white; border: 1px solid #ddd; border-radius: 5px; width: 75%; max-height: 200px; overflow-y: auto; display: none; z-index: 2; margin-top: 5px;"></div>
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="start-date"><i class="far fa-calendar-alt"></i> Од датум:</label>
-                    <input type="date" id="start-date" name="start_date" class="form-input"
-                           value="{{ start_date|default:'' }}">
-                </div>
-                <div class="form-group">
-                    <label for="end-date"><i class="far fa-calendar-alt"></i> До датум:</label>
-                    <input type="date" id="end-date" name="end_date" class="form-input"
-                           value="{{ end_date|default:'' }}">
-                </div>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="action-button">
-                    <i class="fas fa-chart-line"></i> Прикажи историја
-                </button>
-            </div>
-        </form>
+        <button type="submit" class="search-btn">Пребарај</button>
+    </form>
 
-        {% if similar_products and not exact_match %}
-            <!-- Results Section -->
-            <div class="results-container">
-                <!-- Products List -->
-                <div class="products-list">
-                    <h3><i class="fas fa-list-ul"></i> Слични производи во {{ store }}:</h3>
-                    {% for product, similarity in similar_products %}
-                        <div class="product-item">
-                            {% if store == "Vero" %}
-                                <img src="{% static 'images/vero_logo1.png' %}" alt="{{ product }}">
-                            {% elif store == "Ramstore" %}
-                                <img src="{% static 'images/ramstore_logo.png' %}" alt="{{ product }}">
-                            {% elif store == "Reptil" %}
-                                <img src="{% static 'images/reptil_logo.jpg' %}" alt="{{ product }}">
-                            {% else %}
-                                <img src="{% static 'images/no-image.png' %}" alt="{{ product }}">
-                            {% endif %}
-                            <div class="product-info">
-                                <a href="?store={{ store|urlencode }}&query={{ query|urlencode }}&selected_product={{ product|urlencode }}">
-                                    {{ product }}
-                                </a>
-                                <div class="product-meta">
-                                    Сличност: {{ similarity|floatformat:2 }}%
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-
-                <!-- Chart Container -->
-                <div class="chart-container">
-                    {% if matched_name %}
-                        <h3><i class="fas fa-chart-line"></i> Ценовна историја за {{ matched_name }}</h3>
-                        <div class="chart-wrapper">
-                            <canvas id="priceChart"></canvas>
-                        </div>
-                    {% else %}
-                        <div class="no-results">
-                            <i class="fas fa-exclamation-circle"></i>
-                            <p>Не се пронајдени производи за "{{ query }}" во {{ store }}.</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        {% endif %}
-
-        <!-- Stats Summary -->
-        {% if chart_data %}
-        <div class="promo-banner">
-            <div class="banner-content">
-                <h2>Статистички преглед</h2>
-                <p>Клучни метрики за вашиот избор</p>
-            </div>
-            <i class="fas fa-chart-pie"></i>
-        </div>
-
-        <div class="stats-summary">
-            <div class="summary-card">
-                <h4>Тековна цена</h4>
-                <div class="value">
-                    {% if current_price %}
-                        {{ current_price }} ден
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-                <div class="label">Последна забележана</div>
-            </div>
-            <div class="summary-card">
-                <h4>Најниска цена</h4>
-                <div class="value">
-                    {% if min_price %}
-                        {{ min_price }} ден
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-                <div class="label">Во избраниот период</div>
-            </div>
-            <div class="summary-card">
-                <h4>Највисока цена</h4>
-                <div class="value">
-                    {% if max_price %}
-                        {{ max_price }} ден
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-                <div class="label">Во избраниот период</div>
-            </div>
-            <div class="summary-card">
-                <h4>Просечна цена</h4>
-                <div class="value">
-                    {% if avg_price %}
-                        {{ avg_price|floatformat:2 }} ден
-                    {% else %}
-                        -
-                    {% endif %}
-                </div>
-                <div class="label">Во избраниот период</div>
-            </div>
-        </div>
-        {% endif %}
+    {% if similar_products %}
+    <div class="similar-products">
+        <h3>Слични производи:</h3>
+        <ul class="products-list" id="similarProductsList">
+            {% for p, similarity in similar_products %}
+                <li class="product-item" data-product="{{ p }}">{{ p }}</li>
+            {% endfor %}
+        </ul>
     </div>
+    {% endif %}
+</div>
+
+<div class="chart-panel">
+<div class="chart-container" id="chartContainer">
+<div class="chart-header">
+    <h3 class="chart-title" id="chartTitle">График за ценовната историја на производот</h3>
+    <div class="chart-actions" id="chartActions" style="display: none;">
+        <button class="chart-btn" id="downloadChart"><i class="fas fa-download"></i> Сними</button>
+    </div>
+</div>
+
+<div id="chartContent">
+    <div class="no-data">
+        <i class="fas fa-chart-line"></i>
+        <p>Нема податоци за приказ. Избери производ од листата.</p>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-     function transliterateLatinToCyrillic(text) {
-        const map = {
-            'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
-            'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
-            'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
-            'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
-            'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
-            'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
-            's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
-            'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
-            'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
-        };
+let priceChart = null;
 
-        const typoPatterns = [
-            {pattern: /sampon/gi, replace: 'shampon'},
-            {pattern: /cresi/gi, replace: 'creshi'},
-            {pattern: /stipki/gi, replace: 'shtipki'},
-            {pattern: /sch/gi, replace: 'sh'},
-            {pattern: /ck/gi, replace: 'k'},
-            {pattern: /ph/gi, replace: 'f'},
-            {pattern: /th/gi, replace: 't'},
-            {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
-            {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
-            {pattern: /([a-z])\1/gi, replace: '$1'}
-        ];
+// Show messages animation
+document.querySelectorAll('.alert').forEach(alert => {
+    setTimeout(() => alert.classList.add('show'), 100);
+});
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(alert => {
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 300);
+    });
+}, 5000);
 
-        let normalizedText = text.toLowerCase();
-        for (const {pattern, replace} of typoPatterns) {
-            normalizedText = normalizedText.replace(pattern, replace);
-        }
+// --- Cyrillic transliteration map ---
+const cyrMap = {
+    'a':'а','b':'б','v':'в','g':'г','d':'д','e':'е','zh':'ж','z':'з',
+    'i':'и','j':'ј','k':'к','l':'л','m':'м','n':'н','o':'о','p':'п',
+    'r':'р','s':'с','t':'т','u':'у','f':'ф','h':'х','c':'ц','ch':'ч',
+    'sh':'ш','dj':'џ','lj':'љ','nj':'њ','y':'ј','w':'в','x':'кс','q':'ќ'
+};
 
-        let result = '';
-        let i = 0;
-        while (i < normalizedText.length) {
-            if (map[normalizedText.substring(i, i + 3)]) {
-                result += map[normalizedText.substring(i, i + 3)];
-                i += 3;
-            } else if (map[normalizedText.substring(i, i + 2)]) {
-                result += map[normalizedText.substring(i, i + 2)];
-                i += 2;
-            } else if (map[normalizedText[i]]) {
-                result += map[normalizedText[i]];
-                i++;
-            } else {
-                result += normalizedText[i];
-                i++;
-            }
-        }
-        return result;
+function latinToCyrillic(str) {
+    str = str.toLowerCase();
+    for (let key in cyrMap) {
+        let re = new RegExp(key, 'g');
+        str = str.replace(re, cyrMap[key]);
     }
+    return str;
+}
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const productInput = document.getElementById('product-input');
-        const statsSuggestions = document.getElementById('stats-suggestions');
-        const statsSearchForm = document.getElementById('statsSearchForm');
-        const storeSelect = document.getElementById('store-select');
+// Handle similar product clicks
+document.querySelectorAll('#similarProductsList li').forEach(item => {
+    item.addEventListener('click', async function() {
+        document.querySelectorAll('#similarProductsList li').forEach(i => i.classList.remove('active'));
+        this.classList.add('active');
 
-        // Handle form submission with transliteration
-        statsSearchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+        let productName = this.dataset.product;
+        const store = document.querySelector('select[name="store"]').value;
+        if (!store) { alert('Ве молам изберете продавница прво.'); return; }
 
-            const originalQuery = productInput.value.trim();
-            const cyrillicQuery = transliterateLatinToCyrillic(originalQuery);
-            const selectedStore = storeSelect.value;
+        // Convert product name to Cyrillic before sending request
+        const cyrName = latinToCyrillic(productName);
 
-            // Create hidden inputs for the original and transliterated queries
-            const originalInput = document.createElement('input');
-            originalInput.type = 'hidden';
-            originalInput.name = 'original_query';
-            originalInput.value = originalQuery;
-            statsSearchForm.appendChild(originalInput);
+        document.getElementById('chartActions').style.display = 'flex';
+        document.getElementById('chartTitle').innerText = `Историја на цени за: ${productName}`;
 
-            const cyrillicInput = document.createElement('input');
-            cyrillicInput.type = 'hidden';
-            cyrillicInput.name = 'cyrillic_query';
-            cyrillicInput.value = cyrillicQuery;
-            statsSearchForm.appendChild(cyrillicInput);
+        document.getElementById('chartContent').innerHTML = '<div class="loading-spinner"></div>';
 
-            statsSearchForm.submit();
-        });
+        try {
+            const res = await fetch(`/api/product-history/?store=${store}&product=${encodeURIComponent(cyrName)}`);
+            const data = await res.json();
 
-        // Handle input for suggestions
-        productInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            const store = storeSelect.value;
-
-            if (query.length < 2 || !store) {
-                statsSuggestions.style.display = 'none';
+            if (!data || !data.data || data.data.length === 0) {
+                document.getElementById('chartContent').innerHTML = `
+                    <div class="no-data">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Нема податоци за цените на овој производ.</p>
+                    </div>
+                `;
                 return;
             }
 
-            fetch(`/search-suggestions/?q=${encodeURIComponent(query)}&store=${encodeURIComponent(store)}`)
-                .then(response => response.json())
-                .then(data => {
-                    statsSuggestions.innerHTML = '';
-                    if (data.suggestions.length > 0) {
-                        data.suggestions.forEach(suggestion => {
-                            const div = document.createElement('div');
-                            div.textContent = suggestion;
-                            div.style.padding = '8px 12px';
-                            div.style.cursor = 'pointer';
-                            div.addEventListener('click', function() {
-                                productInput.value = suggestion;
-                                statsSuggestions.style.display = 'none';
-                                statsSearchForm.dispatchEvent(new Event('submit'));
-                            });
-                            statsSuggestions.appendChild(div);
-                        });
-                        statsSuggestions.style.display = 'block';
-                    } else {
-                        statsSuggestions.style.display = 'none';
-                    }
-                });
-        });
+            const labels = data.data.map(e => (new Date(e.date)).toLocaleDateString('mk-MK'));
+            const prices = data.data.map(e => e.price);
 
-        document.addEventListener('click', function(e) {
-            if (!productInput.contains(e.target) && !statsSuggestions.contains(e.target)) {
-                statsSuggestions.style.display = 'none';
-            }
-        });
-
-        productInput.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                statsSuggestions.style.display = 'none';
-                statsSearchForm.dispatchEvent(new Event('submit'));
-            }
-        });
-
-        storeSelect.addEventListener('change', function() {
-            statsSuggestions.style.display = 'none';
-        });
-
-        {% if chart_data %}
+            document.getElementById('chartContent').innerHTML = '<canvas id="priceChart"></canvas>';
             const ctx = document.getElementById('priceChart').getContext('2d');
+            if (priceChart) priceChart.destroy();
 
-            const labels = [
-                {% for item in chart_data %}
-                    "{{ item.date|date:'d.m.Y' }}"{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ];
-
-            const prices = [
-                {% for item in chart_data %}
-                    {{ item.price }}{% if not forloop.last %},{% endif %}
-                {% endfor %}
-            ];
-
-            new Chart(ctx, {
+            priceChart = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Цена (МКД)',
-                        data: prices,
-                        borderColor: '#2e652e',
-                        backgroundColor: 'rgba(46, 101, 46, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.1,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return 'Цена: ' + context.parsed.y + ' ден';
-                                }
-                            }
-                        }
-                    }
-                }
+                data: { labels, datasets:[{
+                    label:'Цена (МКД)',
+                    data: prices,
+                    borderColor:'#2e652e',
+                    backgroundColor:'rgba(46,101,46,0.1)',
+                    borderWidth:2,
+                    tension:0.1,
+                    fill:true,
+                    pointBackgroundColor:'#2e652e',
+                    pointBorderColor:'#fff',
+                    pointRadius:4,
+                    pointHoverRadius:6
+                }]}
             });
-        {% endif %}
 
-        const startDate = document.getElementById('start-date');
-        const endDate = document.getElementById('end-date');
-
-        if (startDate && endDate) {
-            statsSearchForm.addEventListener('submit', function(e) {
-                if (startDate.value && endDate.value && startDate.value > endDate.value) {
-                    alert('Крајниот датум мора да биде после почетниот датум.');
-                    e.preventDefault();
-                }
-            });
+        } catch(err) {
+            console.error(err);
+            document.getElementById('chartContent').innerHTML = `
+                <div class="no-data">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Грешка при вчитување на ценовната историја.</p>
+                </div>
+            `;
         }
     });
+});
+
+// Download chart
+document.getElementById('downloadChart')?.addEventListener('click', function() {
+    if(priceChart) {
+        const link = document.createElement('a');
+        link.download = 'price-history.png';
+        link.href = priceChart.toBase64Image();
+        link.click();
+    }
+});
 </script>
 </body>
-{% endblock %}
 </html>
+{% endblock %}
