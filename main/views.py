@@ -38,7 +38,7 @@ from datetime import datetime
 #         return HttpResponse(f"Database connection failed: {str(e)}")
 
 def index(response):
-    return render(response, "main/base.html")
+    return render(response, "main/index.html")
 
 
 from django.db.models import Q, F, Count
@@ -109,10 +109,10 @@ def home(response):
         'stores_with_products': stores_with_products
     }
 
-    return render(response, 'main/base.html', context)
+    return render(response, 'main/index.html', context)
 
 # def base(response):
-#     return render(response, "main/base.html")
+#     return render(response, "main/index.html")
 from django.db.models import Q
 from django.utils import timezone
 from django.db.models import Case, When, DecimalField
@@ -306,7 +306,7 @@ def custom_logout(request):
         'discounted_products': discounted_products,
         'stores_with_products': stores_with_products
     }
-    return render(request, 'main/base.html', context)
+    return render(request, 'main/index.html', context)
 
 
 @login_required
