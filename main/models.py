@@ -81,6 +81,9 @@ class ShoppingListItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     added_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('shopping_list', 'product')
+
 
 
 from django.utils import timezone  # Correct import for timezone.now

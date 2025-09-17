@@ -15,6 +15,7 @@ import os
 from decouple import config
 from dotenv import load_dotenv
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -38,33 +39,76 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 # Tuka ja dodavame kreiranata aplikacija main.apps.MainConfig da znae django deka postoi. sega mora da se ran migrate comandata
+# INSTALLED_APPS = [
+#     'django.contrib.auth',
+#     'django.contrib.contenttypes',
+#     'django.contrib.sessions',
+#     'django.contrib.messages',
+#     'django.contrib.staticfiles',
+#     'main.apps.MainConfig',
+#     'social_django',
+#     "django.contrib.sites",
+# ]
 INSTALLED_APPS = [
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'main.apps.MainConfig',
-    'social_django',
+    # Django built-in apps
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+
+    # Required for allauth
+    "django.contrib.sites",
+
+    # Your app
+    "main.apps.MainConfig",
+
+    # Allauth core
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+
+    # Providers
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.facebook",
 ]
+
 
 AUTHENTICATION_BACKENDS = [
+    # Default backend (required for admin login)
     'django.contrib.auth.backends.ModelBackend',
-    'social_core.backends.google.GoogleOAuth2',
-    'social_core.backends.facebook.FacebookOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
+
+    # Django Allauth backend (handles social logins)
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
-# Add to bottom of settings.py
-SOCIAL_AUTH_FACEBOOK_KEY = 'your-facebook-app-id'       # App ID
-SOCIAL_AUTH_FACEBOOK_SECRET = 'your-facebook-app-secret'  # App Secret
-SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'public_profile']
-SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {'fields': 'id, name, email'}
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = 'your-google-client-id'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'your-google-client-secret'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['email', 'profile']
 
-LOGIN_REDIRECT_URL = 'home'  # Redirect to home after login
+SITE_ID = 7
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+# ACCOUNT_EMAIL_VERIFICATION = "optional"
+# SOCIALACCOUNT_QUERY_EMAIL = True
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {"SCOPE": ["profile", "email"], "AUTH_PARAMS": {"access_type": "online"}},
+    "facebook": {"METHOD": "oauth2", "SCOPE": ["email"], "FIELDS": ["id","email","name","first_name","last_name"]},
+}
+SOCIALACCOUNT_AUTO_SIGNUP = True  # Automatically create user without showing signup page
+SOCIALACCOUNT_LOGIN_ON_GET = True  # Optional: login immediately on GET request
+
+ACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_QUERY_EMAIL = True
+# SOCIALACCOUNT_AUTO_SIGNUP = True
+
+
+
+# LOGIN_REDIRECT_URL = 'home'  # Redirect to home after login
 LOGIN_URL = 'login'
 
 MIDDLEWARE = [
@@ -73,9 +117,11 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',   # <<< ADD THIS LINE
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'DjangoProject3.urls'
 

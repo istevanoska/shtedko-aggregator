@@ -85,16 +85,16 @@ def home(response):
         store_filtered = Products2.objects.filter(store__iexact=cleaned)
         popust_filtered = store_filtered.filter(popust=True)
 
-        print(f"Store: {cleaned}")
-        print(f"Products after store filter: {store_filtered.count()}")
-        print(f"Products after popust filter: {popust_filtered.count()}")
+        # print(f"Store: {cleaned}")
+        # print(f"Products after store filter: {store_filtered.count()}")
+        # print(f"Products after popust filter: {popust_filtered.count()}")
 
         products = popust_filtered.order_by('-price')[:3]
 
-        if not products:
-            print(f"No discounted products for {cleaned}")
-        else:
-            print(f"Found {len(products)} products for {cleaned}")
+        # if not products:
+        #     print(f"No discounted products for {cleaned}")
+        # else:
+        #     print(f"Found {len(products)} products for {cleaned}")
 
         stores_with_products.append({
             'name': cleaned,
@@ -387,15 +387,15 @@ def toggle_list_item(request):
 @login_required
 def add_to_list(request):
     try:
+        # Only allow POST
+        if request.method != "POST":
+            return JsonResponse({'success': False, 'message': 'Invalid request'}, status=405)
+
         # Extract data from POST request
         data = json.loads(request.body)
         product_id = data.get('product_id')
         list_id = data.get('list_id')
 
-        # Debugging: Log received values
-        print(f"Product ID: {product_id}, List ID: {list_id}, User: {request.user}")
-
-        # Validate inputs
         if not product_id or not list_id:
             return JsonResponse({'success': False, 'message': 'Missing product or list ID'}, status=400)
 
@@ -403,30 +403,26 @@ def add_to_list(request):
         shopping_list = get_object_or_404(ShoppingList, id=list_id, user=request.user)
         product = get_object_or_404(Products2, id=product_id)
 
-        # Debugging: Confirm the product and list are found
-        print(f"Shopping List: {shopping_list}, Product: {product}")
-
-        # Get or create the list item
+        # Get or create the item
         item, created = ShoppingListItem.objects.get_or_create(
             shopping_list=shopping_list,
             product=product,
             defaults={'quantity': 1}
         )
 
-        # Check if item is created or updated
         if not created:
             item.quantity += 1
             item.save()
 
-        # Debugging: Confirm the item was saved
-        print(f"Item: {item}, Created: {created}")
-
-        return JsonResponse({'success': True, 'message': 'Product added to list'})
+        return JsonResponse({
+            'success': True,
+            'message': f'{product.name} added to list',
+            'quantity': item.quantity
+        })
 
     except Exception as e:
-        print(f"Error: {e}")  # Log error details
+        print(f"Error: {e}")
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
-
 def get_user_lists(request):
     if not request.user.is_authenticated:
         return JsonResponse({'lists': []})
@@ -624,7 +620,7 @@ def stats_view(request):
     }
 
     # Debug output - remove in production
-    print("Context being sent to template:")
+    # print("Context being sent to template:")
     for key, value in context.items():
         print(f"{key}: {value}")
 
@@ -697,11 +693,28 @@ def nearby_stores_view(request):
     store_chain = store_chain.lower()
 
     stores = [
-        {"name": "Reptil Market Ruzveltova", "lat": 41.9980, "lon": 21.4250, "chain": "reptil"},
-        {"name": "Reptil Market Crniche", "lat": 41.9840, "lon": 21.4400, "chain": "reptil"},
-        {"name": "Reptil Market Kisela Voda", "lat": 41.9510, "lon": 21.4460, "chain": "reptil"},
+        {"name": "Reptil Market Ruzveltova", "lat": 42.0040878561334, "lon": 21.41538436528707, "chain": "reptil"},
+        {"name": "Reptil Market Crniche", "lat": 41.98424985514346, "lon": 21.42854499185496, "chain": "reptil"},
+        {"name": "Reptil Market Butel", "lat": 42.03151299550568, "lon": 21.44460271127004, "chain": "reptil"},
+        {"name": "Reptil Market Avtokomanda", "lat": 42.00314285371043, "lon": 21.464809841955148, "chain": "reptil"},
+        {"name": "Reptil Market Radishani", "lat": 42.05659527027985, "lon": 21.451523714968985, "chain": "reptil"},
+        {"name": "Reptil Market Madzari", "lat": 42.00080136926024, "lon": 21.488524284283873, "chain": "reptil"},
+        {"name": "Reptil Market Lisice", "lat": 41.975386066287584, "lon": 21.472738657297704, "chain": "reptil"},
+        {"name": "Reptil Market Ardorom bul.Jane Sandanski", "lat": 41.98410917961027, "lon": 21.46690158428389, "chain": "reptil"},
+        {"name": "Reptil Market Bardovci", "lat": 42.025668068096394, "lon": 21.37584645411437, "chain": "reptil"},
+        {"name": "Reptil Market Aerodrom", "lat": 41.985188473060354, "lon": 21.453380984283882, "chain": "reptil"},
+        {"name": "Reptil Market Shop & Go", "lat": 41.99948987076041, "lon": 21.423976899626428, "chain": "reptil"},
+        {"name": "Reptil Market Zelen Pazar", "lat": 41.991862538872645, "lon": 21.433574943394476, "chain": "reptil"},
+        {"name": "Reptil Market Drzhavna Bolnica", "lat": 41.99082095885179, "lon": 21.424983018422854, "chain": "reptil"},
+        {"name": "Reptil Market Kisela Voda", "lat": 41.98173349419106, "lon": 21.43810738428388, "chain": "reptil"},
         {"name": "Reptil Market Aerodrom", "lat": 41.9780, "lon": 21.4680, "chain": "reptil"},
-        {"name": "Reptil Market Karposh", "lat": 41.9980, "lon": 21.3930, "chain": "reptil"},
+        {"name": "Reptil Market Karposh 3 br.9", "lat": 42.007022300132036, "lon": 21.400571526550074, "chain": "reptil"},
+        {"name": "Reptil Market Karposh br.6", "lat": 42.00112199222344, "lon": 21.41212279925285, "chain": "reptil"},
+        {"name": "Reptil Market Karposh br.5", "lat": 42.007478018986724, "lon": 21.395736283910317, "chain": "reptil"},
+        {"name": "Reptil Market Porta Vlae", "lat": 42.00816321194575, "lon": 21.370438003817473, "chain": "reptil"},
+        {"name": "Reptil Market Nerezi", "lat": 41.995647756137735, "lon": 21.39414196856774, "chain": "reptil"},
+        {"name": "Reptil Market Vlae", "lat": 42.011056469322966, "lon": 21.374480029937953, "chain": "reptil"},
+        {"name": "Reptil Market Centar Pestaloci", "lat": 41.99836555442384, "lon": 21.421861676512417, "chain": "reptil"},
         {"name": "Ramstore Vardar", "lat": 41.9981, "lon": 21.4325, "chain": "ramstore"},
         {"name": "Ramstore City Mall", "lat": 42.0045, "lon": 21.3919, "chain": "ramstore"},
         {"name": "Vero Aerodrom", "lat": 41.9980, "lon": 21.4680, "chain": "vero"},

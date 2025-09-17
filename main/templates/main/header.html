@@ -512,6 +512,9 @@
                 width: 96%;
             }
         }
+        .header-search input{
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -565,6 +568,8 @@
                 <li><a href="{% url 'product_list' %}">Каталог</a></li>
                 <li style="z-index: 0"><a href="{% url 'stats' %}">Статистика</a></li>
                 <li><a href="{% url 'view_lists' %}">Листи</a></li>
+                <li><a href="{% url 'nearby_stores' %}">Најблиски Продавници</a></li>
+
             </ul>
             <div style="display: flex">
                 <span class="user-greeting" title="{{ user.username }}" style="color: white">
@@ -609,6 +614,7 @@
         <a href="{% url 'product_list' %}">Каталог</a>
         <a href="{% url 'stats' %}">Статистика</a>
         <a href="{% url 'view_lists' %}">Листи</a>
+        <a href="{% url 'nearby_stores' %}">Најблиски Продавници</a>
 
         {% if user.is_authenticated %}
             <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Одјави се</a>

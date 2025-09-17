@@ -15,7 +15,7 @@
             <div class="product-card">
                 <a href="{% url 'product_detail' favorite.product.id %}" class="product-card-link">
                     <div class="product-image-container">
-                        {% if favorite.product.image_url %}
+                        {% if favorite.product.image_url and favorite.product.store != 'Vero' %}
                             <img src="{{ favorite.product.image_url }}" alt="{{ favorite.product.name }}" class="product-image" loading="lazy">
                         {% else %}
                             <div class="no-image-placeholder">

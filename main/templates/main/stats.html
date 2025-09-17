@@ -4,312 +4,6 @@
 {% load static %}
 {% block content %}
 
-<!DOCTYPE html>
-<html lang="mk">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <title>Ценовна историја - Штедко</title>
-    <style>
-        :root {
-            --primary-color: #2e652e;
-            --primary-dark: #1f3f1f;
-            --secondary-color: white;
-            --light-bg: #f5f5f5;
-            --white: #ffffff;
-            --text-dark: #333333;
-            --text-light: #666666;
-            --border-color: #e0e0e0;
-            --error-color: #e74c3c;
-            --orange-light: rgba(253,216,53,0.85);
-            --orange-dark: #F2C9A1;
-            --orange-solid: rgba(246,215,27,0.85);
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            background-color: var(--light-bg);
-            color: var(--text-dark);
-            line-height: 1.6;
-        }
-
-        .main-content {
-            display: flex;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 15px;
-            gap: 20px;
-        }
-
-        .content-area {
-            flex-grow: 1;
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--primary-color);
-            position: relative;
-            padding-bottom: 10px;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(to right, var(--primary-color), var(--orange-solid));
-            border-radius: 3px;
-        }
-
-        .price-history-container {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .search-panel {
-            flex: 1 1 250px;
-            max-width: 300px;
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .chart-panel {
-            flex: 2 1 500px;
-            min-width: 300px;
-            background-color: var(--white);
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .search-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-weight: bold;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-            color: var(--primary-color);
-        }
-
-        .form-group select, 
-        .form-group input {
-            padding: 10px 12px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group select:focus, 
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(46, 101, 46, 0.2);
-        }
-
-        .search-btn {
-            padding: 12px;
-            background-color: var(--primary-color);
-            color: var(--white);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .search-btn:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .similar-products {
-            margin-top: 20px;
-        }
-
-        .similar-products h3 {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 8px;
-        }
-
-        .products-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .product-item {
-            padding: 10px 12px;
-            cursor: pointer;
-            background: var(--white);
-            margin-bottom: 8px;
-            border-radius: 5px;
-            border: 1px solid var(--border-color);
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .product-item:hover {
-            background: #e8f4e8;
-            border-color: var(--primary-color);
-            transform: translateX(5px);
-        }
-
-        .product-item.active {
-            background: var(--primary-color) !important;
-            color: var(--white) !important;
-            border-color: var(--primary-dark);
-        }
-
-        .chart-container {
-            background: var(--white);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .chart-title {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            margin: 0;
-        }
-
-        .chart-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chart-btn {
-            padding: 6px 12px;
-            background-color: var(--orange-solid);
-            color: var(--white);
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
-        }
-
-        .chart-btn:hover {
-            background-color: var(--orange-light);
-        }
-
-        #priceChart {
-            flex-grow: 1;
-            width: 100% !important;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-light);
-        }
-
-        .no-data i {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            color: #ccc;
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(46, 101, 46, 0.2);
-            border-radius: 50%;
-            border-top-color: var(--primary-color);
-            animation: spin 1s ease-in-out infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            .price-history-container {
-                flex-direction: column;
-            }
-            
-            .search-panel {
-                max-width: 88%;
-            }
-            
-            .chart-panel {
-                min-width: 88%;
-            }
-        }
-
-        .message-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            max-width: 400px;
-        }
-
-        .alert {
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            position: relative;
-            background-color: #f8f9fa;
-            border-left: 4px solid #6c757d;
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            transform: translateX(100%);
-            opacity: 0;
-        }
-
-        .alert.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    </style>
-</head>
-<body>
-
 <div class="message-container">
     {% if messages %}
         {% for message in messages %}
@@ -322,174 +16,935 @@
 </div>
 
 <div class="main-content">
-<main class="content-area">
-<h2 class="section-title">Ценовна историја</h2>
+  <main class="content-area">
+    <div class="page-header">
+      <h2 class="section-title">Ценовна историја</h2>
+      <p class="page-description">Откријте ја историјата на цените на производите од вашите омилени продавници</p>
+    </div>
 
-<div class="price-history-container">
-<div class="search-panel">
-    <form method="get" id="searchForm" class="search-form">
-        <div class="form-group">
+    <div class="price-history-container">
+      <!-- Search panel -->
+      <div class="search-panel">
+        <div class="panel-header">
+          <i class="fas fa-search"></i>
+          <h3>Пребарај производи</h3>
+        </div>
+
+        <form method="get" id="searchForm" class="search-form">
+          <div class="form-group">
             <label for="store">Продавница:</label>
-            <select name="store" id="store" required>
+            <div class="select-wrapper">
+              <select name="store" id="store" required>
                 <option value="">-- Избери продавница --</option>
                 <option value="Vero" {% if store == 'Vero' %}selected{% endif %}>Vero</option>
                 <option value="Ramstore" {% if store == 'Ramstore' %}selected{% endif %}>Ramstore</option>
                 <option value="Reptil" {% if store == 'Reptil' %}selected{% endif %}>Reptil</option>
                 <option value="Zito" {% if store == 'Zito' %}selected{% endif %}>Zito</option>
-            </select>
-        </div>
+              </select>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+          </div>
 
-        <div class="form-group">
-            <label for="query">Производ:</label>
-            <input type="text" name="query" id="query" value="{{ query }}" required placeholder="Внеси име на производ">
-        </div>
+          <div class="form-group">
+            <label for="query">Име на производ:</label>
+            <div class="input-wrapper">
+              <input type="text" name="query" id="query" value="{{ query }}" required placeholder="Внеси име на производ">
+              <i class="fas fa-tag"></i>
+            </div>
+          </div>
 
-        <button type="submit" class="search-btn">Пребарај</button>
-    </form>
+          <button type="submit" class="search-btn">
+            <i class="fas fa-search"></i>
+            Пребарај
+          </button>
+        </form>
 
-    {% if similar_products %}
-    <div class="similar-products">
-        <h3>Слични производи:</h3>
-        <ul class="products-list" id="similarProductsList">
+        {% if similar_products %}
+        <div class="similar-products">
+          <div class="similar-header">
+            <i class="fas fa-lightbulb"></i>
+            <h3>Препорачани производи:</h3>
+          </div>
+          <div class="products-scroll-container">
             {% for p, similarity in similar_products %}
-                <li class="product-item" data-product="{{ p }}">{{ p }}</li>
+              <div class="product-item" data-product="{{ p }}">
+                <span class="product-name">{{ p }}</span>
+{#                <span class="similarity-badge">{{ similarity|floatformat:0 }}%</span>#}
+              </div>
             {% endfor %}
-        </ul>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Chart panel -->
+      <div class="chart-panel">
+        <div class="panel-header">
+          <i class="fas fa-chart-line"></i>
+          <h3>Графикон на цени</h3>
+        </div>
+
+        <div class="chart-container" id="chartContainer">
+          <div class="chart-header">
+            <h3 class="chart-title" id="chartTitle">Изберете производ за да ја видите ценовната историја</h3>
+            <div class="chart-actions" id="chartActions" style="display: none;">
+              <button class="chart-btn export-btn" id="downloadChart">
+                <i class="fas fa-download"></i>
+                <span>Сними</span>
+              </button>
+              <button class="chart-btn info-btn" id="chartInfo">
+                <i class="fas fa-info-circle"></i>
+                <span>Инфо</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="chartContent">
+            <div class="no-data">
+              <div class="no-data-icon">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+              <h4>Нема податоци за приказ</h4>
+              <p>Изберете производ од листата за да ја видите неговата ценовна историја</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-container" id="statsContainer" style="display: none;">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-tag"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="currentPrice">-</span>
+              <span class="stat-label">Тековна цена</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon low">
+              <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="lowestPrice">-</span>
+              <span class="stat-label">Најниска цена</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon high">
+              <i class="fas fa-arrow-up"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="highestPrice">-</span>
+              <span class="stat-label">Највисока цена</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-icon avg">
+              <i class="fas fa-balance-scale"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value" id="averagePrice">-</span>
+              <span class="stat-label">Просечна цена</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    {% endif %}
+  </main>
 </div>
 
-<div class="chart-panel">
-<div class="chart-container" id="chartContainer">
-<div class="chart-header">
-    <h3 class="chart-title" id="chartTitle">График за ценовната историја на производот</h3>
-    <div class="chart-actions" id="chartActions" style="display: none;">
-        <button class="chart-btn" id="downloadChart"><i class="fas fa-download"></i> Сними</button>
-    </div>
-</div>
+<!-- Styles -->
+<style>
+:root {
+  --primary: #2e652e;
+  --primary-light: #4caf50;
+  --primary-dark: #1f3f1f;
+  --secondary: #ff9800;
+  --bg: #f8f9fa;
+  --card-bg: #ffffff;
+  --white: #fff;
+  --border: #e0e0e0;
+  --text: #333333;
+  --text-light: #666666;
+  --text-lighter: #888888;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --danger: #f44336;
+  --info: #2196f3;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --transition: all 0.3s ease;
+}
 
-<div id="chartContent">
-    <div class="no-data">
-        <i class="fas fa-chart-line"></i>
-        <p>Нема податоци за приказ. Избери производ од листата.</p>
-    </div>
-</div>
-</div>
-</div>
-</div>
-</main>
-</div>
+* {
+  box-sizing: border-box;
+}
 
+body {
+  background: var(--bg);
+    font-family: Arial, sans-serif;
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.main-content {
+  display: flex;
+  max-width: 1400px;
+  margin: 20px auto;
+  padding: 0 20px;
+  gap: 25px;
+}
+
+.header-search input{
+    width: 100%;
+}
+
+.content-area {
+  flex-grow: 1;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 25px;
+  box-shadow: var(--shadow);
+}
+
+.page-header {
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title {
+  font-size: 1.8rem;
+  color: var(--primary);
+  margin: 0 0 8px 0;
+  font-weight: 700;
+}
+
+.page-description {
+  color: var(--text-light);
+  margin: 0;
+  font-size: 1rem;
+}
+
+.price-history-container {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.search-panel, .chart-panel {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 0;
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.search-panel:hover, .chart-panel:hover {
+  box-shadow: var(--shadow-hover);
+}
+
+.search-panel {
+  flex: 1 1 320px;
+  max-width: 380px;
+}
+
+.chart-panel {
+  flex: 2 1 600px;
+  min-width: 340px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: white;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.panel-header i {
+  margin-right: 12px;
+  font-size: 1.2rem;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.search-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.select-wrapper, .input-wrapper {
+  position: relative;
+}
+
+.select-wrapper i, .input-wrapper i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-lighter);
+  pointer-events: none;
+}
+
+.form-group input, .form-group select {
+  padding: 14px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  width: 100%;
+  transition: var(--transition);
+  background: var(--white);
+  appearance: none;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 101, 46, 0.2);
+}
+
+.search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+.search-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(46, 101, 46, 0.3);
+}
+
+.similar-products {
+  margin-top: 20px;
+  border-top: 1px solid var(--border);
+  padding: 25px;
+}
+
+.similar-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.similar-header i {
+  color: var(--secondary);
+  margin-right: 10px;
+  font-size: 1.1rem;
+}
+
+.similar-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.products-scroll-container {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.products-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.products-scroll-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.products-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+}
+
+.products-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--white);
+}
+
+.product-item:hover {
+  background: #eef8ee;
+  border-color: var(--primary-light);
+  transform: translateX(5px);
+}
+
+.product-item.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.product-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.similarity-badge {
+  background: var(--secondary);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  padding: 25px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.chart-title {
+  font-size: 1.2rem;
+  color: var(--text);
+  margin: 0;
+  font-weight: 600;
+}
+
+.chart-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.chart-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.export-btn {
+  background: var(--primary);
+  color: white;
+}
+
+.export-btn:hover {
+  background: var(--primary-dark);
+}
+
+.info-btn {
+  background: var(--info);
+  color: white;
+}
+
+.info-btn:hover {
+  background: #0b7dda;
+}
+
+.no-data {
+  text-align: center;
+  color: var(--text-light);
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.no-data-icon {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  color: #ddd;
+}
+
+.no-data h4 {
+  font-size: 1.3rem;
+  margin: 0 0 10px 0;
+  color: var(--text-light);
+}
+
+.no-data p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(46, 101, 46, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 40px auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  padding: 20px 25px;
+  border-top: 1px solid var(--border);
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: var(--white);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  transition: var(--transition);
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 15px;
+  background: rgba(46, 101, 46, 0.1);
+  color: var(--primary);
+}
+
+.stat-icon.low {
+  background: rgba(76, 175, 80, 0.1);
+  color: var(--success);
+}
+
+.stat-icon.high {
+  background: rgba(244, 67, 54, 0.1);
+  color: var(--danger);
+}
+
+.stat-icon.avg {
+  background: rgba(33, 150, 243, 0.1);
+  color: var(--info);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.message-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alert {
+  position: relative;
+  padding: 15px 20px;
+  background: var(--card-bg);
+  border-left: 4px solid var(--primary);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: 0.4s;
+  max-width: 350px;
+}
+
+.alert.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.close-btn {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--text-light);
+}
+
+.close-btn:hover {
+  color: var(--text);
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    flex-direction: column;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 0 15px;
+    margin: 15px auto;
+  }
+
+  .content-area {
+    padding: 20px;
+  }
+
+  .price-history-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .search-panel, .chart-panel {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .chart-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .section-title {
+    font-size: 1.5rem;
+  }
+
+  .search-form {
+    padding: 20px;
+  }
+
+  .similar-products, .chart-container {
+    padding: 20px;
+  }
+}
+</style>
+
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@1.2.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
 <script>
 let priceChart = null;
 
-// Show messages animation
+// Animate messages
 document.querySelectorAll('.alert').forEach(alert => {
-    setTimeout(() => alert.classList.add('show'), 100);
+  setTimeout(() => alert.classList.add('show'), 100);
+  setTimeout(() => {
+    alert.style.opacity = '0';
+    setTimeout(() => alert.remove(), 300);
+  }, 5000);
 });
-setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(alert => {
-        alert.style.opacity = '0';
-        setTimeout(() => alert.remove(), 300);
-    });
-}, 5000);
 
-// --- Cyrillic transliteration map ---
-const cyrMap = {
-    'a':'а','b':'б','v':'в','g':'г','d':'д','e':'е','zh':'ж','z':'з',
-    'i':'и','j':'ј','k':'к','l':'л','m':'м','n':'н','o':'о','p':'п',
-    'r':'р','s':'с','t':'т','u':'у','f':'ф','h':'х','c':'ц','ch':'ч',
-    'sh':'ш','dj':'џ','lj':'љ','nj':'њ','y':'ј','w':'в','x':'кс','q':'ќ'
-};
+// Cyrillic transliteration
+const cyrMap = {a:"а",b:"б",v:"в",g:"г",d:"д",e:"е",zh:"ж",z:"з",i:"и",j:"ј",k:"к",l:"л",m:"м",n:"н",o:"о",p:"п",r:"р",s:"с",t:"т",u:"у",f:"ф",h:"х",c:"ц",ch:"ч",sh:"ш",dj:"џ",lj:"љ",nj:"њ",y:"ј",w:"в",x:"кс",q:"ќ"};
 
 function latinToCyrillic(str) {
-    str = str.toLowerCase();
-    for (let key in cyrMap) {
-        let re = new RegExp(key, 'g');
-        str = str.replace(re, cyrMap[key]);
-    }
-    return str;
+  str = str.toLowerCase();
+  for(let k in cyrMap) {
+    str = str.replace(new RegExp(k, "g"), cyrMap[k]);
+  }
+  return str;
 }
 
 // Handle similar product clicks
-document.querySelectorAll('#similarProductsList li').forEach(item => {
-    item.addEventListener('click', async function() {
-        document.querySelectorAll('#similarProductsList li').forEach(i => i.classList.remove('active'));
-        this.classList.add('active');
+document.querySelectorAll('.product-item').forEach(item => {
+  item.addEventListener('click', async function() {
+    document.querySelectorAll('.product-item').forEach(i => i.classList.remove('active'));
+    this.classList.add('active');
 
-        let productName = this.dataset.product;
-        const store = document.querySelector('select[name="store"]').value;
-        if (!store) { alert('Ве молам изберете продавница прво.'); return; }
+    let productName = this.dataset.product;
+    const store = document.querySelector('#store').value;
+    if (!store) {
+      showMessage("Ве молам изберете продавница прво.", "warning");
+      return;
+    }
 
-        // Convert product name to Cyrillic before sending request
-        const cyrName = latinToCyrillic(productName);
+    const cyrName = latinToCyrillic(productName);
+    document.getElementById('chartActions').style.display = 'flex';
+    document.getElementById('chartTitle').innerText = `Историја на цени за: ${productName}`;
+    document.getElementById('chartContent').innerHTML = '<div class="loading-spinner"></div>';
 
-        document.getElementById('chartActions').style.display = 'flex';
-        document.getElementById('chartTitle').innerText = `Историја на цени за: ${productName}`;
-
-        document.getElementById('chartContent').innerHTML = '<div class="loading-spinner"></div>';
-
-        try {
-            const res = await fetch(`/api/product-history/?store=${store}&product=${encodeURIComponent(cyrName)}`);
-            const data = await res.json();
-
-            if (!data || !data.data || data.data.length === 0) {
-                document.getElementById('chartContent').innerHTML = `
-                    <div class="no-data">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>Нема податоци за цените на овој производ.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const labels = data.data.map(e => (new Date(e.date)).toLocaleDateString('mk-MK'));
-            const prices = data.data.map(e => e.price);
-
-            document.getElementById('chartContent').innerHTML = '<canvas id="priceChart"></canvas>';
-            const ctx = document.getElementById('priceChart').getContext('2d');
-            if (priceChart) priceChart.destroy();
-
-            priceChart = new Chart(ctx, {
-                type: 'line',
-                data: { labels, datasets:[{
-                    label:'Цена (МКД)',
-                    data: prices,
-                    borderColor:'#2e652e',
-                    backgroundColor:'rgba(46,101,46,0.1)',
-                    borderWidth:2,
-                    tension:0.1,
-                    fill:true,
-                    pointBackgroundColor:'#2e652e',
-                    pointBorderColor:'#fff',
-                    pointRadius:4,
-                    pointHoverRadius:6
-                }]}
-            });
-
-        } catch(err) {
-            console.error(err);
-            document.getElementById('chartContent').innerHTML = `
-                <div class="no-data">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>Грешка при вчитување на ценовната историја.</p>
-                </div>
-            `;
-        }
+    // Show loading state for stats
+    document.getElementById('statsContainer').style.display = 'grid';
+    document.querySelectorAll('.stat-value').forEach(el => {
+      el.innerText = '...';
     });
+
+    try {
+      const res = await fetch(`/api/product-history/?store=${store}&product=${encodeURIComponent(cyrName)}`);
+      const data = await res.json();
+
+      if (!data?.data?.length) {
+        document.getElementById('chartContent').innerHTML = `
+          <div class="no-data">
+            <div class="no-data-icon">
+              <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h4>Нема податоци за цените</h4>
+            <p>Не се пронајдени записи за цени на овој производ</p>
+          </div>`;
+        document.getElementById('statsContainer').style.display = 'none';
+        return;
+      }
+
+      // Process data for chart
+      const sortedData = data.data.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const labels = sortedData.map(e => new Date(e.date));
+      const prices = sortedData.map(e => parseFloat(e.price));
+
+      // Calculate stats
+      const currentPrice = prices[prices.length - 1];
+      const lowestPrice = Math.min(...prices);
+      const highestPrice = Math.max(...prices);
+      const averagePrice = (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2);
+
+      // Update stats
+      document.getElementById('currentPrice').innerText = `${currentPrice} МКД`;
+      document.getElementById('lowestPrice').innerText = `${lowestPrice} МКД`;
+      document.getElementById('highestPrice').innerText = `${highestPrice} МКД`;
+      document.getElementById('averagePrice').innerText = `${averagePrice} МКД`;
+
+      // Render chart
+      document.getElementById('chartContent').innerHTML = '<canvas id="priceChart"></canvas>';
+      const ctx = document.getElementById('priceChart').getContext('2d');
+
+      if (priceChart) priceChart.destroy();
+
+      priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Цена (МКД)',
+            data: prices,
+            borderColor: '#2e652e',
+            backgroundColor: 'rgba(46, 101, 46, 0.1)',
+            fill: true,
+            tension: 0.2,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#2e652e',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  return `Цена: ${context.parsed.y} МКД`;
+                },
+                title: function(context) {
+                  return new Date(context[0].parsed.x).toLocaleDateString('mk-MK');
+                }
+              }
+            },
+            zoom: {
+              zoom: {
+                wheel: {
+                  enabled: true,
+                },
+                pinch: {
+                  enabled: true
+                },
+                mode: 'x',
+              },
+              pan: {
+                enabled: true,
+                mode: 'x',
+              }
+            }
+          },
+          scales: {
+            x: {
+              type: 'time',
+              time: {
+                unit: 'day',
+                tooltipFormat: 'dd MMM yyyy',
+                displayFormats: {
+                  day: 'dd MMM'
+                }
+              },
+              title: {
+                display: true,
+                text: 'Датум'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: 'Цена (МКД)'
+              },
+              grace: '5%'
+            }
+          }
+        }
+      });
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('chartContent').innerHTML = `
+        <div class="no-data">
+          <div class="no-data-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <h4>Грешка при вчитување</h4>
+          <p>Настана грешка при вчитување на податоците. Обидете се повторно.</p>
+        </div>`;
+      document.getElementById('statsContainer').style.display = 'none';
+    }
+  });
 });
 
 // Download chart
-document.getElementById('downloadChart')?.addEventListener('click', function() {
-    if(priceChart) {
-        const link = document.createElement('a');
-        link.download = 'price-history.png';
-        link.href = priceChart.toBase64Image();
-        link.click();
-    }
+document.getElementById('downloadChart')?.addEventListener('click', () => {
+  if (priceChart) {
+    const link = document.createElement('a');
+    link.download = 'price-history.png';
+    link.href = priceChart.toBase64Image();
+    link.click();
+  } else {
+    showMessage("Нема графикон за снимање.", "warning");
+  }
+});
+
+// Chart info button
+document.getElementById('chartInfo')?.addEventListener('click', () => {
+  showMessage("Користете го тркалчето на глушецот за да зумирате или влечете за да панорамирате графиконот.", "info");
+});
+
+// Helper function to show messages
+function showMessage(message, type) {
+  const messageContainer = document.querySelector('.message-container');
+  const alert = document.createElement('div');
+  alert.className = `alert alert-${type}`;
+  alert.innerHTML = `
+    ${message}
+    <span class="close-btn" onclick="this.parentElement.remove()">×</span>
+  `;
+
+  messageContainer.appendChild(alert);
+
+  setTimeout(() => alert.classList.add('show'), 100);
+  setTimeout(() => {
+    alert.style.opacity = '0';
+    setTimeout(() => alert.remove(), 300);
+  }, 5000);
+}
+
+// Add event listener for form submission to show loading state
+document.getElementById('searchForm').addEventListener('submit', function() {
+  const store = document.querySelector('#store').value;
+  const query = document.querySelector('#query').value;
+
+  if (!store || !query) {
+    return; // Let browser handle validation
+  }
+
+  // Show loading state for similar products
+  const similarProducts = document.querySelector('.similar-products');
+  if (similarProducts) {
+    similarProducts.innerHTML = '<div class="loading-spinner"></div>';
+  }
 });
 </script>
-</body>
-</html>
+
 {% endblock %}

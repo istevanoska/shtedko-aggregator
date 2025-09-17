@@ -1,0 +1,11 @@
+{% extends "main/index.html" %}
+{% block content %}
+<div style="text-align:center; padding:50px;">
+    <h2>Welcome! Almost done...</h2>
+    <p>Your Google account is about to be connected to our site.</p>
+    <form method="post" action="{% url 'socialaccount_signup' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Continue</button>
+    </form>
+</div>
+{% endblock %}

@@ -3,6 +3,8 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from django.urls import path, include
+from django.contrib import admin
 
 from .views import custom_logout, remove_from_list, get_store_products, stats_view
 
@@ -43,6 +45,9 @@ urlpatterns = [
     # path('profile/', views.profile, name='profile'),
     path('get-favorites/', views.get_favorites, name='get_favorites'),
     path('api/product-history/', views.product_history_api, name='product_history_api'),
+    path("accounts/", include("allauth.urls")),
+    path('admin/', admin.site.urls),  # <<< Add this line
+    # provides login, logout, callbacks
 
 ]
 # prethodnoto znaci deka koga odime na pocetna strana nema nisto "" i ne nosi na funkcijata

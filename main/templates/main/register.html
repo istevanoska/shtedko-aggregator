@@ -1,140 +1,232 @@
 {% load static %}
+{% load socialaccount %}
 <!DOCTYPE html>
 <html lang="mk">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Регистрација</title>
 <style>
-    /* Global Reset */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
     * {
+        box-sizing: border-box;
         margin: 0;
         padding: 0;
-        box-sizing: border-box;
     }
 
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        height: 100vh;
+        font-family: 'Poppins', Arial, sans-serif;
+        min-height: 100vh;
         display: flex;
         justify-content: center;
         align-items: center;
-        background: url('{% static "images/baner1.jpg" %}') no-repeat center center/cover;
+        background: url('{% static "images/baner1.jpg" %}') center/cover no-repeat fixed;
         position: relative;
+        color: #333;
+        padding: 15px;
     }
 
-    /* Dark transparent overlay for contrast */
     body::before {
         content: '';
         position: absolute;
         inset: 0;
-        background: rgba(0,0,0,0.5);
+        background: inherit;
+        filter: blur(8px) brightness(0.7);
         z-index: -1;
     }
 
     .auth-container {
+        position: relative;
         width: 100%;
-        max-width: 420px;
-        background: rgba(255, 255, 255, 0.95);
-        padding: 35px 30px;
-        border-radius: 16px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
-        animation: fadeIn 0.6s ease-in-out;
+        max-width: 700px;
+        background-color: rgba(255, 255, 255, 0.97);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        text-align: center;
     }
 
     .auth-container h2 {
-        text-align: center;
-        margin-bottom: 25px;
-        font-size: 28px;
-        color: #222;
+        font-weight: 600;
+        font-size: 1.6rem;
+        margin-bottom: 20px;
+        color: #2e652e;
+    }
+
+    .two-column-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .form-column {
+        flex: 1;
+        min-width: 280px;
     }
 
     .form-group {
-        margin-bottom: 18px;
+        margin-bottom: 12px;
+        text-align: left;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 6px;
-        font-weight: 600;
-        color: #444;
-        font-size: 15px;
+        margin-bottom: 5px;
+        font-weight: 500;
+        color: #2e652e;
+        font-size: 0.9rem;
     }
 
     .form-group input {
         width: 100%;
-        padding: 12px 14px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 15px;
+        padding: 10px 12px;
+        border: 1.5px solid #ddd;
+        border-radius: 6px;
+        font-size: 0.9rem;
         transition: all 0.3s ease;
     }
 
     .form-group input:focus {
         border-color: #28a745;
-        box-shadow: 0 0 0 3px rgba(40,167,69,0.2);
+        box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
         outline: none;
+    }
+
+    .full-width {
+        width: 100%;
+        flex-basis: 100%;
     }
 
     button[type="submit"] {
         width: 100%;
-        padding: 13px;
-        background: linear-gradient(135deg, #28a745, #218838);
+        padding: 12px;
+        background-color: #2e652e;
         color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
         font-weight: 600;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 6px;
         cursor: pointer;
-        transition: transform 0.2s ease, opacity 0.2s ease;
+        transition: background-color 0.3s ease;
+        margin-top: 8px;
     }
 
     button[type="submit"]:hover {
-        transform: translateY(-2px);
-        opacity: 0.9;
+        background-color: #1f3f1f;
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 15px 0;
+        color: #777;
+        font-size: 0.85rem;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background-color: #ddd;
+    }
+
+    .divider::before {
+        margin-right: 8px;
+    }
+
+    .divider::after {
+        margin-left: 8px;
     }
 
     .login-link {
-        text-align: center;
-        margin-top: 18px;
-        font-size: 14px;
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: #555;
     }
 
     .login-link a {
-        color: #007bff;
+        color: #2e652e;
         font-weight: 600;
         text-decoration: none;
-        transition: color 0.3s ease;
     }
 
     .login-link a:hover {
-        color: #0056b3;
+        color: #1f3f1f;
         text-decoration: underline;
     }
 
     .errorlist {
-        color: #dc3545;
-        margin-bottom: 15px;
-        padding-left: 20px;
-        font-size: 14px;
+        background: #ffe6e6;
+        border: 1px solid #ff4d4d;
+        color: #d8000c;
+        padding: 8px 10px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        list-style: none;
+        font-weight: 500;
+        font-size: 0.8rem;
     }
 
     .errorlist li {
-        list-style-type: none;
-        margin-bottom: 5px;
+        margin: 0;
     }
 
-    small.helptext {
-        font-size: 12px;
+    .social-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .social-buttons a {
+        flex: 1;
+        text-align: center;
+        text-decoration: none;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 500;
+        color: white;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .social-buttons a.google {
+        background-color: #DB4437;
+    }
+
+    .social-buttons a.google:hover {
+        background-color: #c1351d;
+    }
+
+    .social-buttons a.facebook {
+        background-color: #3b5998;
+    }
+
+    .social-buttons a.facebook:hover {
+        background-color: #2d4373;
+    }
+
+    .help-text {
         color: #666;
-        margin-top: 4px;
+        font-size: 0.75rem;
         display: block;
+        margin-top: 4px;
     }
 
-    /* Fade-in animation */
-    @keyframes fadeIn {
-        from {opacity: 0; transform: translateY(20px);}
-        to {opacity: 1; transform: translateY(0);}
+    @media (max-width: 650px) {
+        .two-column-form {
+            flex-direction: column;
+        }
+
+        .form-column {
+            min-width: 100%;
+        }
+
+        .social-buttons {
+            flex-direction: column;
+            gap: 8px;
+        }
     }
 </style>
 </head>
@@ -142,35 +234,52 @@
 <div class="auth-container">
     <h2>Регистрација</h2>
 
-    {% if form.errors %}
-    <ul class="errorlist">
-        {% for field, errors in form.errors.items %}
-            {% for error in errors %}
-                <li>{{ error }}</li>
-            {% endfor %}
+    {% if form.non_field_errors %}
+        <ul class="errorlist full-width">
+        {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
         {% endfor %}
-    </ul>
+        </ul>
     {% endif %}
 
     <form method="post" novalidate>
         {% csrf_token %}
+        <div class="two-column-form">
+            {% for field in form %}
+            <div class="form-column">
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <span class="help-text">{{ field.help_text }}</span>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
 
-        {% for field in form %}
-        <div class="form-group">
-            {{ field.label_tag }}
-            {{ field }}
-            {% if field.help_text %}
-                <small class="helptext">{{ field.help_text }}</small>
-            {% endif %}
-        </div>
-        {% endfor %}
-
-        <button type="submit">Регистрирај се</button>
-
-        <div class="login-link">
-            <a href="{% url 'login' %}">Веќе имате профил? Најавете се</a>
+            <div class="full-width">
+                <button type="submit">Регистрирај се</button>
+            </div>
         </div>
     </form>
+
+    <div class="divider full-width">или регистрирај се со</div>
+
+    <div class="social-buttons full-width">
+        <a href="{% provider_login_url 'google' %}" class="google">Google</a>
+        <a href="{% provider_login_url 'facebook' %}" class="facebook">Facebook</a>
+    </div>
+
+    <div class="login-link full-width">
+        Веќе имате сметка? <a href="{% url 'login' %}">Најавете се</a>
+    </div>
 </div>
 </body>
 </html>

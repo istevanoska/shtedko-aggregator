@@ -28,6 +28,10 @@
                 margin-top: 20px;
             }
 
+            .header-search input {
+                width: 97%;
+            }
+
             /* Enhanced Filters sidebar */
             .filters {
                 width: 280px;
@@ -584,6 +588,9 @@
 
                 .product-image {
                     height: 160px;
+                }
+                .pagination{
+                    margin-bottom: 50px;
                 }
             }
 
@@ -1763,7 +1770,7 @@
                     <label style="margin-top: 7px; color: rgba(31,70,31,0.9)"
                            for="sort">Сортирај по:</label>
                     <select id="sort" onchange="updateSort()">
-                        <option value="-" >    -- Избери --
+                        <option value="-"> -- Избери --
                         </option>
                         <option value="price_asc" {% if selected_sort == 'price_asc' %}selected{% endif %}>Цена
                             (најниска)
@@ -1795,12 +1802,20 @@
                         {% endif %}
                         <a href="{% url 'product_detail' product.id %}">
                             <div class="product-image">
-                                {% if product.image_url %}
+{#                                {% if product.store == 'Vero' %}#}
+{#                                    <img src="{% static 'images/no-image.png' %}" alt="no-image">#}
+{#                                {% else %}#}
+{#                                    <img src="{{ product.image_url }}" alt="{{ product.name }}"#}
+{#                                         style="max-width: 100%; max-height: 100%;">#}
+{#                                {% endif %}#}
+                                {% if product.image_url and product.store != 'Vero' %}
                                     <img src="{{ product.image_url }}" alt="{{ product.name }}"
                                          style="max-width: 100%; max-height: 100%;">
                                 {% else %}
-                                    [No Image]
+                                    <img src="{% static 'images/no-image.png' %}" alt="no-image">
                                 {% endif %}
+
+
                             </div>
                             <div class="product-info">
 
@@ -2096,8 +2111,12 @@
 
 
 
+
+
                             {% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo;</a>
                     <a href="?page=
+
+
 
 
 
@@ -2365,8 +2384,12 @@
 
 
 
+
+
                             {{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&rsaquo;</a>
                     <a href="?page=
+
+
 
 
 
@@ -2907,6 +2930,12 @@
 
             addToListButtons.forEach(button => {
                 button.addEventListener('click', async () => {
+                    // Pulse animation
+                    button.classList.remove('pulse-on-click');
+                    void button.offsetWidth; // force reflow
+                    button.classList.add('pulse-on-click');
+
+                    // Add to list logic
                     const productId = button.dataset.productId;
                     const selectedListId = document.getElementById('listSelector').value;
 
@@ -2930,7 +2959,8 @@
 
                         const result = await response.json();
                         if (result.success) {
-                            {#alert("Производот е додаден во листата!");#}
+                            // Optionally show a message here
+                            // alert("Производот е додаден во листата!");
                         } else {
                             alert("Грешка: " + result.message);
                         }
@@ -2957,13 +2987,7 @@
                 return cookieValue;
             }
         });
-        document.querySelectorAll('.add-to-list-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                button.classList.remove('pulse-on-click'); // reset animation if applied
-                void button.offsetWidth; // force reflow so animation can be reapplied
-                button.classList.add('pulse-on-click');
-            });
-        });
+
 
         document.addEventListener('DOMContentLoaded', function () {
             // Desktop search elements
