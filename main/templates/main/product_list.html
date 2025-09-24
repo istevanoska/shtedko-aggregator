@@ -589,7 +589,8 @@
                 .product-image {
                     height: 160px;
                 }
-                .pagination{
+
+                .pagination {
                     margin-bottom: 50px;
                 }
             }
@@ -1732,11 +1733,11 @@
                                {% if 'Ramstore' in selected_stores %}checked{% endif %}>
                         <label for="store-ramstore">Ramstore</label>
                     </div>
-                    {#                    <div class="filter-option">#}
-                    {#                        <input type="checkbox" id="store-zito" name="store" value="Zito"#}
-                    {#                               {% if 'Zito' in selected_stores %}checked{% endif %}>#}
-                    {#                        <label for="store-zito">Zito</label>#}
-                    {#                    </div>#}
+                    {#                                        <div class="filter-option">#}
+                    {#                                            <input type="checkbox" id="store-zito" name="store" value="Zito"#}
+                    {#                                                   {% if 'Zito' in selected_stores %}checked{% endif %}>#}
+                    {#                                            <label for="store-zito">Zito</label>#}
+                    {#                                        </div>#}
                     {#                    <div class="filter-option">#}
                     {#                        <input type="checkbox" id="store-kam" name="store" value="Kam"#}
                     {#                               {% if 'Kam' in selected_stores %}checked{% endif %}>#}
@@ -1802,12 +1803,12 @@
                         {% endif %}
                         <a href="{% url 'product_detail' product.id %}">
                             <div class="product-image">
-{#                                {% if product.store == 'Vero' %}#}
-{#                                    <img src="{% static 'images/no-image.png' %}" alt="no-image">#}
-{#                                {% else %}#}
-{#                                    <img src="{{ product.image_url }}" alt="{{ product.name }}"#}
-{#                                         style="max-width: 100%; max-height: 100%;">#}
-{#                                {% endif %}#}
+                                {#                                {% if product.store == 'Vero' %}#}
+                                {#                                    <img src="{% static 'images/no-image.png' %}" alt="no-image">#}
+                                {#                                {% else %}#}
+                                {#                                    <img src="{{ product.image_url }}" alt="{{ product.name }}"#}
+                                {#                                         style="max-width: 100%; max-height: 100%;">#}
+                                {#                                {% endif %}#}
                                 {% if product.image_url and product.store != 'Vero' %}
                                     <img src="{{ product.image_url }}" alt="{{ product.name }}"
                                          style="max-width: 100%; max-height: 100%;">
@@ -1914,9 +1915,11 @@
                                         <img src="{% static 'images/novo_disc.png' %}" width="90px">
                                     </div>
                                 {% endif %}
+
+                                <!-- Move the anchor to only wrap the product image and info, not the button -->
                                 <a href="{% url 'product_detail' product.id %}">
                                     <div class="product-image">
-                                        {% if product.image_url %}
+                                        {% if product.image_url and product.store != 'Vero' %}
                                             <img src="{{ product.image_url }}" alt="{{ product.name }}"
                                                  style="max-width: 100%; max-height: 100%;">
                                         {% else %}
@@ -1958,19 +1961,26 @@
                                                      style="height: 35px;">
                                             {% endif %}
                                         </div>
-                                        <div class="product-category">{{ product.category|translate_category }}</div>
-                                        <div class="product-actions">
-                                            <a href="{{ product.product_url }}" target="_blank" class="view-product"
-                                               style="color: rgba(22,53,22,0.93); ">Види производ</a>
-                                            <div class="product-actions">
-                                                <button class="btn btn-success add-to-list-btn"
-                                                        style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer; "
-                                                        data-product-id="{{ product.id }}"><b>Додај</b>
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <div class="product-category"
+                                             style="color: rgba(42,82,42,0.76)">{{ product.category|translate_category }}</div>
                                     </div>
                                 </a>
+
+                                <div class="product-actions">
+                                    <a href="{{ product.product_url }}" target="_blank" class="view-product"
+                                       style="color: rgba(22,53,22,0.93); ">Види производ</a>
+
+                                    <!-- Buttons are now directly inside the div -->
+                                    <button class="btn btn-success add-to-list-btn"
+                                            style="padding: 7px; background-color: #2e652e; color: white; border-radius: 10px; border-color: rgba(84,146,73,0.71); cursor: pointer;"
+                                            data-product-id="{{ product.id }}"><b>Додај</b>
+                                    </button>
+
+                                    <button onclick="toggleFavorite(this, {{ product.id }})" class="favorite-btn"
+                                            data-product-id="{{ product.id }}">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                </div>
                             </div>
                         {% endfor %}
                     </div>
@@ -1982,6 +1992,16 @@
             <span class="step-links" style="margin-bottom: 40px">
                 {% if page_obj.has_previous %}
                     <a href="?page=1
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2246,6 +2266,16 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
                             {{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&lsaquo;</a>
                 {% endif %}
 
@@ -2255,73 +2285,6 @@
 
                 {% if page_obj.has_next %}
                     <a href="?page=
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -2519,6 +2482,16 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
                             {{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&raquo;</a>
                 {% endif %}
             </span>
@@ -2529,159 +2502,135 @@
 
 
     <script>
-        function toggleMenu() {
-            const menu = document.getElementById('other');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-
-        // Filter toggle for mobile
-        function toggleFilters() {
-            document.querySelectorAll('.filter-section').forEach(section => {
-                section.classList.toggle('active');
-            });
-        }
+        let userLists = [];
+        let currentProductId = null;
 
         document.addEventListener('DOMContentLoaded', function () {
-            // Initialize filters as collapsed on mobile
             if (window.innerWidth <= 768) {
                 document.querySelectorAll('.filter-section').forEach(section => {
                     section.classList.remove('active');
                 });
             }
 
-            // Close filters when clicking outside
-            document.addEventListener('click', function (e) {
-                if (!e.target.closest('.filters') && !e.target.classList.contains('filter-toggle')) {
-                    document.querySelectorAll('.filter-section').forEach(section => {
-                        section.classList.remove('active');
-                    });
-                }
-            });
-        });
-        document.addEventListener('DOMContentLoaded', function () {
-            // Price range slider functionality
             const priceSlider = document.getElementById('priceRange');
             const maxPriceDisplay = document.getElementById('maxPriceDisplay');
 
             if (priceSlider && maxPriceDisplay) {
-                // Set initial value if filter is active
                 if ("{{ selected_max_price }}" && "{{ selected_max_price }}" !== "1000") {
                     priceSlider.value = "{{ selected_max_price }}";
                     maxPriceDisplay.textContent = "{{ selected_max_price }}" + ' ден.';
                 }
 
-                // Update display when slider moves
                 priceSlider.addEventListener('input', function () {
                     maxPriceDisplay.textContent = this.value + ' ден.';
                 });
             }
 
-            // Connect the sorting dropdown
             const sortSelect = document.getElementById('sort');
             if (sortSelect) {
                 sortSelect.addEventListener('change', function () {
-                    // Get the selected sort value
                     const sortValue = this.value;
 
-                    // Get current URL parameters
                     const urlParams = new URLSearchParams(window.location.search);
 
-                    // Update or add the sort parameter
                     urlParams.set('sort', sortValue);
-
-                    // Reset to first page when changing sort
                     urlParams.set('page', '1');
-
-                    // Reload the page with new parameters
                     window.location.search = urlParams.toString();
                 });
             }
 
-            // Function to handle checkbox changes (immediate filter application)
             document.querySelectorAll('.filter-option input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', function () {
                     document.getElementById('filterForm').submit();
                 });
             });
 
-            // Ensure form submits properly
             document.getElementById('filterForm').addEventListener('submit', function (e) {
-                // You can add any pre-submit logic here if needed
             });
 
-            // Add to shopping list functionality
-            document.querySelectorAll('.add-to-list').forEach(button => {
-                button.addEventListener('click', function () {
-                    const productId = this.getAttribute('data-product-id');
-
-                    // Send AJAX request to add to shopping list
-                    fetch('/add-to-list/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        },
-                        body: JSON.stringify({
-                            product_id: productId
-                        })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert('Продуктот е додаден во вашата листа!');
-                            } else {
-                                alert('Грешка: ' + data.message);
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Настана грешка при додавање на продуктот.');
-                        });
-                });
-            });
-        });
-        // Global variables for list management
-
-        let selectedListId = null;
-        let rememberChoice = localStorage.getItem('rememberListChoice') === 'true';
-
-        // Toggle lists dropdown
-        function toggleListsDropdown() {
-            const dropdown = document.getElementById('listsDropdown');
-            dropdown.classList.toggle('show');
-
-            // Load lists if not already loaded
-            if (dropdown.classList.contains('show') && userLists.length === 0) {
+            setupSearchFunctionality();
+            {% if user.is_authenticated %}
                 fetchUserLists();
+            {% endif %}
+
+            if (!localStorage.getItem('catalogTourShown')) {
+                setTimeout(showInstructionModal, 1000);
+                localStorage.setItem('catalogTourShown', 'true');
+            }
+
+            document.getElementById('closeInstruction')?.addEventListener('click', function () {
+                document.getElementById('instructionModal').style.display = 'none';
+            });
+
+            setupFavoriteButtons();
+        });
+
+        function toggleFilters() {
+            document.querySelectorAll('.filter-section').forEach(section => {
+                section.classList.toggle('active');
+            });
+        }
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.filters') && !e.target.classList.contains('filter-toggle')) {
+                document.querySelectorAll('.filter-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+            }
+        });
+
+        async function handleAddToListClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            this.classList.remove('pulse-on-click');
+            void this.offsetWidth; // Trigger reflow
+            this.classList.add('pulse-on-click');
+
+            const productId = this.dataset.productId;
+
+            const selectedListId = document.getElementById('listSelector')?.value;
+
+            if (!selectedListId) {
+                alert("Ве молиме изберете листа.");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/lists/add-product/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({product_id: productId, list_id: selectedListId})
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    const counter = document.querySelector(`#counter-${productId}`);
+                    if (counter) counter.textContent = parseInt(counter.textContent) + 1;
+                    alert("Продуктот е успешно додаден во листата!");
+                } else {
+                    alert("Грешка: " + result.message);
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                alert("Настана грешка. Обидете се повторно.");
             }
         }
 
-        // Close dropdown when clicking outside
-        window.addEventListener('click', function (e) {
-            if (!e.target.closest('.lists-dropdown') && !e.target.classList.contains('lists-toggle')) {
-                const dropdown = document.getElementById('listsDropdown');
-                dropdown.classList.remove('show');
-            }
-        });
-
-        // Fetch user's shopping lists
-        let userLists = [];
-        let currentProductId = null;
-
-        // Fetch user's lists
         async function fetchUserLists() {
             try {
                 const response = await fetch('/api/lists/');
                 const data = await response.json();
-                console.log("Fetched data from /api/lists/:", data); // 🔍 Check structure
+                console.log("Fetched data from /api/lists/:", data);
 
-                // Access the lists properly based on the received data structure
                 if (data.lists && Array.isArray(data.lists)) {
-                    userLists = data.lists;  // Now userLists gets the correct array
+                    userLists = data.lists;
                 } else {
                     console.error("Unexpected response format:", data);
-                    userLists = []; // Fallback to empty
+                    userLists = [];
                 }
             } catch (error) {
                 console.error('Error fetching lists:', error);
@@ -2689,518 +2638,156 @@
             }
         }
 
-
-        // Render user's shopping lists in navbar
-        function renderUserLists() {
-            const container = document.getElementById('navbarListsContainer');
-
-            if (userLists.length === 0) {
-                container.innerHTML = '<div class="no-lists">Немате креирано листи</div>';
-                return;
-            }
-
-            container.innerHTML = '';
-
-            userLists.forEach(list => {
-                const listItem = document.createElement('div');
-                listItem.className = 'list-item';
-                listItem.textContent = list.name;
-                listItem.dataset.listId = list.id;
-
-                if (selectedListId === list.id) {
-                    listItem.classList.add('active');
-                }
-
-                listItem.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent event bubbling
-                    window.location.href = `/lists/${list.id}/`; // Navigate to list detail
-                });
-
-                container.appendChild(listItem);
-            });
-        }
-
-        // Create new list from dropdown
-        function createNewListFromDropdown() {
-            const listName = prompt('Внесете име за новата листа:');
-            if (!listName) return;
-
-            fetch('/api/lists/create/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({name: listName})
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        userLists.push({id: data.list_id, name: listName});
-                        renderUserLists();
-                        alert('Листата е успешно креирана!');
-                    } else {
-                        alert('Грешка: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Настана грешка при креирање на листата.');
-                });
-        }
-
-
-        async function showListOptions(button) {
-            currentProductId = button.getAttribute('data-product-id');
-
-            // Check authentication
-            {% if not user.is_authenticated %}
-                window.location.href = "{% url 'login' %}?next={{ request.path }}";
-                return;
-            {% endif %}
-
-            // Fetch lists if not already loaded
-            if (userLists.length === 0) {
-                await fetchUserLists();
-            }
-
-            // Populate modal
-            const modal = document.getElementById('listModal');
-            const listsContainer = document.getElementById('listsContainer');
-            listsContainer.innerHTML = '';
-
-            if (userLists.length === 0) {
-                listsContainer.innerHTML = `
-                <p>Немате креирано листи.</p>
-                <div class="create-new-list" onclick="showNewListForm()">Креирај нова листа</div>
-            `;
-            } else {
-                userLists.forEach(list => {
-                    const listOption = document.createElement('div');
-                    listOption.className = 'list-option';
-                    listOption.textContent = list.name;
-                    listOption.onclick = () => addProductToList(currentProductId, list.id);
-                    listsContainer.appendChild(listOption);
-                });
-            }
-
-            modal.style.display = 'flex';
-        }
-
-        async function showListOptionsModal(productId) {
-            const modal = document.getElementById('listModal');
-            const listsContainer = document.getElementById('listsContainer');
-
-            try {
-                const response = await fetch('/api/lists/');
-                const userLists = await response.json();
-
-                console.log("Fetched user lists:", userLists); // 🔍 ADD THIS LINE HERE
-
-                // Clear old list options
-                listsContainer.innerHTML = '';
-
-                // Add new list options
-                userLists.forEach(list => {
-                    console.log("Rendering option →", list.name, list.id); // Optional: log each list's name & id
-
-                    const listOption = document.createElement('div');
-                    listOption.className = 'list-option';
-                    listOption.innerHTML = list.name;
-                    listOption.onclick = () => addProductToList(productId, list.id);
-                    listsContainer.appendChild(listOption);
-                });
-
-                modal.style.display = 'block';
-            } catch (error) {
-                console.error('Error loading user lists:', error);
-            }
-        }
-
-        async function addProductToList(productId, listId) {
-            if (!productId || !listId) {
-                alert('Недостасува ID на продукт или листа!');
-                return;
-            }
-
-            console.log("Sending to server → Product ID:", productId, "List ID:", listId);
-
-            try {
-                const response = await fetch('/add-to-list/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCSRFToken()
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        list_id: listId
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    alert('Продуктот е успешно додаден во листата!');
-                    closeModal();
-                } else {
-                    alert('Грешка: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Настана грешка при додавање на продуктот.');
-            }
-        }
-
-        // Helper function to get CSRF token from cookies
-        function getCSRFToken() {
-            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        }
-
-
-        // Function to create new list
-        function createNewList() {
-            const listName = document.getElementById('newListName').value.trim();
-            if (!listName) return;
-
-            fetch('/api/lists/create/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({name: listName})
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        userLists.push({id: data.list_id, name: listName});
-                        showListOptionsModal(currentProductId);
-                        document.getElementById('newListForm').style.display = 'none';
-                        document.getElementById('newListName').value = '';
-                    } else {
-                        alert('Грешка: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Настана грешка при креирање на листата.');
-                });
-        }
-
-        function showNewListForm() {
-            document.getElementById('newListForm').style.display = 'block';
-        }
-
-        function closeModal() {
-            document.getElementById('listModal').style.display = 'none';
-        }
-
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function () {
-            // Close modal when clicking outside
-            document.getElementById('listModal').addEventListener('click', function (e) {
-                if (e.target === this) {
-                    closeModal();
-                }
-            });
-
-            // Pre-fetch user lists if authenticated
-            {% if user.is_authenticated %}
-                fetchUserLists();
-            {% endif %}
-        });
-
-        function toggleMobileMenu() {
-            const menu = document.getElementById("mobile-menu");
-            const overlay = document.getElementById("overlay");
-
-            menu.classList.toggle("open");
-            overlay.classList.toggle("active");
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const addToListButtons = document.querySelectorAll('.add-to-list-btn');
-
-            addToListButtons.forEach(button => {
-                button.addEventListener('click', async () => {
-                    // Pulse animation
-                    button.classList.remove('pulse-on-click');
-                    void button.offsetWidth; // force reflow
-                    button.classList.add('pulse-on-click');
-
-                    // Add to list logic
-                    const productId = button.dataset.productId;
-                    const selectedListId = document.getElementById('listSelector').value;
-
-                    if (!selectedListId) {
-                        alert("Ве молиме изберете листа.");
-                        return;
-                    }
-
-                    try {
-                        const response = await fetch('/api/lists/add-product/', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': getCookie('csrftoken'),
-                            },
-                            body: JSON.stringify({
-                                product_id: productId,
-                                list_id: selectedListId
-                            })
-                        });
-
-                        const result = await response.json();
-                        if (result.success) {
-                            // Optionally show a message here
-                            // alert("Производот е додаден во листата!");
-                        } else {
-                            alert("Грешка: " + result.message);
-                        }
-                    } catch (error) {
-                        console.error("Fetch error:", error);
-                        alert("Настана грешка. Обидете се повторно.");
-                    }
-                });
-            });
-
-            // Helper for CSRF token
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
-            }
-        });
-
-
-        document.addEventListener('DOMContentLoaded', function () {
-            // Desktop search elements
+        function setupSearchFunctionality() {
             const searchInput = document.getElementById('searchInput');
             const suggestionsDiv = document.getElementById('suggestions');
             const searchForm = document.getElementById('searchForm');
 
-            // Mobile search elements
             const mobileSearchInput = document.getElementById('mobileSearchInput');
             const mobileSearchForm = document.getElementById('mobileSearchForm');
 
-            // Extended transliteration with typo correction
-            function transliterateLatinToCyrillic(text) {
-                const map = {
-                    'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
-                    'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
-                    'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
-                    'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
-                    'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
-                    'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
-                    's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
-                    'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
-                    'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
-                };
-
-                const typoPatterns = [
-                    {pattern: /sampon/gi, replace: 'shampon'},
-                    {pattern: /cresi/gi, replace: 'creshi'},
-                    {pattern: /stipki/gi, replace: 'shtipki'},
-                    {pattern: /sch/gi, replace: 'sh'},
-                    {pattern: /ck/gi, replace: 'k'},
-                    {pattern: /ph/gi, replace: 'f'},
-                    {pattern: /th/gi, replace: 't'},
-                    {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
-                    {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
-                    {pattern: /([a-z])\1/gi, replace: '$1'}
-                ];
-
-                let normalizedText = text.toLowerCase();
-                for (const {pattern, replace} of typoPatterns) {
-                    normalizedText = normalizedText.replace(pattern, replace);
-                }
-
-                let result = '';
-                let i = 0;
-                while (i < normalizedText.length) {
-                    if (map[normalizedText.substring(i, i + 3)]) {
-                        result += map[normalizedText.substring(i, i + 3)];
-                        i += 3;
-                    } else if (map[normalizedText.substring(i, i + 2)]) {
-                        result += map[normalizedText.substring(i, i + 2)];
-                        i += 2;
-                    } else if (map[normalizedText[i]]) {
-                        result += map[normalizedText[i]];
-                        i++;
-                    } else {
-                        result += normalizedText[i];
-                        i++;
-                    }
-                }
-                return result;
+            if (searchInput && suggestionsDiv && searchForm) {
+                setupSearch(searchInput, searchForm, suggestionsDiv);
             }
 
-            function setupSearch(input, form) {
-                input.addEventListener('input', function () {
-                    const query = this.value.trim();
-                    if (query.length < 2) {
-                        suggestionsDiv.style.display = 'none';
-                        return;
-                    }
-
-                    fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            suggestionsDiv.innerHTML = '';
-                            if (data.suggestions.length > 0) {
-                                data.suggestions.forEach(suggestion => {
-                                    const div = document.createElement('div');
-                                    div.textContent = suggestion;
-                                    div.style.padding = '5px 10px';
-                                    div.style.cursor = 'pointer';
-                                    div.addEventListener('click', function () {
-                                        input.value = transliterateLatinToCyrillic(suggestion);
-                                        suggestionsDiv.style.display = 'none';
-                                        form.submit();
-                                    });
-                                    suggestionsDiv.appendChild(div);
-                                });
-                                suggestionsDiv.style.display = 'block';
-                            } else {
-                                suggestionsDiv.style.display = 'none';
-                            }
-                        });
-                });
-
-                input.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        suggestionsDiv.style.display = 'none';
-                        input.value = transliterateLatinToCyrillic(input.value);
-                        form.submit();
-                    }
-                });
+            if (mobileSearchInput && mobileSearchForm) {
+                setupSearch(mobileSearchInput, mobileSearchForm, suggestionsDiv);
             }
-
-            setupSearch(searchInput, searchForm);
-            setupSearch(mobileSearchInput, mobileSearchForm);
 
             document.addEventListener('click', function (e) {
-                if (!searchInput.contains(e.target) && !suggestionsDiv.contains(e.target) &&
-                    !mobileSearchInput.contains(e.target)) {
+                if (suggestionsDiv &&
+                    !searchInput?.contains(e.target) &&
+                    !suggestionsDiv.contains(e.target) &&
+                    !mobileSearchInput?.contains(e.target)) {
                     suggestionsDiv.style.display = 'none';
                 }
             });
-        });
-        const priceRange = document.getElementById('priceRange');
-        const maxPriceDisplay = document.getElementById('maxPriceDisplay');
+        }
 
-        priceRange.addEventListener('input', () => {
-            maxPriceDisplay.textContent = priceRange.value + ' ден.';
-        });
-        document.addEventListener('DOMContentLoaded', function () {
-            // Check if this is the first visit to the catalog page
-            if (!localStorage.getItem('catalogTourShown')) {
-                // Show the instruction modal after a short delay
-                setTimeout(showInstructionModal, 1000);
+        function setupSearch(input, form, suggestionsDiv) {
+            input.addEventListener('input', function () {
+                const query = this.value.trim();
+                if (query.length < 2) {
+                    suggestionsDiv.style.display = 'none';
+                    return;
+                }
 
-                // Mark that the tour has been shown
-                localStorage.setItem('catalogTourShown', 'true');
-            }
-
-            // Close button handler
-            document.getElementById('closeInstruction')?.addEventListener('click', function () {
-                document.getElementById('instructionModal').style.display = 'none';
+                fetch(`/search-suggestions/?q=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsDiv.innerHTML = '';
+                        if (data.suggestions.length > 0) {
+                            data.suggestions.forEach(suggestion => {
+                                const div = document.createElement('div');
+                                div.textContent = suggestion;
+                                div.style.padding = '5px 10px';
+                                div.style.cursor = 'pointer';
+                                div.addEventListener('click', function () {
+                                    input.value = transliterateLatinToCyrillic(suggestion);
+                                    suggestionsDiv.style.display = 'none';
+                                    form.submit();
+                                });
+                                suggestionsDiv.appendChild(div);
+                            });
+                            suggestionsDiv.style.display = 'block';
+                        } else {
+                            suggestionsDiv.style.display = 'none';
+                        }
+                    });
             });
-        });
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Check if first visit
-            if (!localStorage.getItem('catalogTourShown')) {
-                setTimeout(showEnhancedTour, 1000);
-                localStorage.setItem('catalogTourShown', 'true');
-            }
-
-            // Close button
-            document.getElementById('closeInstruction')?.addEventListener('click', closeTour);
-            document.getElementById('gotItBtn')?.addEventListener('click', closeTour);
-
-            // Optional: Replay button
-            document.getElementById('showInstructionsAgain')?.addEventListener('click', showEnhancedTour);
-        });
-
-        function showEnhancedTour() {
-            const modal = document.getElementById('instructionModal');
-            const listArrow = document.getElementById('listArrow');
-            const navArrow = document.getElementById('navArrow');
-            const listSelector = document.getElementById('listSelector');
-            const navLists = document.querySelector('.user-actions .list-icon');
-            // In showEnhancedTour():
-            {#listArrow.style.left = '300px';  // Fixed test position#}
-            {#listArrow.style.top = '100px';#}
-            {#navArrow.style.left = '200px';#}
-            {#navArrow.style.top = '200px';#}
-
-            if (modal && listArrow && navArrow) {
-                // Position arrows
-                if (listSelector) {
-                    const listRect = listSelector.getBoundingClientRect();
-                    listArrow.style.left = `${listRect.left + listRect.width / 2 - 50}px`; // Adjust X position
-                    listArrow.style.top = `${listRect.top - 80}px`; // Adjust Y position
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    suggestionsDiv.style.display = 'none';
+                    input.value = transliterateLatinToCyrillic(input.value);
+                    form.submit();
                 }
-
-                if (navLists) {
-                    const navRect = navLists.getBoundingClientRect();
-                    navArrow.style.left = `${navRect.left + navRect.width / 2 - 50}px`; // Adjust X position
-                    navArrow.style.top = `${navRect.bottom - 30}px`; // Adjust Y position
-                }
-
-                // Show modal and arrows
-                modal.style.display = 'flex';
-                setTimeout(() => {
-                    listArrow.style.opacity = '1';
-                    navArrow.style.opacity = '1';
-                }, 500);
-            }
+            });
         }
 
-        function closeTour() {
-            const modal = document.getElementById('instructionModal');
-            if (modal) {
-                modal.style.animation = 'modalExit 0.3s forwards';
-                setTimeout(() => {
-                    modal.style.display = 'none';
-                }, 300);
+        function transliterateLatinToCyrillic(text) {
+            const map = {
+                'dzh': 'џ', 'dzs': 'џ', 'dsh': 'џ',
+                'zh': 'ж', 'ch': 'ч', 'sh': 'ш', 'lj': 'љ', 'nj': 'њ', 'kj': 'ќ', 'dj': 'ѓ',
+                'zs': 'ж', 'hs': 'ш', 'cx': 'ч', 'sx': 'ш', 'jx': 'ж',
+                'tz': 'ц', 'ts': 'ц', 'tc': 'ц', 'dz': 'џ',
+                'a': 'а', 'b': 'б', 'v': 'в', 'g': 'г', 'd': 'д', 'e': 'е', 'z': 'з', 'i': 'и',
+                'j': 'ј', 'k': 'к', 'l': 'л', 'm': 'м', 'n': 'н', 'o': 'о', 'p': 'п', 'r': 'р',
+                's': 'с', 't': 'т', 'u': 'у', 'f': 'ф', 'h': 'х', 'c': 'ц',
+                'y': 'ј', 'w': 'в', 'x': 'кс', 'q': 'к',
+                'ia': 'ја', 'ie': 'је', 'io': 'јо', 'iu': 'ју'
+            };
+
+            const typoPatterns = [
+                {pattern: /sampon/gi, replace: 'shampon'},
+                {pattern: /cresi/gi, replace: 'creshi'},
+                {pattern: /stipki/gi, replace: 'shtipki'},
+                {pattern: /sch/gi, replace: 'sh'},
+                {pattern: /ck/gi, replace: 'k'},
+                {pattern: /ph/gi, replace: 'f'},
+                {pattern: /th/gi, replace: 't'},
+                {pattern: /([a-z]),([a-z])/gi, replace: '$1$2'},
+                {pattern: /([a-z])\.([a-z])/gi, replace: '$1$2'},
+                {pattern: /([a-z])\1/gi, replace: '$1'}
+            ];
+
+            let normalizedText = text.toLowerCase();
+            for (const {pattern, replace} of typoPatterns) {
+                normalizedText = normalizedText.replace(pattern, replace);
             }
-        }
 
-        document.getElementById('showInstructionsAgain')?.addEventListener('click', showInstructionModal);
-
-        // Add this script to your template
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    cookie = cookie.trim();
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
+            let result = '';
+            let i = 0;
+            while (i < normalizedText.length) {
+                if (map[normalizedText.substring(i, i + 3)]) {
+                    result += map[normalizedText.substring(i, i + 3)];
+                    i += 3;
+                } else if (map[normalizedText.substring(i, i + 2)]) {
+                    result += map[normalizedText.substring(i, i + 2)];
+                    i += 2;
+                } else if (map[normalizedText[i]]) {
+                    result += map[normalizedText[i]];
+                    i++;
+                } else {
+                    result += normalizedText[i];
+                    i++;
                 }
             }
-            return cookieValue;
+            return result;
+        }
+
+        function setupFavoriteButtons() {
+            const favoriteButtons = document.querySelectorAll('.favorite-btn');
+            favoriteButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const productId = this.getAttribute('data-product-id');
+                    toggleFavorite(this, productId);
+                });
+            });
+
+            {% if user.is_authenticated %}
+                fetch('/get-favorites/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            favoriteButtons.forEach(button => {
+                                const productId = button.getAttribute('data-product-id');
+                                if (data.favorites.includes(parseInt(productId))) {
+                                    const icon = button.querySelector('i');
+                                    icon.classList.remove('far');
+                                    icon.classList.add('fas');
+                                    icon.style.color = '#e74c3c';
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching favorites:', error);
+                    });
+            {% endif %}
         }
 
         function toggleFavorite(button, productId) {
@@ -3217,11 +2804,9 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Toggle the heart icon
                         icon.classList.toggle('far');
                         icon.classList.toggle('fas');
 
-                        // Update color immediately
                         if (icon.classList.contains('fas')) {
                             icon.style.color = '#e74c3c';
                             button.classList.add('pulse');
@@ -3230,7 +2815,6 @@
                             icon.style.color = '#ccc';
                         }
 
-                        // Reload favorites list page if needed
                         if (window.location.pathname === '/favorites/') {
                             window.location.reload();
                         }
@@ -3246,36 +2830,49 @@
                 });
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Check if user is authenticated
-            {% if user.is_authenticated %}
-                // Get all favorite buttons
-                const favoriteButtons = document.querySelectorAll('.favorite-btn');
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+                    if (cookie.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
-                // Get list of favorited product IDs from the server
-                fetch('/get-favorites/')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // For each product, check if it's favorited
-                            favoriteButtons.forEach(button => {
-                                const productId = button.getAttribute('data-product-id');
-                                if (data.favorites.includes(parseInt(productId))) {
-                                    // If favorited, set the heart to filled state
-                                    const icon = button.querySelector('i');
-                                    icon.classList.remove('far');
-                                    icon.classList.add('fas');
-                                    icon.style.color = '#e74c3c';
-                                }
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error fetching favorites:', error);
-                    });
-            {% endif %}
-        });
+        function showInstructionModal() {
+            const modal = document.getElementById('instructionModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
 
+        function closeTour() {
+            const modal = document.getElementById('instructionModal');
+            if (modal) {
+                modal.style.animation = 'modalExit 0.3s forwards';
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        function updateSort() {
+            const sortSelect = document.getElementById('sort');
+            if (sortSelect) {
+                const sortValue = sortSelect.value;
+
+                const urlParams = new URLSearchParams(window.location.search);
+                urlParams.set('sort', sortValue);
+                urlParams.set('page', '1');
+                window.location.search = urlParams.toString();
+            }
+        }
     </script>
     <!-- Instruction Modal - Enhanced -->
     <div id="instructionModal" class="instruction-modal">
@@ -3291,6 +2888,7 @@
                 </div>
                 <div class="instruction-step">
                     <div class="step-number">2</div>
+                    {#                    <span id="counter-{{ product.id }}">0</span>#}
                     <p>Кликнете на копчето <strong>"Додај"</strong> за да го вметнете производот во избраната листа.</p>
                 </div>
                 <div class="instruction-step">
@@ -3302,33 +2900,11 @@
         </div>
     </div>
 
-
-    {#    <!-- Arrow pointing to list selector -->#}
-    {#    <div id="listArrow" class="arrow-pointer pulse-arrow"#}
-    {#         style="width: 60px; height: 60px; position: absolute;">#}
-    {#        <svg viewBox="0 0 24 24" style="width: 100%; height: 100%;" preserveAspectRatio="xMidYMid meet"#}
-    {#             xmlns="http://www.w3.org/2000/svg">#}
-    {#            <path d="m14.707 12.707-4 4a1 1 0 0 1-1.414-1.414L12.586 12 9.293 8.707a1 1 0 1 1 1.414-1.414l4 4a1 1 0 0 1 0 1.414z"#}
-    {#                  style="fill:rgba(31,63,31,0.93)"/>#}
-    {#        </svg>#}
-    {#    </div>#}
-
-
-    {#    <div id="navArrow" class="arrow-pointer pulse-arrow"#}
-    {#         style="position: absolute; width: 50px; height: 50px;">#}
-    {#        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet"#}
-    {#             style="width: 100%; height: 100%;">#}
-    {#            <path d="M16 15a1 1 0 0 1-.707-.293L12 11.414l-3.293 3.293a1 1 0 1 1-1.414-1.414l4-4a1 1 0 0 1 1.414 0l4 4A1 1 0 0 1 16 15z"#}
-    {#                  style="fill:rgba(31,63,31,0.93)"/>#}
-    {#        </svg>#}
-    {#    </div>#}
-
-
     </div>
-    <button id="showInstructionsAgain"
-            style="position: fixed; bottom: 20px; right: 20px; background: #2e652e; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px;">
-        ?
-    </button>
+    {#    <button id="showInstructionsAgain"#}
+    {#            style="position: fixed; bottom: 20px; right: 20px; background: #2e652e; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; font-size: 20px;">#}
+    {#        ?#}
+    {#    </button>#}
     </body>
 {% endblock %}
 </html>

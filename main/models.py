@@ -84,10 +84,6 @@ class ShoppingListItem(models.Model):
     class Meta:
         unique_together = ('shopping_list', 'product')
 
-
-
-from django.utils import timezone  # Correct import for timezone.now
-
 User = get_user_model()
 
 class Favorite(models.Model):

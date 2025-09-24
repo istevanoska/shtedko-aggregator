@@ -17,15 +17,10 @@
             --accent-color: #28a745;
             --background-overlay: rgba(255, 255, 255, 0.97);
             --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            {#--border-radius: 12px;#}
             --transition: all 0.3s ease;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         html, body {
             height: 100%;
@@ -41,10 +36,7 @@
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: inherit;
             filter: blur(8px);
             z-index: -1;
@@ -121,7 +113,7 @@
             width: 100%;
             background-color: var(--background-overlay);
             padding: 35px;
-            border-radius: var(--border-radius);
+            border-radius: 12px;
             box-shadow: var(--shadow);
             border: 1px solid rgba(0, 0, 0, 0.05);
         }
@@ -152,11 +144,7 @@
             letter-spacing: 0.5px;
         }
 
-        .shopping-list-items {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .shopping-list-items { display: flex; flex-direction: column; gap: 12px; }
 
         .shopping-list-item {
             display: grid;
@@ -171,10 +159,7 @@
             border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
-        .shopping-list-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
+        .shopping-list-item:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
 
         .shopping-list-item.checked {
             background-color: #f8f9fa;
@@ -183,24 +168,15 @@
             opacity: 0.8;
         }
 
-        .checkbox input {
-            display: none;
-        }
+        .checkbox input { display: none; }
 
         .checkbox label {
-            width: 22px;
-            height: 22px;
+            width: 22px; height: 22px;
             border: 2px solid var(--secondary-color);
             border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             cursor: pointer;
             transition: var(--transition);
-        }
-
-        .checkbox label:hover {
-            border-color: #2980b9;
         }
 
         .checkbox input:checked + label {
@@ -209,9 +185,7 @@
         }
 
         .checkbox input:checked + label::after {
-            content: '✓';
-            color: white;
-            font-size: 13px;
+            content: '✓'; color: white; font-size: 13px;
         }
 
         .quantity input {
@@ -231,215 +205,64 @@
             box-shadow: 0 0 0 2px rgba(46, 101, 46, 0.2);
         }
 
-        .price, .store {
-            font-weight: 500;
-            color: #444;
-            font-size: 15px;
-        }
+        .price, .store { font-weight: 500; color: #444; font-size: 15px; }
 
-        .price {
-            font-weight: 600;
-            color: #2c3e50;
-        }
+        .price { font-weight: 600; color: #2c3e50; }
 
-        .product-name {
-            font-weight: 500;
-            word-break: break-word;
-            font-size: 15px;
-            line-height: 1.4;
-        }
+        .product-name { font-weight: 500; word-break: break-word; font-size: 15px; line-height: 1.4; }
 
-        .actions {
-            display: flex;
-            justify-content: flex-end;
-        }
+        .actions { display: flex; justify-content: flex-end; }
 
         .remove-button {
             background-color: #e74c3c;
-            border: none;
-            color: white;
+            border: none; color: white;
             padding: 10px 18px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
+            cursor: pointer; font-size: 14px;
             transition: var(--transition);
-            font-weight: 500;
-            margin-right: -50px;
+            font-weight: 500; margin-right: -50px;
         }
 
-        .remove-button:hover {
-            background-color: #c0392b;
-            transform: translateY(-1px);
+        .remove-button:hover { background-color: #c0392b; transform: translateY(-1px); }
+
+        .product-image img { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #eee; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* Alternative list styles */
+        #alternative-list {
+            margin:30px 0;
+            padding:20px;
+            background:#fffbe6;
+            border:1px solid #f0c36d;
+            border-radius:10px;
+            display:none;
         }
 
-        .product-image img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 1px solid #eee;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        #alternative-list h2 {
+            color:#e67e22;
+            margin-bottom:15px;
+            font-size:20px;
         }
 
-        /* Mobile Styles (unchanged from your loved version) */
-        @media (max-width: 768px) {
-            .sticky-price-summary {
-                top: 70px;
-                flex-wrap: wrap;
-                padding: 10px;
-            }
-
-            .sticky-price-summary .summary-item {
-                font-size: 12px;
-                margin: 5px;
-            }
-
-            .sticky-price-summary .summary-item span:last-child {
-                font-size: 14px;
-            }
-
-            .sticky-price-summary .group-button {
-                order: 1;
-                margin-top: 10px;
-                width: 100%;
-            }
-
-            .shopping-list-wrapper {
-                flex-direction: column;
-                padding: 10px;
-                margin-top: 0;
-            }
-
-            .shopping-list-container {
-                width: 100%;
-                padding: 15px;
-            }
-
-            .shopping-list-header {
-                display: none;
-            }
-
-            .shopping-list-item {
-                grid-template-columns: 50px 1fr auto;
-                grid-template-rows: auto auto auto;
-                gap: 12px;
-                padding: 15px;
-                position: relative;
-            }
-
-            .product-image {
-                grid-column: 1;
-                grid-row: 1 / span 3;
-            }
-
-            .product-name {
-                grid-column: 2;
-                grid-row: 1;
-                font-weight: 600;
-            }
-
-            .quantity {
-                grid-column: 2;
-                grid-row: 2;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .price {
-                grid-column: 3;
-                grid-row: 2;
-                text-align: right;
-            }
-
-            .store {
-                grid-column: 2;
-                grid-row: 3;
-                font-size: 13px;
-                color: #666;
-            }
-
-            .actions {
-                position: absolute;
-                top: 15px;
-                right: 15px;
-            }
-
-            .checkbox {
-                position: absolute;
-                bottom: 15px;
-                right: 15px;
-            }
-
-            .quantity input {
-                width: 70px;
-            }
-
-            .shopping-list-title {
-                font-size: 22px;
-                margin-bottom: 15px;
-            }
-
-            .remove-button {
-                padding: 6px 12px;
-                font-size: 13px;
-                {#margin-left: -50px;#}\
-                margin-right: 50px;
-            }
+        .alternative-item {
+            display:flex;
+            justify-content: space-between;
+            align-items:center;
+            padding:10px;
+            border-bottom:1px solid #ddd;
         }
 
-        @media (max-width: 480px) {
-            .shopping-list-item {
-                grid-template-columns: 40px 1fr auto;
-                padding: 12px;
-                gap: 10px;
-            }
-
-            .product-image img {
-                width: 40px;
-                height: 40px;
-            }
-
-            .quantity input {
-                width: 60px;
-                padding: 6px;
-            }
-
-            .price {
-                font-size: 14px;
-            }
-
-            .store {
-                font-size: 12px;
-            }
-
-            .remove-button {
-                padding: 5px 10px;
-                font-size: 12px;
-                {#margin-left: -50px;#}
-                margin-right: 1px;
-
-            }
-
-            .shopping-list-title {
-                font-size: 20px;
-            }
+        .alternative-item span {
+            display:block;
         }
 
-        @media (min-width: 769px) {
-            .sticky-price-summary {
-                top: 130px;
-            }
+        .alternative-total {
+            margin-top:15px;
+            font-weight:700;
+            font-size:16px;
+            text-align:right;
+            color:#27ae60;
         }
 
-        {#isklucok#}
-        {#i.fas.fa-search{#}
-        {#    margin-right: 35px;#}
-        {#}#}
-       .header-search input{
-           width: 102%;
-       }
-        }
     </style>
 </head>
 <body>
@@ -474,6 +297,7 @@
         <span id="sticky-total-price">{{ total_price }} ден.</span>
     </div>
     <button id="group-by-store" class="group-button">Групирај по продавници</button>
+    <button id="find-cheaper" class="group-button" style="background-color:#f39c12;">Најди поевтина алтернатива</button>
 </div>
 
 <!-- Main Content -->
@@ -491,11 +315,9 @@
             </div>
             <div class="shopping-list-items">
                 {% for item in items %}
-                    <div class="shopping-list-item {% if item.checked %}checked{% endif %}"
-                         data-item-id="{{ item.id }}">
+                    <div class="shopping-list-item {% if item.checked %}checked{% endif %}" data-item-id="{{ item.id }}">
                         <div class="checkbox">
-                            <input type="checkbox" class="item-checkbox" id="item-{{ item.id }}"
-                                   {% if item.checked %}checked{% endif %}>
+                            <input type="checkbox" class="item-checkbox" id="item-{{ item.id }}" {% if item.checked %}checked{% endif %}>
                             <label for="item-{{ item.id }}"></label>
                         </div>
                         <div class="product-image">
@@ -503,8 +325,7 @@
                         </div>
                         <div class="product-name">{{ item.product.name }}</div>
                         <div class="quantity">
-                            <input type="number" class="quantity-input" min="1" value="{{ item.quantity }}"
-                                   data-price="{{ item.product.price }}">
+                            <input type="number" class="quantity-input" min="1" value="{{ item.quantity }}" data-price="{{ item.product.price }}">
                         </div>
                         <div class="price">{{ item.product.price }} ден.</div>
                         <div class="store">{{ item.product.store }}</div>
@@ -518,166 +339,163 @@
             <p style="text-align:center; color: #555; font-size: 16px; margin-top: 30px;">Немате додадено продукти во оваа листа.</p>
         {% endif %}
     </div>
+
+    <!-- Alternative List -->
+    <div id="alternative-list">
+        <h2>Поевтина алтернативна листа</h2>
+        <div id="alternative-items"></div>
+        <div id="alternative-total" class="alternative-total"></div>
+    </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    cookie = cookie.trim();
-                    if (cookie.startsWith(name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
-                        break;
-                    }
+document.addEventListener('DOMContentLoaded', () => {
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.slice(name.length + 1));
+                    break;
                 }
             }
-            return cookieValue;
         }
+        return cookieValue;
+    }
 
-        const csrftoken = getCookie('csrftoken');
+    const csrftoken = getCookie('csrftoken');
 
-        function updateAllPriceDisplays() {
-            let checked = 0, all = 0, checkedCount = 0;
-            document.querySelectorAll('.shopping-list-item').forEach(item => {
-                const qty = parseInt(item.querySelector('.quantity-input').value) || 0;
-                const price = parseFloat(item.querySelector('.quantity-input').dataset.price);
-                const total = qty * price;
-                all += total;
-                if (item.querySelector('.item-checkbox').checked) {
-                    checked += total;
-                    checkedCount++;
-                }
-            });
-
-            document.getElementById('sticky-total-price').textContent = `${checked.toFixed(2)} ден.`;
-            document.getElementById('sticky-total-price-all').textContent = `${all.toFixed(2)} ден.`;
-            document.getElementById('sticky-checked-items').textContent = checkedCount;
-        }
-
-        function updateCheckedCount() {
-            const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
-            document.getElementById('sticky-checked-items').textContent = checkedCount;
-            updateAllPriceDisplays();
-        }
-
-        // Checkbox functionality
-        document.querySelectorAll('.item-checkbox').forEach(cb => {
-            cb.addEventListener('change', () => {
-                const itemId = cb.closest('.shopping-list-item').dataset.itemId;
-                cb.closest('.shopping-list-item').classList.toggle('checked', cb.checked);
-
-                // Send update to server
-                fetch(`/update-list-item/${itemId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrftoken,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        checked: cb.checked
-                    })
-                }).then(response => {
-                    if (!response.ok) {
-                        console.error('Failed to update item');
-                    }
-                });
-
-                updateCheckedCount();
-            });
-        });
-
-        // Quantity input functionality
-        document.querySelectorAll('.quantity-input').forEach(input => {
-            input.addEventListener('change', function() {
-                const itemId = this.closest('.shopping-list-item').dataset.itemId;
-                const newQuantity = this.value;
-
-                // Send update to server
-                fetch(`/update-list-item/${itemId}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrftoken,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        quantity: newQuantity
-                    })
-                }).then(response => {
-                    if (!response.ok) {
-                        console.error('Failed to update quantity');
-                    }
-                });
-
-                updateAllPriceDisplays();
-            });
-        });
-
-        // Remove button functionality
-        document.querySelectorAll('.remove-button').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.dataset.itemId;
-                if (!confirm('Дали сте сигурни дека сакате да го отстраните овој производ?')) return;
-
-                fetch(`/remove-from-list/${id}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrftoken,
-                        'Content-Type': 'application/json'
-                    },
-                }).then(res => {
-                    if (res.ok) {
-                        btn.closest('.shopping-list-item').remove();
-                        const itemCount = document.querySelectorAll('.shopping-list-item').length;
-                        document.getElementById('sticky-total-items').textContent = itemCount;
-                        updateCheckedCount();
-                    }
-                });
-            });
-        });
-
-        // Group by store functionality
-        let isGrouped = false;
-        let originalOrder = [];
-
-        document.getElementById('group-by-store')?.addEventListener('click', () => {
-            const container = document.querySelector('.shopping-list-items');
-
-            if (!isGrouped) {
-                originalOrder = Array.from(container.children);
-
-                const grouped = {};
-                originalOrder.forEach(item => {
-                    const store = item.querySelector('.store').textContent.trim();
-                    if (!grouped[store]) grouped[store] = [];
-                    grouped[store].push(item);
-                });
-
-                container.innerHTML = '';
-                for (const store in grouped) {
-                    const section = document.createElement('div');
-                    section.style.marginBottom = '25px';
-                    section.innerHTML = `<div style="font-weight:bold; margin:15px 0 10px; padding:12px 20px; background:#f1f8e9; border-radius:8px; color:#2e652e; font-size:16px; border-left:4px solid #2e652e;">${store}</div>`;
-                    grouped[store].forEach(i => section.appendChild(i));
-                    container.appendChild(section);
-                }
-
-                isGrouped = true;
-                document.getElementById('group-by-store').textContent = 'Одгрупирај';
-            } else {
-                container.innerHTML = '';
-                originalOrder.forEach(item => container.appendChild(item));
-
-                isGrouped = false;
-                document.getElementById('group-by-store').textContent = 'Групирај по продавници';
+    function updateAllPriceDisplays() {
+        let checked = 0, all = 0, checkedCount = 0;
+        document.querySelectorAll('.shopping-list-item').forEach(item => {
+            const qty = parseInt(item.querySelector('.quantity-input').value) || 0;
+            const price = parseFloat(item.querySelector('.quantity-input').dataset.price);
+            const total = qty * price;
+            all += total;
+            if (item.querySelector('.item-checkbox').checked) {
+                checked += total;
+                checkedCount++;
             }
         });
 
-        // Initialize counts
-        updateCheckedCount();
+        document.getElementById('sticky-total-price').textContent = `${checked.toFixed(2)} ден.`;
+        document.getElementById('sticky-total-price-all').textContent = `${all.toFixed(2)} ден.`;
+        document.getElementById('sticky-checked-items').textContent = checkedCount;
+    }
+
+    function updateCheckedCount() { updateAllPriceDisplays(); }
+
+    document.querySelectorAll('.item-checkbox').forEach(cb => {
+        cb.addEventListener('change', () => {
+            const itemId = cb.closest('.shopping-list-item').dataset.itemId;
+            cb.closest('.shopping-list-item').classList.toggle('checked', cb.checked);
+
+            fetch(`/update-list-item/${itemId}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken,'Content-Type': 'application/json'},
+                body: JSON.stringify({checked: cb.checked})
+            });
+
+            updateCheckedCount();
+        });
     });
+
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const itemId = this.closest('.shopping-list-item').dataset.itemId;
+            fetch(`/update-list-item/${itemId}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken,'Content-Type': 'application/json'},
+                body: JSON.stringify({quantity: this.value})
+            });
+            updateAllPriceDisplays();
+        });
+    });
+
+    document.querySelectorAll('.remove-button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.itemId;
+            if (!confirm('Дали сте сигурни дека сакате да го отстраните овој производ?')) return;
+
+            fetch(`/remove-from-list/${id}/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': csrftoken,'Content-Type': 'application/json'},
+            }).then(res => {
+                if (res.ok) {
+                    btn.closest('.shopping-list-item').remove();
+                    const itemCount = document.querySelectorAll('.shopping-list-item').length;
+                    document.getElementById('sticky-total-items').textContent = itemCount;
+                    updateCheckedCount();
+                }
+            });
+        });
+    });
+
+    let isGrouped = false;
+    let originalOrder = [];
+    document.getElementById('group-by-store')?.addEventListener('click', () => {
+        const container = document.querySelector('.shopping-list-items');
+        if (!isGrouped) {
+            originalOrder = Array.from(container.children);
+            const grouped = {};
+            originalOrder.forEach(item => {
+                const store = item.querySelector('.store').textContent.trim();
+                if (!grouped[store]) grouped[store] = [];
+                grouped[store].push(item);
+            });
+            container.innerHTML = '';
+            for (const store in grouped) {
+                const section = document.createElement('div');
+                section.style.marginBottom = '25px';
+                section.innerHTML = `<div style="font-weight:bold; margin:15px 0 10px; padding:12px 20px; background:#f1f8e9; border-radius:8px; color:#2e652e; font-size:16px; border-left:4px solid #2e652e;">${store}</div>`;
+                grouped[store].forEach(i => section.appendChild(i));
+                container.appendChild(section);
+            }
+            isGrouped = true;
+            document.getElementById('group-by-store').textContent = 'Одгрупирај';
+        } else {
+            container.innerHTML = '';
+            originalOrder.forEach(item => container.appendChild(item));
+            isGrouped = false;
+            document.getElementById('group-by-store').textContent = 'Групирај по продавници';
+        }
+    });
+
+    updateCheckedCount();
+});
+
+// Find cheaper alternatives
+document.getElementById('find-cheaper')?.addEventListener('click', async () => {
+    const listId = "{{ shopping_list.id }}";
+    const response = await fetch(`/api/lists/${listId}/cheaper/`);
+    if (!response.ok) { alert("Не успеавме да ги најдеме алтернативите."); return; }
+    const data = await response.json();
+    const container = document.getElementById("alternative-items");
+    container.innerHTML = "";
+
+    let totalAlternativePrice = 0;
+
+    if (data.alternatives.length === 0) {
+        container.innerHTML = "<p>Нема поевтини алтернативи.</p>";
+    } else {
+        data.alternatives.forEach(item => {
+            totalAlternativePrice += parseFloat(item.original_price);
+            const div = document.createElement('div');
+            div.className = 'alternative-item';
+            div.innerHTML = `
+                <span><b>${item.original}</b></span>
+                <span style="color:green;"><b>${item.alternative}</b></span>
+                <span><i>во ${item.store}</i></span>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    {#document.getElementById("alternative-total").textContent = `Вкупна цена на алтернативите: ${totalAlternativePrice.toFixed(2)} ден.`;#}
+    document.getElementById("alternative-list").style.display = "block";
+});
 </script>
 </body>
 {% endblock %}

@@ -9,7 +9,7 @@ from .db import get_all_products
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 STOPWORDS = {
-    "парче", "свежо", "парчиња", "грам", "г.", "ком", "комад", "број", "бр", "парчиња", "(Р)","крекери","чоколадо","kg","кг","/","млад","млади",
+    "млад", "млади", "свежо", "голем", "мал", "ситен", "парче", "парчиња", "грам", "г.", "ком", "комад", "бр", "(Р)"
 }
 
 def get_similar_products(product_name, product_category, top_n=5):
@@ -35,11 +35,11 @@ def get_similar_products(product_name, product_category, top_n=5):
 
     for p in filtered_products:
         try:
-            product_keywords = set(tokenize(p['name']))
+            product_keywords = set([k for k in tokenize(p['name']) if k not in STOPWORDS])
             common_keywords = query_keywords & product_keywords
 
             if len(common_keywords) == 0:
-                continue  # skip if no overlap
+                continue
 
             keyword_score = sum(keyword_freq[k] for k in common_keywords)
 
@@ -62,7 +62,7 @@ def get_similar_products(product_name, product_category, top_n=5):
             else:
                 store_bonus -= 5
 
-            total_score = keyword_score + bonus + (sim * 5) + store_bonus
+            total_score = keyword_score + bonus + (sim * 2) + store_bonus
 
             results.append({
                 'id': p['id'],

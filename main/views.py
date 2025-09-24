@@ -348,9 +348,38 @@ def view_list(request, list_id):
     items = ShoppingListItem.objects.filter(shopping_list=shopping_list)
 
     # Debugging: Log the items being passed to the template
-    print(f"Items in list {shopping_list.name}: {items}")
+    # print(f"Items in list {shopping_list.name}: {items}")
 
     return render(request, 'main/list_detail.html', {'shopping_list': shopping_list, 'items': items})
+
+@login_required
+@csrf_exempt   # ако користиш fetch без CSRF token
+def update_list_item(request, item_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            item = get_object_or_404(ShoppingListItem, id=item_id, shopping_list__user=request.user)
+
+            # quantity update
+            if "quantity" in data:
+                item.quantity = int(data["quantity"])
+
+            # checked update (ако го користиш)
+            if "checked" in data:
+                item.checked = bool(data["checked"])
+
+            item.save()
+
+            return JsonResponse({
+                "success": True,
+                "id": item.id,
+                "quantity": item.quantity,
+                "checked": item.checked,
+            })
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)
 
 @login_required
 def delete_list(request, list_id):
@@ -679,7 +708,7 @@ def nearby_stores_view(request):
     fuel_consumption = request.GET.get('fuel_consumption')
     store_chain = request.GET.get('store_chain')
 
-    print("Received params:", user_lat, user_lon, fuel_consumption, store_chain)
+    # print("Received params:", user_lat, user_lon, fuel_consumption, store_chain)
 
     if not all([user_lat, user_lon, fuel_consumption, store_chain]):
         return render(request, "main/nearby_stores.html", {
@@ -715,16 +744,33 @@ def nearby_stores_view(request):
         {"name": "Reptil Market Nerezi", "lat": 41.995647756137735, "lon": 21.39414196856774, "chain": "reptil"},
         {"name": "Reptil Market Vlae", "lat": 42.011056469322966, "lon": 21.374480029937953, "chain": "reptil"},
         {"name": "Reptil Market Centar Pestaloci", "lat": 41.99836555442384, "lon": 21.421861676512417, "chain": "reptil"},
-        {"name": "Ramstore Vardar", "lat": 41.9981, "lon": 21.4325, "chain": "ramstore"},
-        {"name": "Ramstore City Mall", "lat": 42.0045, "lon": 21.3919, "chain": "ramstore"},
-        {"name": "Vero Aerodrom", "lat": 41.9980, "lon": 21.4680, "chain": "vero"},
-        {"name": "Vero Taftalidze", "lat": 41.9972, "lon": 21.4085, "chain": "vero"},
-        {"name": "Vero GTC", "lat": 41.9981, "lon": 21.4325, "chain": "vero"},
-        {"name": "Vero Čair", "lat": 42.0000, "lon": 21.4330, "chain": "vero"},
+        {"name": "Ramstore Market 11", "lat": 41.9896248940383, "lon": 21.45568173713548, "chain": "ramstore"},
+        {"name": "Ramstore Cair", "lat": 42.017436971570035, "lon": 21.436184959875927, "chain": "ramstore"},
+        {"name": "Ramstore Cair 2", "lat": 42.022700328389064, "lon": 21.435762437135484, "chain": "ramstore"},
+        {"name": "Ramstore Star Aerodrom", "lat": 41.98654757229333, "lon": 21.450426514395055, "chain": "ramstore"},
+        {"name": "Ramstore Shopping Center", "lat": 41.99251527889315, "lon": 21.427055698505697, "chain": "ramstore"},
+        {"name": "Ramstore Kapitol", "lat": 41.9878772356499, "lon": 21.46707632124615, "chain": "ramstore"},
+        {"name": "Ramstore Market", "lat": 41.9853253132668, "lon": 21.483641643472588, "chain": "ramstore"},
+        {"name": "Ramstore Kapishtec", "lat": 41.9947383374632, "lon": 21.416895067820587, "chain": "ramstore"},
+        {"name": "Ramstore Taftalidze", "lat": 42.001758830707814, "lon": 21.389292875765268, "chain": "ramstore"},
+        {"name": "Ramstore Prashka", "lat": 41.99939882083739, "lon": 21.39787594427638, "chain": "ramstore"},
+        {"name": "Ramstore Vodno", "lat": 41.98469521844405, "lon":  21.420580291654616, "chain": "ramstore"},
+        {"name": "Ramstore Karposh", "lat": 42.00807772238484, "lon":  21.408472021246162, "chain": "ramstore"},
+        {"name": "Ramstore Debar Maalo", "lat": 42.002711576049585, "lon": 21.416465914395033, "chain": "ramstore"},
+        {"name": "Ramstore City Mall", "lat": 42.00592369715923, "lon": 21.391752451931264, "chain": "ramstore"},
+        {"name": "Vero Center", "lat": 41.99349349030633, "lon": 21.441443522297725, "chain": "vero"},
+        {"name": "Vero Market Diamond Mall", "lat": 41.99070018070719, "lon": 21.430010799252866, "chain": "vero"},
+        {"name": "Vero GTC", "lat": 41.9953250741886, "lon": 21.43430233350842, "chain": "vero"},
+        {"name": "Vero Kisela Voda", "lat": 41.98282114008978, "lon": 21.440353396808742, "chain": "vero"},
+        {"name": "Vero Aerodrom", "lat": 41.984879474737774, "lon": 21.46860481127003, "chain": "vero"},
+        {"name": "Vero Taftalidze", "lat": 41.99826594634961, "lon": 21.40492322342702, "chain": "vero"},
+        {"name": "Vero Market", "lat": 41.995321011631525, "lon": 21.420769939888274, "chain": "vero"},
+        {"name": "Vero Market Cair", "lat": 42.01471886198107, "lon": 21.44505766894132, "chain": "vero"},
+        {"name": "Vero Karposh 4", "lat": 42.00712126048666, "lon": 21.392984968941317, "chain": "vero"},
     ]
 
     filtered_stores = [s for s in stores if s["chain"] == store_chain]
-    print("Filtered stores:", filtered_stores)
+    # print("Filtered stores:", filtered_stores)
 
     results = []
     for store in filtered_stores:
@@ -978,3 +1024,35 @@ def product_history_api(request):
         data = [{'date': row[0].isoformat(), 'price': float(row[1])} for row in rows]
 
     return JsonResponse({'data': data})
+
+from django.http import JsonResponse
+from rapidfuzz import fuzz
+from .models import ShoppingList, ShoppingListItem, Products2
+
+def generate_cheaper_list(request, list_id):
+    shopping_list = get_object_or_404(ShoppingList, id=list_id)
+    items = ShoppingListItem.objects.filter(shopping_list=shopping_list)
+
+    cheaper_alternatives = []
+
+    for item in items:
+        product = item.product
+        product_name = product.name
+        product_category = product.category
+
+        # најди најслични продукти со твојата функција
+        candidates = get_similar_products(product_name, product_category, top_n=5)
+
+        if candidates:
+            # земи го првиот кој е поевтин
+            for candidate in candidates:
+                if candidate['price'] and product.price and candidate['price'] < product.price:
+                    cheaper_alternatives.append({
+                        "original": f"{product.name} ({product.price} ден.)",
+                        "alternative": f"{candidate['name']} ({candidate['price']} ден.)",
+                        "store": candidate['store'],
+                        "image": candidate.get('image'),
+                    })
+                    break  # најдовме поевтина → не барај понатаму
+
+    return JsonResponse({"alternatives": cheaper_alternatives})

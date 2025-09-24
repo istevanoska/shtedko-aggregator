@@ -46,8 +46,11 @@ urlpatterns = [
     path('get-favorites/', views.get_favorites, name='get_favorites'),
     path('api/product-history/', views.product_history_api, name='product_history_api'),
     path("accounts/", include("allauth.urls")),
-    path('admin/', admin.site.urls),  # <<< Add this line
-    # provides login, logout, callbacks
+    path('admin/', admin.site.urls),
+    path("api/lists/<int:list_id>/cheaper/", views.generate_cheaper_list, name="generate_cheaper_list"),
+    path('update-list-item/<int:item_id>/', views.update_list_item, name='update_list_item'),
+
+
 
 ]
 # prethodnoto znaci deka koga odime na pocetna strana nema nisto "" i ne nosi na funkcijata

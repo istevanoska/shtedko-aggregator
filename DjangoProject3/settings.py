@@ -37,20 +37,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# Application definition
-# Tuka ja dodavame kreiranata aplikacija main.apps.MainConfig da znae django deka postoi. sega mora da se ran migrate comandata
-# INSTALLED_APPS = [
-#     'django.contrib.auth',
-#     'django.contrib.contenttypes',
-#     'django.contrib.sessions',
-#     'django.contrib.messages',
-#     'django.contrib.staticfiles',
-#     'main.apps.MainConfig',
-#     'social_django',
-#     "django.contrib.sites",
-# ]
 INSTALLED_APPS = [
-    # Django built-in apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -58,18 +45,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
 
-    # Required for allauth
     "django.contrib.sites",
 
-    # Your app
     "main.apps.MainConfig",
 
-    # Allauth core
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
 
-    # Providers
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.facebook",
 ]
