@@ -88,6 +88,7 @@ The project uses **scraped supermarket data stored in a SQL database** and integ
 ---
 
 ## Project Structure 
+```txt
 shtedko-aggregator/
 ├── .idea/                  # IDE configuration (PyCharm)
 ├── DjangoProject3/         # Django project settings
@@ -101,6 +102,7 @@ shtedko-aggregator/
 ├── manage.py
 ├── requirements.txt
 └── README.md
+```
 
 
 ## How to Run the Project
