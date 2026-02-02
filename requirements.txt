@@ -1,0 +1,12 @@
+Django>=4.2,<5.0
+
+requests>=2.31.0
+transliterate>=1.10.2
+openrouteservice>=2.3.3
+rapidfuzz>=3.6.1
+
+# Ако користиш MySQL
+mysqlclient>=2.2.0
+
+# Ако користиш PostgreSQL (алтернатива)
+# psycopg2-binary>=2.9.9
